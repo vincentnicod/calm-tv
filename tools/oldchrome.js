@@ -210,11 +210,13 @@ function run(bin, url, extra, budget) {
       for (const p of PAGES) {
         const url = 'http://127.0.0.1:8765/' + p[0] + '.html';
         current = p[0];
-        // headless Chromium 79 on Linux now and then fails to hand over the page ("Failed to serialize document") or hangs: try again
+        // headless Chromium 79 on Linux now and then fails to hand over the page ("Failed to serialize document") or hangs, and Chromium 68
+        // now and then hands over an empty document (<html><head></head><body></body></html>) instead of the page: try again until the
+        // dump holds the page itself (the stand-in's webOSSystem script is in every page)
         let r = null;
         for (let tries = 0; tries < 5; tries++) {
           r = await run(bin, url, ['--dump-dom'], p[4]);
-          if (r.status === 0 && (r.stdout || '').indexOf('<body') >= 0) break;
+          if (r.status === 0 && (r.stdout || '').indexOf('webOSSystem') >= 0) break;
         }
         const dom = r.stdout || '';
         const errs = (/data-errors="([^"]*)"/.exec(dom) || [])[1] || '';
