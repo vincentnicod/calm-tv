@@ -1,0 +1,53 @@
+# Every push to a branch (main included) builds the package and publishes it as a PRE-release named test-<branch>: the TV installed
+# with CYTV_BRANCH=main follows test-main (Update channel in the manager app). "latest" and the stable updater never see it.
+name: Test build
+on:
+  push:
+    paths-ignore:   # a documentation-only push does not need a test build
+      - "docs/**"
+      - "zensical.toml"
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache Node 8 and the old Chromium builds
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/cleanyourtv
+          key: cytv-engines-${{ runner.os }}-node8.12.0-chromium555668-706915
+      - name: Libraries the old Chromium builds need
+        run: |
+          sudo apt-get update -qq
+          for p in libnss3 libatk1.0-0t64 libatk-bridge2.0-0t64 libcups2t64 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2t64 libpangocairo-1.0-0 libgtk-3-0t64 libxss1 libxtst6 fonts-liberation; do sudo apt-get install -y -qq $p >/dev/null 2>&1 || echo "not installed: $p"; done
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Development tools (type checks, lint, formatting)
+        run: npm ci --no-audit --no-fund
+      - name: Checks (tests under Node 8.12.0, what webOS 5 and 6 ship, and the current Node; pages up to date)
+        run: CYTV_SHOTS=$RUNNER_TEMP/shots sh tools/check.sh --chromium
+      - name: Screenshots of the pages in Chromium 68 and 79
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: old-chromium-screenshots
+          path: ${{ runner.temp }}/shots
+          if-no-files-found: ignore
+      - name: Build the package
+        run: CYTV_BUILD="${GITHUB_SHA::7}" python3 ipk/build.py
+      - name: Publish the test build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          slug=$(printf '%s' "$GITHUB_REF_NAME" | tr 'A-Z' 'a-z' | sed 's/[^a-z0-9]/-/g; s/--*/-/g; s/^-//; s/-$//' | cut -c1-60)
+          [ -n "$slug" ] || { echo "branch name gives an empty tag"; exit 1; }
+          tag="test-$slug"
+          subject=$(git log -1 --format=%s)
+          svc=$(sed -n "s/^const VERSION = '\(.*\)';/\1/p" helper/helper.js | head -1)
+          printf 'build: %s\nbranch: %s\n\nTest build of the branch %s (service %s). Not a release: it is for people who are asked to try a change.\nLast commit: %s\n' \
+            "${GITHUB_SHA::7}" "$GITHUB_REF_NAME" "$GITHUB_REF_NAME" "$svc" "$subject" > notes.txt
+          gh release delete "$tag" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$tag" --prerelease --target "$GITHUB_SHA" --title "Test build: $GITHUB_REF_NAME" --notes-file notes.txt dist/*

@@ -1,0 +1,17 @@
+{
+  "name": "cleanyourtv-webos-tools",
+  "private": true,
+  "description": "Development tools only (type checks, lint, formatting). Nothing here is shipped to the TV; the service and the pages have no dependencies.",
+  "scripts": {
+    "check": "sh tools/check.sh",
+    "lint": "node tools/lint.js",
+    "format": "prettier --write \"helper/*.js\" \"tools/**/*.js\" \"app/src/**/*.{js,css}\" \"manager/src/**/*.{js,css}\" scripts/jtool.js && node tools/build-pages.js"
+  },
+  "devDependencies": {
+    "@types/node": "20.14.10",
+    "eslint": "9.9.0",
+    "globals": "15.9.0",
+    "prettier": "3.3.3",
+    "typescript": "5.5.4"
+  }
+}

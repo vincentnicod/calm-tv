@@ -1,0 +1,3 @@
+{ "name": "Still", "author": "CleanYourTV", "description": "No animation and a quiet glow, for anyone who prefers a calm screen.",
+  "colors": { "accent": "#4c8dff" },
+  "effects": { "speed": 0, "glow": 0.4 } }

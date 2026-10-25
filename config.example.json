@@ -1,0 +1,26 @@
+{
+  "dock": [
+    "netflix",
+    "youtube.leanback.v4",
+    "amazon",
+    "com.disney.disneyplus-prod"
+  ],
+  "topbar": [
+    {
+      "label": "Inputs",
+      "icon": "inputs",
+      "action": "inputs"
+    },
+    {
+      "label": "Live TV",
+      "icon": "tv",
+      "action": "live"
+    },
+    {
+      "label": "Settings",
+      "icon": "settings",
+      "app": "com.palm.app.settings"
+    }
+  ],
+  "hidden": []
+}

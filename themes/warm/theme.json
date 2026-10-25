@@ -1,0 +1,3 @@
+{ "name": "Warm", "author": "CleanYourTV", "description": "Brown and amber with the glow in the accent colour.",
+  "colors": { "night": "#120d08", "panel": "#221810", "ink": "#fff3e6", "accent": "#ffb347" },
+  "effects": { "glowColor": "accent", "glow": 0.9, "wallpaper": "warm.jpg", "wallpaperDim": 0.3 } }

@@ -1,0 +1,6272 @@
+<!doctype html>
+<!-- Built by tools/build-pages.js from app/src: edit the files there, not this one. -->
+<html><head><meta charset="utf-8"><title>Home</title>
+<meta name="viewport" content="width=1920">
+<style>
+/* Typefaces shipped next to the page (SIL Open Font License, app/font-*-OFL.txt); themes choose them with type.font and type.display.
+   A browser only downloads the ones the page uses. */
+@font-face {
+  font-family: "Calm Manrope";
+  src: url("font-manrope.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Calm Geist";
+  src: url("font-geist.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Calm Instrument Sans";
+  src: url("font-instrument-sans.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Calm Instrument Serif";
+  src: url("font-instrument-serif.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Calm Instrument Serif";
+  src: url("font-instrument-serif-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: "Calm Hanken Grotesk";
+  src: url("font-hanken.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Calm Sora";
+  src: url("font-sora.woff2") format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+}
+/* Built for a weak TV GPU: only transform and opacity ever animate; no blur, masks or filters. Everything a theme changes (manager > Theme) is a
+   variable here; the service works the values out (helper/theme.js) and the defaults below are the original look. */
+:root {
+  --ink: #f5f6f8;
+  --ink2: rgba(245, 246, 248, 0.62);
+  --night: #07080b;
+  --night-rgb: 7, 8, 11;
+  --panel: #14161b;
+  --panel2: #1a1c22;
+  --acc: #f5f6f8;
+  --acc-ink: #0b0c10;
+  --focus: #f5f6f8;
+  --font: "LG Smart UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --fs: 1;
+  --spd: 1;
+  --glow-op: 1;
+  --wall: none;
+  --pill-bg: rgba(255, 255, 255, 0.09);
+  --pill-ring: rgba(255, 255, 255, 0.1);
+  --pill-r: 32px;
+  --pill-h: 64px;
+  --bar-gap: 16px;
+  --menu-bg: rgba(5, 6, 9, 0.97);
+  --row-r: 30px;
+  --clock-l: 96px;
+  --clock-r: auto;
+  --clock-t: 54px;
+  --clock-b: auto;
+  --clock-tx: none;
+  --clock-ai: flex-start;
+  --clock-s: 1;
+  --date-s: 1;
+  --clock-d: flex;
+  --date-d: block;
+  --bar-l: auto;
+  --bar-r: 96px;
+  --bar-t: 54px;
+  --bar-b: auto;
+  --bar-tx: none;
+  --bar-d: flex;
+  --name-d: block;
+  --name-x: 96px;
+  --name-y: 150px;
+  --name-a: left;
+  --name-s: 1;
+  --view-top: 300px;
+  --dock-l: 96px;
+  --dock-r: auto;
+  --dock-t: 60px;
+  --dock-b: auto;
+  --dock-tx: none;
+  --dock-w: 408px;
+  --dock-h: 230px;
+  --dock-gap: 32px;
+  --dock-rad: 36px;
+  --dock-panel: 0;
+  --dock-pad: 0px;
+  --dock-lift: -10px;
+  --dock-fs: 1.05;
+  --cols: 10;
+  --tile-w: 151px;
+  --tile-h: 151px;
+  --gap-x: 24px;
+  --gap-y: 26px;
+  --tile-r: 34px;
+  --grid-l: 96px;
+  --grid-w: 1728px;
+  --grid-t: 350px;
+  --grid-fs: 1.12;
+  --ov-dim: 0.95;
+  --gloss: 0;
+  --tile-border: 0;
+  --ring-w: 4px;
+  --ring-off: 4px;
+  --dock-dim: 1;
+  --clock-w: 600;
+  --clock-ls: -0.02em;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+html,
+body {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: var(--night);
+  color: var(--ink);
+  font-family: var(--font);
+}
+body {
+  background-image: var(--wall);
+  background-size: 1920px 1080px;
+}
+::selection {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.glow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 720px;
+  opacity: 0;
+  transition: opacity calc(0.35s * var(--spd)) linear;
+  will-change: opacity;
+  background: radial-gradient(ellipse 1400px 640px at 26% -6%, rgba(var(--c), 0.45), transparent 70%);
+}
+.glow.on {
+  opacity: var(--glow-op);
+}
+
+#top {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  z-index: 5;
+  pointer-events: none;
+}
+#clock {
+  position: absolute;
+  left: var(--clock-l);
+  right: var(--clock-r);
+  top: var(--clock-t);
+  bottom: var(--clock-b);
+  transform: var(--clock-tx);
+  display: var(--clock-d);
+  align-items: center;
+  height: 76px;
+}
+#time {
+  font-family: var(--font-d, var(--font));
+  font-size: calc(56px * var(--fs) * var(--clock-s));
+  font-weight: var(--clock-w);
+  letter-spacing: var(--clock-ls);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+#date {
+  display: var(--date-d);
+  font-size: calc(28px * var(--fs) * var(--date-s));
+  color: var(--date-ink, rgba(245, 246, 248, 0.88));
+  margin-left: 22px;
+  padding-top: 14px;
+}
+[data-clock="stack"] #clock {
+  flex-direction: column;
+  align-items: var(--clock-ai);
+  height: auto;
+}
+[data-clock="stack"] #date {
+  margin: 8px 0 0 6px;
+  padding: 0;
+}
+#bar {
+  pointer-events: auto;
+  position: absolute;
+  left: var(--bar-l);
+  right: var(--bar-r);
+  top: var(--bar-t);
+  bottom: var(--bar-b);
+  transform: var(--bar-tx);
+  display: var(--bar-d);
+  align-items: center;
+  height: calc(var(--pill-h) + 12px);
+}
+#bar > * + * {
+  margin-left: var(--bar-gap);
+}
+.pill {
+  display: flex;
+  align-items: center;
+  height: var(--pill-h);
+  padding: 0 30px 0 24px;
+  border-radius: var(--pill-r);
+  font-size: calc(26px * var(--fs));
+  font-weight: 500;
+  background: var(--pill-bg);
+  box-shadow: inset 0 0 0 1px var(--pill-ring);
+  transition: transform calc(0.12s * var(--spd)) cubic-bezier(0.3, 1.35, 0.5, 1);
+  will-change: transform;
+}
+.pill > * + * {
+  margin-left: 14px;
+}
+.pill svg {
+  width: 30px;
+  height: 30px;
+  flex: none;
+}
+.pill span {
+  white-space: nowrap;
+}
+.pill.f {
+  background: var(--acc);
+  color: var(--acc-ink);
+  transform: scale(1.07);
+}
+[data-bar="round"] .pill {
+  width: var(--pill-h);
+  padding: 0;
+  justify-content: center;
+}
+[data-bar="flat"] .pill {
+  background: none;
+  box-shadow: none;
+}
+[data-labels="hide"] .pill span {
+  display: none;
+}
+
+#shelf {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--name-y);
+  height: 120px;
+  padding: 0 var(--name-x);
+  text-align: var(--name-a);
+  display: var(--name-d);
+  z-index: 5;
+}
+#name {
+  font-size: calc(92px * var(--fs) * var(--name-s));
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  line-height: 1.05;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* the view clips rows as they scroll up under the shelf */
+#view {
+  position: absolute;
+  left: 0;
+  top: var(--view-top);
+  width: 1920px;
+  height: calc(1080px - var(--view-top));
+  overflow: hidden;
+  z-index: 2;
+}
+#scroll {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: calc(1080px - var(--view-top));
+  transition: transform calc(0.3s * var(--spd)) ease-out;
+  will-change: transform;
+}
+#dock {
+  position: absolute;
+  left: var(--dock-l);
+  right: var(--dock-r);
+  top: var(--dock-t);
+  bottom: var(--dock-b);
+  transform: var(--dock-tx);
+  display: flex;
+  z-index: 4;
+  padding: var(--dock-pad);
+  border-radius: calc(var(--dock-rad) + var(--dock-pad));
+  background: rgba(255, 255, 255, var(--dock-panel));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, calc(var(--dock-panel) * 1.4));
+}
+#dock > * + * {
+  margin-left: var(--dock-gap);
+}
+#grid {
+  position: absolute;
+  left: var(--grid-l);
+  top: var(--grid-t);
+  width: var(--grid-w);
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  gap: var(--gap-y) var(--gap-x);
+}
+/* an overlay grid: hidden until the focus moves down into it, then dark layer + grid over the screen above the dock */
+[data-grid="overlay"] #grid {
+  z-index: 3;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity calc(0.22s * var(--spd)) linear;
+}
+[data-grid="overlay"].grid-open #grid {
+  opacity: 1;
+  pointer-events: auto;
+}
+[data-grid="overlay"] #scroll::before,
+[data-grid="push"] #scroll::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -1600px;
+  width: 1920px;
+  height: 4400px;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  background: rgba(var(--night-rgb), var(--ov-dim));
+  transition: opacity calc(0.22s * var(--spd)) linear;
+}
+[data-grid="overlay"].grid-open #scroll::before,
+[data-grid="push"].grid-open #scroll::before {
+  opacity: 1;
+}
+/* push: the grid sits under the dock; focusing it scrolls the dock up and fades the grid in */
+[data-grid="push"] #grid {
+  z-index: 3;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity calc(0.25s * var(--spd)) linear;
+}
+[data-grid="push"].grid-open #grid {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* every row of tiles centred, also a last row that is not full */
+[data-galign="center"] #grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+[data-galign="center"] #grid .tile {
+  width: var(--tile-w);
+}
+.tile::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--gloss);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 46%, rgba(0, 0, 0, 0.24));
+}
+
+.tile {
+  --c: 74, 84, 112;
+  --b: 20, 22, 27;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+  background: rgb(var(--b));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, var(--tile-border));
+  transition: transform calc(0.12s * var(--spd)) cubic-bezier(0.3, 1.35, 0.5, 1);
+}
+.snap .tile,
+.snap .pill {
+  transition: none;
+} /* held arrow key: follow the focus without animating each step */
+/* the picture's own box: it crops a picture that fills the tile, so the tile itself (and its focus ring and name) is never cut off */
+.tile .face {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tile.fill .face {
+  overflow: hidden;
+}
+.tile.fill img {
+  object-fit: fill;
+}
+.tile.press {
+  transform: scale(0.96) !important;
+  transition-duration: calc(0.06s * var(--spd));
+}
+.tile.launching {
+  opacity: 0.82;
+}
+.tile img {
+  object-fit: contain;
+}
+.tile svg {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.9;
+}
+.tile .t {
+  font-size: calc(26px * var(--fs));
+  font-weight: 600;
+  padding: 12px;
+  text-align: center;
+  line-height: 1.15;
+  opacity: 0.9;
+}
+/* The focus ring is a pseudo-element with its own radius: Chromium before 94 draws an outline as a rectangle, not around rounded corners. */
+.tile.f {
+  z-index: 3;
+  box-shadow: 0 24px 36px rgba(0, 0, 0, 0.6);
+}
+.tile.f::before {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  left: calc(-1 * (var(--ring-off) + var(--ring-w)));
+  top: calc(-1 * (var(--ring-off) + var(--ring-w)));
+  right: calc(-1 * (var(--ring-off) + var(--ring-w)));
+  bottom: calc(-1 * (var(--ring-off) + var(--ring-w)));
+  border: var(--ring-w) solid var(--focus);
+  border-radius: calc(var(--tile-r) + var(--ring-off) + var(--ring-w));
+}
+#dock .tile.f::before {
+  border-radius: calc(var(--dock-rad) + var(--ring-off) + var(--ring-w));
+}
+#dock .tile {
+  width: var(--dock-w);
+  height: var(--dock-h);
+  border-radius: var(--dock-rad);
+}
+#dock .tile img {
+  height: 56%;
+  max-width: 46%;
+}
+#dock .tile svg {
+  width: 96px;
+  height: 96px;
+}
+#dock .tile.f {
+  transform: translateY(var(--dock-lift)) scale(var(--dock-fs));
+}
+#grid .tile {
+  height: var(--tile-h);
+  border-radius: var(--tile-r);
+}
+#grid .tile img {
+  width: 64%;
+  height: 64%;
+}
+#grid .tile svg {
+  width: 64px;
+  height: 64px;
+}
+#grid .tile.f {
+  transform: scale(var(--grid-fs));
+}
+#grid .tile.sys {
+  flex-direction: column;
+}
+#grid .tile.sys > * + * {
+  margin-top: 8px;
+}
+.slab {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink2);
+}
+#grid .tile.sys {
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+#toast {
+  position: absolute;
+  bottom: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  padding: 18px 38px;
+  border-radius: 34px;
+  font-size: 28px;
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  opacity: 0;
+  pointer-events: none;
+}
+#toast.on {
+  opacity: 1;
+}
+
+/* ---------- names under the tiles, drawn icons, the HDMI card, "All apps" (calm.js) ---------- */
+.tile .cap {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  top: 100%;
+  margin-top: 18px;
+  font-size: calc(28px * var(--fs));
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--ink2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+#dock .tile.f .cap {
+  color: var(--ink);
+}
+/* a theme that shows the large name at the top needs no names under the dock */
+[data-shelf="show"] #dock .tile .cap {
+  display: none;
+}
+/* in the grid the name shows under the focused tile only, and only when the theme has no large name at the top */
+#grid .tile .cap {
+  left: -40px;
+  right: -40px;
+  margin-top: 12px;
+  font-size: calc(22px * var(--fs));
+  text-align: center;
+  color: var(--ink);
+  opacity: 0;
+}
+[data-shelf="hide"] #grid .tile.f .cap {
+  opacity: 1;
+}
+.tile svg.glyph {
+  color: #fff;
+  stroke: none;
+  opacity: 1;
+  overflow: visible;
+}
+#dock .tile svg.glyph {
+  width: 116px;
+  height: 116px;
+}
+#grid .tile svg.glyph {
+  width: 76px;
+  height: 76px;
+}
+.tile svg.glyph text {
+  font-family: var(--font);
+  letter-spacing: 0.04em;
+}
+.gl-youtube {
+  background-image: linear-gradient(160deg, #ff2a4f, #e8002b);
+}
+.gl-iptv {
+  background-image: linear-gradient(140deg, #4b6cff, #8a4dff 60%, #b84dff);
+}
+.gl-tv {
+  background-image: linear-gradient(140deg, #2b95ff, #0a5be0);
+}
+.gl-hdmi {
+  background-image: linear-gradient(160deg, #3b404d, #1c1f26);
+}
+.tile.gl-hdmi {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+}
+.tile.gl-hdmi.f {
+  box-shadow: 0 24px 36px rgba(0, 0, 0, 0.6);
+}
+.gl-film {
+  background-image: linear-gradient(150deg, #ef3b57, #a3173a);
+}
+.gl-music {
+  background-image: linear-gradient(150deg, #27cf78, #0d8a5a);
+}
+.gl-sport {
+  background-image: linear-gradient(150deg, #ffa224, #f0571b);
+}
+/* the HDMI card's port, with a dot that is green while the device is on */
+.chip {
+  position: absolute;
+  left: 22px;
+  top: 20px;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 16px 0 14px;
+  border-radius: 20px;
+  font-size: 22px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(245, 246, 248, 0.86);
+  pointer-events: none;
+}
+.chip i {
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+  margin-right: 10px;
+  background: rgba(245, 246, 248, 0.35);
+}
+.chip.on i {
+  background: #3ddc84;
+}
+#grid .chip {
+  display: none;
+}
+/* a round button's name, under it while it has the focus */
+.pill {
+  position: relative;
+}
+[data-labels="hide"] .pill::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  margin-top: 14px;
+  transform: translateX(-50%);
+  font-size: calc(22px * var(--fs));
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--ink);
+  opacity: 0;
+  pointer-events: none;
+}
+[data-labels="hide"] .pill.f::after {
+  opacity: 1;
+}
+/* "All apps" under a dock at the top, while the grid waits below (push) */
+#more {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 54px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: calc(22px * var(--fs));
+  font-weight: 500;
+  color: var(--ink2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity calc(0.2s * var(--spd)) linear;
+}
+#more svg {
+  width: 30px;
+  height: 30px;
+  margin-top: 2px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+[data-grid="push"][data-dock="top"].has-grid:not(.grid-open) #more {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ---------- the dock as cards (theme dock.style "card"): a dark card tinted with the app's colour, the icon small in the top corner,
+   the name inside. The cards without the focus step back (dock.dim). ---------- */
+[data-dockstyle="card"] #dock .tile {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 60%), var(--panel);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+  opacity: var(--dock-dim);
+  transition:
+    transform calc(0.16s * var(--spd)) cubic-bezier(0.25, 1, 0.4, 1),
+    opacity calc(0.2s * var(--spd)) linear;
+}
+[data-dockstyle="card"] #dock .tile.f {
+  opacity: 1;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+}
+.tile .tint {
+  display: none;
+}
+[data-dockstyle="card"] #dock .tile .tint {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(150deg, rgba(var(--c), 0.42) 0%, rgba(var(--c), 0.14) 50%, rgba(var(--c), 0.04) 100%);
+  transition: opacity calc(0.25s * var(--spd)) linear;
+}
+[data-dockstyle="card"] #dock .tile.f .tint {
+  opacity: 1;
+}
+[data-dockstyle="card"] #dock .tile .face {
+  left: 30px;
+  top: 30px;
+  right: auto;
+  bottom: auto;
+  width: 76px;
+  height: 76px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgb(var(--b));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 8px 18px rgba(0, 0, 0, 0.35);
+}
+[data-dockstyle="card"] #dock .tile .face img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
+}
+[data-dockstyle="card"] #dock .tile svg.glyph {
+  width: 46px;
+  height: 46px;
+}
+[data-dockstyle="card"] #dock .tile .face .t {
+  font-size: 18px;
+  padding: 6px;
+}
+[data-dockstyle="card"] #dock .tile .cap {
+  top: auto;
+  bottom: 28px;
+  left: 32px;
+  right: 32px;
+  margin: 0;
+  font-size: calc(32px * var(--fs));
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+[data-dockstyle="card"] #dock .chip {
+  left: auto;
+  right: 30px;
+  top: 30px;
+  height: 30px;
+  padding: 0;
+  background: none;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ink2);
+}
+
+/* ---------- docks of logos (calm.js makes them from the icons): `logo` with no tile, `glass` on frosted glass, `paper` on a card.
+   A logo is white on a light ink and dark on a dark ink; in a tile filled with the accent (dock.focus "fill") it takes the accent's ink. */
+.tile .mono,
+.tile .mono .mw,
+.tile .mono .mk {
+  display: none;
+}
+[data-dockstyle="logo"] #dock .tile,
+[data-dockstyle="glass"] #dock .tile,
+[data-dockstyle="paper"] #dock .tile {
+  color: var(--ink);
+}
+[data-dockstyle="logo"] #dock .tile {
+  background: none;
+  box-shadow: none;
+}
+[data-dockstyle="glass"] #dock .tile {
+  background-color: rgba(255, 255, 255, 0.05);
+  background-image: linear-gradient(rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.04)), var(--glass, none);
+  background-size:
+    auto,
+    1920px 1080px;
+  background-repeat: no-repeat;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+[data-dockstyle="paper"] #dock .tile {
+  background: var(--panel);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 10px 30px rgba(60, 50, 40, 0.12);
+}
+[data-dockstyle="logo"] #dock .tile:not(.gl) .face,
+[data-dockstyle="glass"] #dock .tile:not(.gl) .face,
+[data-dockstyle="paper"] #dock .tile:not(.gl) .face,
+[data-dockstyle="logo"] #dock .chip,
+[data-dockstyle="glass"] #dock .chip,
+[data-dockstyle="paper"] #dock .chip {
+  display: none;
+}
+[data-dockstyle="logo"] #dock .tile svg.glyph,
+[data-dockstyle="glass"] #dock .tile svg.glyph,
+[data-dockstyle="paper"] #dock .tile svg.glyph {
+  width: 50px;
+  height: 50px;
+  color: inherit;
+}
+[data-dockstyle="paper"] #dock .tile svg.glyph {
+  width: 64px;
+  height: 64px;
+}
+[data-dockstyle="logo"] #dock .tile .mono,
+[data-dockstyle="glass"] #dock .tile .mono,
+[data-dockstyle="paper"] #dock .tile .mono {
+  display: flex;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0 26px;
+  pointer-events: none;
+}
+[data-dockstyle="logo"] #dock .mono img,
+[data-dockstyle="glass"] #dock .mono img,
+[data-dockstyle="paper"] #dock .mono img {
+  max-width: 100%;
+  max-height: 40px;
+}
+[data-dockstyle="paper"] #dock .mono img {
+  max-height: 52px;
+}
+[data-dockstyle="logo"] #dock .mono .mt,
+[data-dockstyle="glass"] #dock .mono .mt,
+[data-dockstyle="paper"] #dock .mono .mt {
+  font-size: calc(27px * var(--fs));
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+[data-inkmode="light"] #dock .tile:not(.f) .mono .mw,
+[data-inkmode="dark"] #dock .tile:not(.f) .mono .mk,
+[data-dockfocus="fill"][data-accmode="light"] #dock .tile.f .mono .mw,
+[data-dockfocus="fill"][data-accmode="dark"] #dock .tile.f .mono .mk,
+[data-dockfocus="lift"][data-inkmode="light"] #dock .tile.f .mono .mw,
+[data-dockfocus="lift"][data-inkmode="dark"] #dock .tile.f .mono .mk,
+[data-dockfocus="ring"][data-inkmode="light"] #dock .tile.f .mono .mw,
+[data-dockfocus="ring"][data-inkmode="dark"] #dock .tile.f .mono .mk {
+  display: block;
+}
+/* the focused logo's name, under it (logo and glass); a paper card keeps every name under it */
+[data-dockstyle="logo"] #dock .tile .cap,
+[data-dockstyle="glass"] #dock .tile .cap {
+  display: block;
+  left: -60px;
+  right: -60px;
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: calc(22px * var(--fs));
+  font-weight: 500;
+  color: var(--ink);
+  opacity: 0;
+}
+[data-dockstyle="logo"] #dock .tile.f .cap,
+[data-dockstyle="glass"] #dock .tile.f .cap {
+  opacity: 1;
+}
+[data-dockstyle="paper"] #dock .tile .cap {
+  margin-top: 20px;
+  font-size: calc(24px * var(--fs));
+}
+
+/* ---------- focus: "fill" fills the tile with the accent; "lift" brightens glass; both instead of a ring ---------- */
+[data-dockfocus="fill"] #dock .tile,
+[data-dockfocus="lift"] #dock .tile {
+  transition: transform calc(0.14s * var(--spd)) cubic-bezier(0.25, 1, 0.4, 1);
+}
+[data-dockfocus="fill"] #dock .tile.f::before,
+[data-dockfocus="lift"] #dock .tile.f::before {
+  display: none;
+}
+[data-dockfocus="fill"] #dock .tile.f {
+  background: var(--acc);
+  color: var(--acc-ink);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
+}
+[data-dockfocus="lift"] #dock .tile.f {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 34px 70px rgba(0, 0, 0, 0.45);
+}
+[data-dockfocus="lift"] #dock .tile .tint {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.16);
+  opacity: 0;
+  transition: opacity calc(0.18s * var(--spd)) linear;
+}
+[data-dockfocus="lift"] #dock .tile.f .tint {
+  opacity: 1;
+}
+
+/* ---------- a dock of words (dock.style "word"): the names in the display typeface, no icons; the focused one in italic over a hairline,
+   the number of its key above each ---------- */
+[data-dockstyle="word"] #dock {
+  align-items: baseline;
+  counter-reset: dk;
+}
+[data-dockstyle="word"] #dock .tile {
+  display: block;
+  width: auto;
+  height: auto;
+  background: none;
+  box-shadow: none;
+}
+[data-dockstyle="word"] #dock .tile.f {
+  transform: none;
+  box-shadow: none;
+}
+[data-dockstyle="word"] #dock .tile .face,
+[data-dockstyle="word"] #dock .tile .mono,
+[data-dockstyle="word"] #dock .chip,
+[data-dockstyle="word"] #dock .tint {
+  display: none;
+}
+[data-dockstyle="word"] #dock .tile .cap {
+  display: block;
+  position: static;
+  margin: 0;
+  font-family: var(--font-d, var(--font));
+  font-size: calc(64px * var(--fs));
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  opacity: 0.32;
+  white-space: nowrap;
+  max-width: 760px; /* a very long name ends in an ellipsis instead of pushing the row off the screen */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 8px;
+}
+[data-dockstyle="word"] #dock .tile.f .cap {
+  opacity: 1;
+  font-style: italic;
+}
+[data-dockstyle="word"] #dock .tile.f::before {
+  left: 0;
+  right: 0;
+  top: auto;
+  bottom: -24px;
+  height: 1px;
+  border: 0;
+  border-radius: 0;
+  background: var(--ink);
+  opacity: 0.55;
+}
+[data-dockstyle="word"] #dock .tile::after {
+  counter-increment: dk;
+  content: counter(dk);
+  left: 2px;
+  top: -30px;
+  right: auto;
+  bottom: auto;
+  background: none;
+  opacity: 0.35;
+  font: 500 15px var(--font);
+  letter-spacing: 0.14em;
+  color: var(--ink);
+}
+[data-dockstyle="word"] #dock .tile.f::after {
+  opacity: 0.75;
+}
+
+/* ---------- top buttons as words (bar.style "text", or "caps" in small spaced capitals), the focused one in a pill ---------- */
+[data-bar="text"] .pill,
+[data-bar="caps"] .pill {
+  padding: 0 24px;
+}
+[data-bar="text"] .pill:not(.f),
+[data-bar="caps"] .pill:not(.f) {
+  background: none;
+  box-shadow: none;
+  color: var(--ink2);
+}
+[data-bar="text"] .pill svg,
+[data-bar="caps"] .pill svg {
+  display: none;
+}
+[data-bar="caps"] .pill {
+  font-size: calc(16px * var(--fs));
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+[data-bar="caps"] #more {
+  font-size: calc(15px * var(--fs));
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+[data-datecase="caps"] #date {
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+}
+
+/* ---------- a clock at the bottom steps aside while the app grid is open ---------- */
+#clock {
+  transition: opacity calc(0.2s * var(--spd)) linear;
+}
+[data-clockpos="bottom"].grid-open #clock {
+  opacity: 0;
+}
+
+/* ---------- night mode (22:00 to 6:00) and the idle screen (calm.js): a veil over Home, only opacity changes ---------- */
+#veil {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  z-index: 20;
+  pointer-events: none;
+  background: #140c02;
+  opacity: 0;
+  transition: opacity 1.2s linear;
+}
+.night #veil {
+  opacity: 0.24;
+}
+.idle #veil {
+  background: #000;
+  opacity: 0.42;
+  transition-duration: 2.5s;
+}
+#view,
+#bar,
+#shelf {
+  transition: opacity 0.9s linear;
+}
+#top {
+  transition: transform 4s ease-in-out;
+}
+body.idle #view,
+body.idle #bar,
+body.idle #shelf,
+body.idle #more,
+body.idle .glow {
+  opacity: 0 !important;
+}
+
+/* ---------- the Remote buttons screen (calm.js, RB) ---------- */
+#rb {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  padding: 0 170px;
+  background: rgb(var(--night-rgb));
+}
+#rb .rb-l {
+  width: 760px;
+}
+#rb .rb-r {
+  margin-left: auto;
+  width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#rb .rb-remote {
+  height: 740px;
+  width: auto;
+}
+#rb .rb-hot {
+  stroke: var(--acc);
+  opacity: 0.85;
+}
+#rb.teach .rb-hot {
+  animation: rbpulse 1.4s ease-in-out infinite;
+}
+@keyframes rbpulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+#rb .rb-note {
+  margin-top: 28px;
+  max-width: 440px;
+  text-align: center;
+  font-size: calc(21px * var(--fs));
+  line-height: 1.4;
+  color: var(--ink2);
+}
+#rb .rb-eyebrow {
+  font-size: calc(17px * var(--fs));
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink2);
+}
+#rb h2 {
+  margin: 14px 0 16px;
+  font-size: calc(56px * var(--fs));
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+}
+#rb .rb-p {
+  max-width: 660px;
+  margin-bottom: 34px;
+  font-size: calc(26px * var(--fs));
+  line-height: 1.4;
+  color: var(--ink2);
+}
+#rb .rb-p.rb-small {
+  margin-top: -18px;
+  font-size: calc(21px * var(--fs));
+}
+#rb .rb-list > * + * {
+  margin-top: 14px;
+}
+#rb .rb-card {
+  display: flex;
+  align-items: center;
+  height: 104px;
+  padding: 0 28px;
+  border-radius: 24px;
+  background: var(--panel2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+#rb .rb-card.f {
+  background: var(--acc);
+  color: var(--acc-ink);
+}
+#rb .rb-badge {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-right: 24px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #2c3038;
+  color: #fff;
+}
+#rb .rb-badge img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+#rb .rb-badge svg {
+  width: 40px;
+  height: 40px;
+}
+#rb .rb-badge.plus {
+  background: none;
+  box-shadow: inset 0 0 0 2px currentColor;
+  color: inherit;
+  opacity: 0.8;
+}
+#rb .rb-badge.plus svg {
+  width: 30px;
+  height: 30px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+#rb .rb-badge.big {
+  width: 128px;
+  height: 128px;
+  margin: 0 0 34px;
+  border-radius: 34px;
+}
+#rb .rb-badge.big svg {
+  width: 80px;
+  height: 80px;
+}
+#rb.done .rb-badge.big {
+  box-shadow: 0 0 0 6px #3ddc84;
+}
+#rb .rb-tx {
+  min-width: 0;
+}
+#rb .rb-name {
+  font-size: calc(30px * var(--fs));
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#rb .rb-sub {
+  margin-top: 2px;
+  font-size: calc(20px * var(--fs));
+  opacity: 0.65;
+}
+/* menus */
+#ov {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  z-index: 30;
+  background: var(--menu-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#ov .panel {
+  width: 760px;
+  display: flex;
+  flex-direction: column;
+}
+#ov .panel > * + * {
+  margin-top: 12px;
+}
+#ov h2 {
+  font-size: 46px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.row {
+  display: flex;
+  align-items: center;
+  height: 84px;
+  padding: 0 34px;
+  border-radius: var(--row-r);
+  font-size: calc(30px * var(--fs));
+  font-weight: 500;
+  background: var(--panel2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.row > * + * {
+  margin-left: 22px;
+}
+.row svg {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.row .lb {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.row .st {
+  font-size: 22px;
+  opacity: 0.65;
+}
+.row.dim {
+  opacity: 0.6;
+}
+.row.f {
+  background: var(--acc);
+  color: var(--acc-ink);
+  opacity: 1;
+}
+.more {
+  height: 22px;
+  text-align: center;
+  font-size: 20px;
+  color: var(--ink2);
+}
+/* Live TV (inside the launcher) */
+#lv {
+  --ink2: rgba(245, 246, 248, 0.76);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  z-index: 60;
+  background: #000;
+  display: none;
+}
+#lv.on {
+  display: block;
+}
+#lv-stage,
+#lv-stage video {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  background: #000;
+}
+#lv .layer {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s linear;
+}
+#lv .layer.on {
+  opacity: 1;
+}
+/* channel banner: a floating panel in the launcher's style */
+#lv-osd {
+  left: 96px;
+  right: 96px;
+  bottom: 64px;
+  height: 232px;
+  border-radius: 44px;
+  padding: 0 44px 0 36px;
+  display: flex;
+  align-items: center;
+  background: rgba(12, 13, 17, 0.92);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 30px 60px rgba(0, 0, 0, 0.5);
+}
+/* channel banner: a floating panel in the launcher's style */
+#lv-osd > * + * {
+  margin-left: 32px;
+}
+#lv-osd .logo {
+  width: 150px;
+  height: 150px;
+  border-radius: 34px;
+  background: #1c1e24;
+  object-fit: contain;
+  flex: none;
+}
+#lv-osd .num {
+  font-size: 92px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  min-width: 120px;
+  flex: none;
+}
+#lv-osd .info {
+  flex: 1;
+  min-width: 0;
+}
+#lv-osd .name {
+  font-size: 50px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#lv-osd .now {
+  font-size: 32px;
+  margin-top: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#lv-osd .next {
+  font-size: 26px;
+  color: var(--ink2);
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pbar {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+}
+.pbar i {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: currentColor;
+  width: 0;
+}
+#lv-osd .pbar {
+  margin-top: 16px;
+  color: var(--ink);
+}
+#lv-numin {
+  right: 96px;
+  top: 64px;
+  font-size: 88px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+#lv-msg {
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 34px;
+}
+#lv-msg > * + * {
+  margin-top: 18px;
+}
+#lv-msg.on {
+  background: rgba(0, 0, 0, 0.62);
+}
+#lv-msg b {
+  font-size: 56px;
+  letter-spacing: -0.02em;
+}
+#lv-msg .small {
+  font-size: 26px;
+  color: var(--ink2);
+  max-width: 1100px;
+}
+#lv.gd #lv-spin {
+  visibility: hidden;
+}
+#lv-tune {
+  left: 0;
+  right: 0;
+  top: 590px;
+  text-align: center;
+  font-size: 30px;
+  color: var(--ink2);
+}
+#lv-toast {
+  left: 50%;
+  bottom: 64px;
+  transform: translateX(-50%);
+  padding: 16px 34px;
+  border-radius: 30px;
+  background: rgba(12, 13, 17, 0.94);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  font-size: 28px;
+  white-space: nowrap;
+}
+#lv-stats {
+  left: 48px;
+  top: 40px;
+  padding: 14px 22px;
+  border-radius: 24px;
+  background: rgba(0, 0, 0, 0.65);
+  font: 24px/1.35 monospace;
+  white-space: pre;
+  color: #cfe;
+}
+#lv-menu,
+#lv-filter {
+  right: 96px;
+  top: 196px;
+  width: 640px;
+  padding: 30px 28px 22px;
+  border-radius: 40px;
+  background: rgba(12, 13, 17, 0.96);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 30px 60px rgba(0, 0, 0, 0.5);
+}
+#lv-menu h3,
+#lv-filter h3 {
+  font-size: 34px;
+  margin: 0 0 14px 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mrow {
+  display: flex;
+  align-items: center;
+  height: 76px;
+  margin-bottom: 10px;
+  padding: 0 28px;
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.07);
+  font-size: 28px;
+}
+.mrow .ml {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mrow .mv {
+  color: var(--ink2);
+  flex: none;
+  margin-left: 20px;
+}
+.mrow.f {
+  background: var(--ink);
+  color: #0b0c10;
+}
+.mrow.f .mv {
+  color: rgba(11, 12, 16, 0.62);
+}
+.bds {
+  display: flex;
+  align-items: center;
+  margin-left: 16px;
+  flex: none;
+}
+.bds > * + * {
+  margin-left: 8px;
+}
+/* the badges keep their own 16 px on top of the row's spacing */
+.crow > .bds {
+  margin-left: 38px;
+}
+.bd {
+  font-size: 19px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.14);
+  white-space: nowrap;
+}
+.bd.w {
+  background: rgba(255, 200, 80, 0.22);
+  color: #ffd27a;
+}
+.crow.f .bd {
+  background: rgba(11, 12, 16, 0.14);
+  color: #0b0c10;
+}
+.crow.f .bd.w {
+  background: rgba(160, 100, 0, 0.2);
+  color: #6a4200;
+}
+svg.st {
+  width: 26px;
+  height: 26px;
+  fill: #ffcc4d;
+  flex: none;
+}
+.crow.f svg.st {
+  fill: #c98a00;
+} /* the favourite star; a plain .st is the menu's right-hand text */
+.empty {
+  padding: 40px 30px;
+  font-size: 30px;
+  color: var(--ink2);
+  max-width: 860px;
+  line-height: 1.35;
+}
+.ctab.f {
+  background: none;
+  box-shadow: none;
+  color: var(--ink2);
+  font-size: 23px;
+}
+#lv-search {
+  display: none;
+  flex: none;
+  width: 420px;
+  height: 56px;
+  border-radius: 28px;
+  border: 0;
+  outline: 0;
+  padding: 0 24px;
+  font: inherit;
+  font-size: 26px;
+  background: var(--ink);
+  color: #0b0c10;
+}
+#lv-osd .facts {
+  font-size: 24px;
+  color: var(--ink2);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#lv-spin {
+  left: 932px;
+  top: 512px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 6px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  animation: lvsp 1s linear infinite;
+}
+@keyframes lvsp {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* guide screen (OK) */
+#lv-guide {
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  background: rgba(7, 8, 11, 0.9);
+}
+#lv-glow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 720px;
+  background: radial-gradient(ellipse 1400px 640px at 26% -6%, rgba(var(--c), 0.3), transparent 70%);
+}
+#lv-gtop {
+  position: absolute;
+  left: 96px;
+  right: 96px;
+  top: 54px;
+  height: 76px;
+  display: flex;
+  align-items: center;
+}
+#lv-gtop > * + * {
+  margin-left: 36px;
+}
+#lv-gtitle {
+  font-size: 56px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  flex: none;
+}
+#lv-gtabs {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  align-items: center;
+}
+#lv-gtabs > * + * {
+  margin-left: 14px;
+}
+.ctab {
+  height: 56px;
+  padding: 0 26px;
+  max-width: 340px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: 28px;
+  font-size: 25px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  flex: none;
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+.ctab.on {
+  background: var(--ink);
+  color: #0b0c10;
+}
+.ctab.m {
+  background: none;
+  box-shadow: none;
+  color: var(--ink2);
+  padding: 0 6px;
+}
+#lv-gclock {
+  font-size: 56px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+#lv-rows {
+  position: absolute;
+  left: 96px;
+  top: 196px;
+  width: 900px;
+}
+.crow {
+  display: flex;
+  align-items: center;
+  height: 104px;
+  margin-bottom: 12px;
+  padding: 0 28px 0 18px;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+}
+.crow > * + * {
+  margin-left: 22px;
+}
+.crow .lg {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: #1c1e24;
+  object-fit: contain;
+  flex: none;
+}
+.crow .n {
+  width: 78px;
+  font-size: 27px;
+  color: var(--ink2);
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+.crow .t {
+  flex: 1;
+  min-width: 0;
+}
+.crow .nm {
+  font-size: 30px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.crow .nw {
+  font-size: 24px;
+  color: var(--ink2);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.crow .pbar {
+  margin-top: 9px;
+  height: 6px;
+  color: var(--ink);
+}
+.crow.cur .n {
+  color: var(--ink);
+}
+.crow.f {
+  background: var(--ink);
+  color: #0b0c10;
+  box-shadow: 0 20px 34px rgba(0, 0, 0, 0.5);
+}
+.crow.f .n,
+.crow.f .nw {
+  color: rgba(11, 12, 16, 0.62);
+}
+.crow.f .pbar {
+  background: rgba(11, 12, 16, 0.18);
+  color: #0b0c10;
+}
+.crow.f .lg {
+  background: #e9ebef;
+}
+.cmore {
+  height: 22px;
+  text-align: center;
+  font-size: 20px;
+  color: var(--ink2);
+  width: 900px;
+  position: absolute;
+  left: 0;
+}
+#lv-detail {
+  position: absolute;
+  left: 1070px;
+  top: 196px;
+  width: 754px;
+}
+#lv-detail .dn {
+  font-size: 64px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#lv-detail .dg {
+  font-size: 24px;
+  color: var(--ink2);
+  margin-top: 6px;
+}
+#lv-detail .card {
+  margin-top: 30px;
+  padding: 30px 34px;
+  border-radius: 36px;
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+#lv-detail .dt {
+  font-size: 24px;
+  color: var(--ink2);
+  font-variant-numeric: tabular-nums;
+}
+#lv-detail .dp {
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-top: 6px;
+  line-height: 1.12;
+  max-height: 96px;
+  overflow: hidden;
+}
+#lv-detail .dd {
+  font-size: 26px;
+  color: rgba(245, 246, 248, 0.82);
+  margin-top: 14px;
+  line-height: 1.35;
+  max-height: 140px;
+  overflow: hidden;
+}
+#lv-detail .card .pbar {
+  margin-top: 20px;
+  color: var(--ink);
+}
+#lv-detail h3 {
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--ink2);
+  margin: 30px 0 10px;
+}
+#lv-detail .up {
+  display: flex;
+  font-size: 27px;
+  height: 50px;
+  align-items: center;
+  white-space: nowrap;
+}
+#lv-detail .up > * + * {
+  margin-left: 22px;
+}
+#lv-detail .up .tm {
+  width: 86px;
+  color: var(--ink2);
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+#lv-detail .up .tt {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+</style></head><body>
+<div class="glow" id="gA"></div><div class="glow" id="gB"></div>
+<div id="top"><div id="clock"><div id="time"></div><div id="date"></div></div><div id="bar"></div></div>
+<div id="shelf"><div id="name"></div></div>
+<div id="view"><div id="scroll"><div id="dock"></div><div id="grid"></div></div></div>
+<div id="more"></div>
+<div id="veil"></div>
+<div id="lv"><div id="lv-stage"></div><div id="lv-spin" class="layer"></div><div id="lv-osd" class="layer"><img class="logo" id="lv-ologo" alt=""><div class="num" id="lv-onum"></div><div class="info"><div class="name" id="lv-oname"></div><div class="now" id="lv-onow"></div><div class="next" id="lv-onext"></div><div class="facts" id="lv-ofacts"></div><div class="pbar"><i id="lv-obar"></i></div></div></div><div id="lv-numin" class="layer"></div><div id="lv-guide" class="layer"><div id="lv-glow"></div><div id="lv-gtop"><div id="lv-gtitle"></div><div id="lv-gtabs"></div><input id="lv-search" type="text" autocomplete="off"><div id="lv-gclock"></div></div><div id="lv-rows"></div><div id="lv-detail"></div></div><div id="lv-filter" class="layer"></div><div id="lv-menu" class="layer"></div><div id="lv-msg" class="layer"></div><div id="lv-tune" class="layer"></div><div id="lv-toast" class="layer"></div><div id="lv-stats" class="layer"></div></div>
+<div id="toast"></div>
+<script>
+var API = 'http://127.0.0.1:8765',
+  CACHE_KEY = 'cytv.cache.v4',
+  VERSION = '1.6.0';
+var DEFAULTS = {
+  dock: ['netflix', 'youtube.leanback.v4', 'amazon', 'com.disney.disneyplus-prod'],
+  topbar: [
+    { label: 'Inputs', icon: 'inputs', action: 'inputs' },
+    { label: 'Settings', icon: 'settings', app: 'com.palm.app.settings' },
+  ],
+};
+var PRESETS = [
+  { label: 'Inputs', icon: 'inputs', action: 'inputs' },
+  { label: 'Settings', icon: 'settings', app: 'com.palm.app.settings' },
+  { label: 'Live TV', icon: 'tv', action: 'live' },
+];
+var ICONS = {
+  inputs: '<path d="M15 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/>',
+  settings: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+  edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  tv: '<rect x="2" y="7" width="20" height="15" rx="2"/><path d="M17 2l-5 5-5-5"/>',
+  grid: '<path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/>',
+  hdmi: '<path d="M4 8h16v7l-3 3H7l-3-3z"/><path d="M9 11v3M12 11v3M15 11v3"/>',
+  restore: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
+};
+function svg(name) {
+  return (
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+    (ICONS[name] || ICONS.grid) +
+    '</svg>'
+  );
+}
+/* ---------- language and clock follow the TV ---------- */
+var LOC = (window.webOSSystem && webOSSystem.locale) || navigator.language || 'en-GB',
+  LANG = LOC.slice(0, 2);
+var TX = {
+  nl: {
+    'Running apps': 'Geopende apps',
+    'Close': 'Sluiten',
+    'Close all': 'Alles sluiten',
+    'No apps are running': 'Er zijn geen apps geopend',
+    'Could not close': 'Kan niet sluiten',
+    'Could not read the running apps': 'Kan de geopende apps niet lezen',
+    'Inputs': 'Ingangen',
+    'Settings': 'Instellingen',
+    'Customise': 'Aanpassen',
+    'Open': 'Openen',
+    'Move left in dock': 'Naar links in dock',
+    'Move right in dock': 'Naar rechts in dock',
+    'Remove from dock': 'Uit dock verwijderen',
+    'Add to dock': 'Aan dock toevoegen',
+    'Add to dock...': 'Aan dock toevoegen...',
+    'Replace which app?': 'Welke app vervangen?',
+    'Hide app': 'App verbergen',
+    'Remove this button': 'Deze knop verwijderen',
+    'hold OK on an app': 'houd OK ingedrukt op een app',
+    'Hold OK on any app to change the dock': 'Houd OK ingedrukt op een app om het dock te wijzigen',
+    'Top buttons': 'Knoppen bovenaan',
+    'Hidden apps': 'Verborgen apps',
+    'App order': 'Volgorde van apps',
+    'Most used first': 'Meest gebruikt eerst',
+    'A to Z': 'A tot Z',
+    'Reset customisation': 'Aanpassingen herstellen',
+    'Add a button...': 'Knop toevoegen...',
+    'Add a button': 'Knop toevoegen',
+    'An app...': 'Een app...',
+    'Pick an app': 'Kies een app',
+    'OK to remove': 'OK om te verwijderen',
+    'Hidden apps (OK to show again)': 'Verborgen apps (OK om te tonen)',
+    'No hidden apps': 'Geen verborgen apps',
+    'Restore LG Home': 'LG Home herstellen',
+    'Switching to LG Home: the TV restarts...': 'Overschakelen naar LG Home: de TV start opnieuw op...',
+    'Could not open': 'Kan niet openen',
+    'Could not save settings': 'Instellingen opslaan mislukt',
+    'Helper not reachable, retrying...': 'Helper niet bereikbaar, opnieuw proberen...',
+    'Connected': 'Verbonden',
+    'Active': 'Actief',
+    'Clock': 'Klok',
+    'Automatic': 'Automatisch',
+    '24-hour': '24-uurs',
+    '12-hour': '12-uurs',
+  },
+  de: {
+    'Running apps': 'Geöffnete Apps',
+    'Close': 'Schließen',
+    'Close all': 'Alle schließen',
+    'No apps are running': 'Keine Apps geöffnet',
+    'Could not close': 'Konnte nicht geschlossen werden',
+    'Could not read the running apps': 'Geöffnete Apps konnten nicht gelesen werden',
+    'Inputs': 'Eingänge',
+    'Settings': 'Einstellungen',
+    'Customise': 'Anpassen',
+    'Open': 'Öffnen',
+    'Move left in dock': 'Im Dock nach links',
+    'Move right in dock': 'Im Dock nach rechts',
+    'Remove from dock': 'Aus dem Dock entfernen',
+    'Add to dock': 'Zum Dock hinzufügen',
+    'Add to dock...': 'Zum Dock hinzufügen...',
+    'Replace which app?': 'Welche App ersetzen?',
+    'Hide app': 'App ausblenden',
+    'Remove this button': 'Diese Schaltfläche entfernen',
+    'hold OK on an app': 'OK auf einer App gedrückt halten',
+    'Hold OK on any app to change the dock': 'Halte OK auf einer App gedrückt, um das Dock zu ändern',
+    'Top buttons': 'Obere Schaltflächen',
+    'Hidden apps': 'Ausgeblendete Apps',
+    'App order': 'App-Reihenfolge',
+    'Most used first': 'Meistgenutzte zuerst',
+    'A to Z': 'A bis Z',
+    'Reset customisation': 'Anpassungen zurücksetzen',
+    'Add a button...': 'Schaltfläche hinzufügen...',
+    'Add a button': 'Schaltfläche hinzufügen',
+    'An app...': 'Eine App...',
+    'Pick an app': 'App auswählen',
+    'OK to remove': 'OK zum Entfernen',
+    'Hidden apps (OK to show again)': 'Ausgeblendete Apps (OK zum Einblenden)',
+    'No hidden apps': 'Keine ausgeblendeten Apps',
+    'Restore LG Home': 'LG Home wiederherstellen',
+    'Switching to LG Home: the TV restarts...': 'Wechsel zu LG Home: Der Fernseher startet neu...',
+    'Could not open': 'Konnte nicht geöffnet werden',
+    'Could not save settings': 'Einstellungen konnten nicht gespeichert werden',
+    'Helper not reachable, retrying...': 'Helper nicht erreichbar, neuer Versuch...',
+    'Connected': 'Verbunden',
+    'Active': 'Aktiv',
+    'Clock': 'Uhr',
+    'Automatic': 'Automatisch',
+    '24-hour': '24 Stunden',
+    '12-hour': '12 Stunden',
+  },
+  fr: {
+    'Running apps': 'Apps ouvertes',
+    'Close': 'Fermer',
+    'Close all': 'Tout fermer',
+    'No apps are running': 'Aucune app ouverte',
+    'Could not close': 'Impossible de fermer',
+    'Could not read the running apps': 'Impossible de lire les apps ouvertes',
+    'Inputs': 'Entrées',
+    'Settings': 'Paramètres',
+    'Customise': 'Personnaliser',
+    'Open': 'Ouvrir',
+    'Move left in dock': 'Déplacer à gauche dans le dock',
+    'Move right in dock': 'Déplacer à droite dans le dock',
+    'Remove from dock': 'Retirer du dock',
+    'Add to dock': 'Ajouter au dock',
+    'Add to dock...': 'Ajouter au dock...',
+    'Replace which app?': 'Remplacer quelle app ?',
+    'Hide app': 'Masquer l’app',
+    'Remove this button': 'Supprimer ce bouton',
+    'hold OK on an app': 'maintenez OK sur une app',
+    'Hold OK on any app to change the dock': 'Maintenez OK sur une app pour modifier le dock',
+    'Top buttons': 'Boutons du haut',
+    'Hidden apps': 'Apps masquées',
+    'App order': 'Ordre des apps',
+    'Most used first': 'Les plus utilisées d’abord',
+    'A to Z': 'De A à Z',
+    'Reset customisation': 'Tout réinitialiser',
+    'Add a button...': 'Ajouter un bouton...',
+    'Add a button': 'Ajouter un bouton',
+    'An app...': 'Une app...',
+    'Pick an app': 'Choisir une app',
+    'OK to remove': 'OK pour supprimer',
+    'Hidden apps (OK to show again)': 'Apps masquées (OK pour afficher)',
+    'No hidden apps': 'Aucune app masquée',
+    'Restore LG Home': 'Rétablir LG Home',
+    'Switching to LG Home: the TV restarts...': 'Passage à LG Home : le téléviseur redémarre...',
+    'Could not open': 'Impossible d’ouvrir',
+    'Could not save settings': 'Impossible d’enregistrer les réglages',
+    'Helper not reachable, retrying...': 'Assistant injoignable, nouvel essai...',
+    'Connected': 'Connecté',
+    'Active': 'Actif',
+    'Clock': 'Horloge',
+    'Automatic': 'Automatique',
+    '24-hour': '24 heures',
+    '12-hour': '12 heures',
+  },
+  es: {
+    'Running apps': 'Apps abiertas',
+    'Close': 'Cerrar',
+    'Close all': 'Cerrar todas',
+    'No apps are running': 'No hay apps abiertas',
+    'Could not close': 'No se pudo cerrar',
+    'Could not read the running apps': 'No se pudieron leer las apps abiertas',
+    'Inputs': 'Entradas',
+    'Settings': 'Ajustes',
+    'Customise': 'Personalizar',
+    'Open': 'Abrir',
+    'Move left in dock': 'Mover a la izquierda en el dock',
+    'Move right in dock': 'Mover a la derecha en el dock',
+    'Remove from dock': 'Quitar del dock',
+    'Add to dock': 'Añadir al dock',
+    'Add to dock...': 'Añadir al dock...',
+    'Replace which app?': '¿Qué app reemplazar?',
+    'Hide app': 'Ocultar app',
+    'Remove this button': 'Quitar este botón',
+    'hold OK on an app': 'mantén OK en una app',
+    'Hold OK on any app to change the dock': 'Mantén OK en una app para cambiar el dock',
+    'Top buttons': 'Botones superiores',
+    'Hidden apps': 'Apps ocultas',
+    'App order': 'Orden de las apps',
+    'Most used first': 'Más usadas primero',
+    'A to Z': 'De la A a la Z',
+    'Reset customisation': 'Restablecer personalización',
+    'Add a button...': 'Añadir un botón...',
+    'Add a button': 'Añadir un botón',
+    'An app...': 'Una app...',
+    'Pick an app': 'Elige una app',
+    'OK to remove': 'OK para quitar',
+    'Hidden apps (OK to show again)': 'Apps ocultas (OK para mostrar)',
+    'No hidden apps': 'No hay apps ocultas',
+    'Restore LG Home': 'Restaurar LG Home',
+    'Switching to LG Home: the TV restarts...': 'Cambiando a LG Home: el televisor se reinicia...',
+    'Could not open': 'No se pudo abrir',
+    'Could not save settings': 'No se pudieron guardar los ajustes',
+    'Helper not reachable, retrying...': 'Helper no disponible, reintentando...',
+    'Connected': 'Conectado',
+    'Active': 'Activo',
+    'Clock': 'Reloj',
+    'Automatic': 'Automático',
+    '24-hour': '24 horas',
+    '12-hour': '12 horas',
+  },
+};
+var TXL = {
+  nl: {
+    'Live TV': 'Live TV',
+    'All channels': 'Alle zenders',
+    'Loading channels...': 'Zenders laden...',
+    'Set up Live TV': 'Live TV instellen',
+    'Open this address on your phone or computer:': 'Open dit adres op je telefoon of computer:',
+    'and enter this code:': 'en voer deze code in:',
+    'Then paste your M3U playlist address. This page closes by itself.':
+      'Plak daarna het adres van je M3U-afspeellijst. Deze pagina sluit vanzelf.',
+    'This channel is not available.': 'Deze zender is niet beschikbaar.',
+    'Press OK to try again.': 'Druk op OK om het opnieuw te proberen.',
+    'The helper is not reachable.': 'De helper is niet bereikbaar.',
+    'Next': 'Straks',
+    'Later': 'Later',
+    'No guide data': 'Geen programmagegevens',
+  },
+  de: {
+    'All channels': 'Alle Sender',
+    'Loading channels...': 'Sender werden geladen...',
+    'Set up Live TV': 'Live TV einrichten',
+    'Open this address on your phone or computer:': 'Öffne diese Adresse auf dem Handy oder Computer:',
+    'and enter this code:': 'und gib diesen Code ein:',
+    'Then paste your M3U playlist address. This page closes by itself.':
+      'Füge dann die Adresse deiner M3U-Playlist ein. Diese Seite schließt sich von selbst.',
+    'This channel is not available.': 'Dieser Sender ist nicht verfügbar.',
+    'Press OK to try again.': 'OK drücken, um es erneut zu versuchen.',
+    'The helper is not reachable.': 'Der Helper ist nicht erreichbar.',
+    'Next': 'Danach',
+    'Later': 'Später',
+    'No guide data': 'Keine Programmdaten',
+  },
+  fr: {
+    'All channels': 'Toutes les chaînes',
+    'Loading channels...': 'Chargement des chaînes...',
+    'Set up Live TV': 'Configurer Live TV',
+    'Open this address on your phone or computer:': 'Ouvrez cette adresse sur votre téléphone ou ordinateur :',
+    'and enter this code:': 'et saisissez ce code :',
+    'Then paste your M3U playlist address. This page closes by itself.':
+      'Collez ensuite l’adresse de votre liste M3U. Cette page se ferme toute seule.',
+    'This channel is not available.': 'Cette chaîne n’est pas disponible.',
+    'Press OK to try again.': 'Appuyez sur OK pour réessayer.',
+    'The helper is not reachable.': 'L’assistant est injoignable.',
+    'Next': 'Ensuite',
+    'Later': 'Plus tard',
+    'No guide data': 'Pas de guide',
+  },
+  es: {
+    'All channels': 'Todos los canales',
+    'Loading channels...': 'Cargando canales...',
+    'Set up Live TV': 'Configurar Live TV',
+    'Open this address on your phone or computer:': 'Abre esta dirección en tu móvil u ordenador:',
+    'and enter this code:': 'e introduce este código:',
+    'Then paste your M3U playlist address. This page closes by itself.':
+      'Después pega la dirección de tu lista M3U. Esta página se cierra sola.',
+    'This channel is not available.': 'Este canal no está disponible.',
+    'Press OK to try again.': 'Pulsa OK para reintentar.',
+    'The helper is not reachable.': 'El helper no está disponible.',
+    'Next': 'Después',
+    'Later': 'Más tarde',
+    'No guide data': 'Sin guía',
+  },
+};
+(function () {
+  var add = {
+    nl: {
+      'Favourites': 'Favorieten',
+      'Recent': 'Recent',
+      'Search...': 'Zoeken...',
+      'Filters': 'Filters',
+      'Country': 'Land',
+      'Language': 'Taal',
+      'Quality': 'Kwaliteit',
+      'All': 'Alle',
+      'Clear filters': 'Filters wissen',
+      'Added to favourites': 'Toegevoegd aan favorieten',
+      'Removed from favourites': 'Verwijderd uit favorieten',
+      'Favourite': 'Favoriet',
+      'On': 'Aan',
+      'Off': 'Uit',
+      'Stream': 'Stream',
+      'streams': 'streams',
+      'Statistics': 'Statistieken',
+      'Close': 'Sluiten',
+      'Tuning...': 'Afstemmen...',
+      'Checking why...': 'Oorzaak wordt gezocht...',
+      'buffer': 'buffer',
+      'frames': 'beelden',
+      'dropped': 'gemist',
+      'reloaded': 'opnieuw geladen',
+      'No favourites yet. Press the green button on a channel.': 'Nog geen favorieten. Druk op de groene knop bij een zender.',
+      'Nothing watched yet.': 'Nog niets bekeken.',
+      'No channels match.': 'Geen zenders gevonden.',
+      'The server refused the stream: it may be blocked in your country or need special request headers.':
+        'De server weigert de stream: mogelijk geblokkeerd in jouw land of er zijn speciale headers nodig.',
+      'The stream was not found (404): the channel is offline or its address has changed.':
+        'De stream is niet gevonden (404): de zender is offline of het adres is gewijzigd.',
+      'The stream server reported an error.': 'De streamserver meldt een fout.',
+      'The address answers with a web page, not a video.': 'Het adres geeft een webpagina, geen video.',
+      'This stream is protected by DRM and cannot be played here.': 'Deze stream is met DRM beveiligd en kan hier niet worden afgespeeld.',
+      'The stream server cannot be reached.': 'De streamserver is niet bereikbaar.',
+      'The stream is too slow to start.': 'De stream start te langzaam.',
+      'The stream answers, but the TV could not play it: probably a format it cannot decode.':
+        'De stream antwoordt, maar de tv kon hem niet afspelen: waarschijnlijk een formaat dat hij niet kan decoderen.',
+    },
+    de: {
+      'Favourites': 'Favoriten',
+      'Recent': 'Zuletzt',
+      'Search...': 'Suchen...',
+      'Filters': 'Filter',
+      'Country': 'Land',
+      'Language': 'Sprache',
+      'Quality': 'Qualität',
+      'All': 'Alle',
+      'Clear filters': 'Filter löschen',
+      'Added to favourites': 'Zu Favoriten hinzugefügt',
+      'Removed from favourites': 'Aus Favoriten entfernt',
+      'Favourite': 'Favorit',
+      'On': 'An',
+      'Off': 'Aus',
+      'Stream': 'Stream',
+      'streams': 'Streams',
+      'Statistics': 'Statistik',
+      'Close': 'Schließen',
+      'Tuning...': 'Sender wird eingestellt...',
+      'Checking why...': 'Ursache wird gesucht...',
+      'buffer': 'Puffer',
+      'frames': 'Bilder',
+      'dropped': 'verworfen',
+      'reloaded': 'neu geladen',
+      'No favourites yet. Press the green button on a channel.': 'Noch keine Favoriten. Drücke bei einem Sender die grüne Taste.',
+      'Nothing watched yet.': 'Noch nichts angesehen.',
+      'No channels match.': 'Keine passenden Sender.',
+      'The server refused the stream: it may be blocked in your country or need special request headers.':
+        'Der Server verweigert den Stream: vielleicht in deinem Land gesperrt oder es werden spezielle Header benötigt.',
+      'The stream was not found (404): the channel is offline or its address has changed.':
+        'Der Stream wurde nicht gefunden (404): Der Sender ist offline oder die Adresse hat sich geändert.',
+      'The stream server reported an error.': 'Der Stream-Server meldet einen Fehler.',
+      'The address answers with a web page, not a video.': 'Die Adresse liefert eine Webseite, kein Video.',
+      'This stream is protected by DRM and cannot be played here.':
+        'Dieser Stream ist DRM-geschützt und kann hier nicht abgespielt werden.',
+      'The stream server cannot be reached.': 'Der Stream-Server ist nicht erreichbar.',
+      'The stream is too slow to start.': 'Der Stream startet zu langsam.',
+      'The stream answers, but the TV could not play it: probably a format it cannot decode.':
+        'Der Stream antwortet, aber der Fernseher konnte ihn nicht abspielen: wahrscheinlich ein Format, das er nicht dekodieren kann.',
+    },
+    fr: {
+      'Favourites': 'Favoris',
+      'Recent': 'Récents',
+      'Search...': 'Rechercher...',
+      'Filters': 'Filtres',
+      'Country': 'Pays',
+      'Language': 'Langue',
+      'Quality': 'Qualité',
+      'All': 'Tous',
+      'Clear filters': 'Effacer les filtres',
+      'Added to favourites': 'Ajouté aux favoris',
+      'Removed from favourites': 'Retiré des favoris',
+      'Favourite': 'Favori',
+      'On': 'Oui',
+      'Off': 'Non',
+      'Stream': 'Flux',
+      'streams': 'flux',
+      'Statistics': 'Statistiques',
+      'Close': 'Fermer',
+      'Tuning...': 'Connexion...',
+      'Checking why...': 'Recherche de la cause...',
+      'buffer': 'tampon',
+      'frames': 'images',
+      'dropped': 'perdues',
+      'reloaded': 'rechargé',
+      'No favourites yet. Press the green button on a channel.': 'Pas encore de favoris. Appuyez sur la touche verte sur une chaîne.',
+      'Nothing watched yet.': 'Rien de regardé pour l’instant.',
+      'No channels match.': 'Aucune chaîne trouvée.',
+      'The server refused the stream: it may be blocked in your country or need special request headers.':
+        'Le serveur refuse le flux : il est peut-être bloqué dans votre pays ou nécessite des en-têtes spéciaux.',
+      'The stream was not found (404): the channel is offline or its address has changed.':
+        'Flux introuvable (404) : la chaîne est hors ligne ou son adresse a changé.',
+      'The stream server reported an error.': 'Le serveur de flux signale une erreur.',
+      'The address answers with a web page, not a video.': 'L’adresse renvoie une page web, pas une vidéo.',
+      'This stream is protected by DRM and cannot be played here.': 'Ce flux est protégé par DRM et ne peut pas être lu ici.',
+      'The stream server cannot be reached.': 'Le serveur de flux est injoignable.',
+      'The stream is too slow to start.': 'Le flux démarre trop lentement.',
+      'The stream answers, but the TV could not play it: probably a format it cannot decode.':
+        'Le flux répond, mais le téléviseur n’a pas pu le lire : probablement un format qu’il ne sait pas décoder.',
+    },
+    es: {
+      'Favourites': 'Favoritos',
+      'Recent': 'Recientes',
+      'Search...': 'Buscar...',
+      'Filters': 'Filtros',
+      'Country': 'País',
+      'Language': 'Idioma',
+      'Quality': 'Calidad',
+      'All': 'Todos',
+      'Clear filters': 'Quitar filtros',
+      'Added to favourites': 'Añadido a favoritos',
+      'Removed from favourites': 'Quitado de favoritos',
+      'Favourite': 'Favorito',
+      'On': 'Sí',
+      'Off': 'No',
+      'Stream': 'Emisión',
+      'streams': 'emisiones',
+      'Statistics': 'Estadísticas',
+      'Close': 'Cerrar',
+      'Tuning...': 'Sintonizando...',
+      'Checking why...': 'Buscando la causa...',
+      'buffer': 'búfer',
+      'frames': 'imágenes',
+      'dropped': 'perdidas',
+      'reloaded': 'recargado',
+      'No favourites yet. Press the green button on a channel.': 'Aún no hay favoritos. Pulsa el botón verde en un canal.',
+      'Nothing watched yet.': 'Todavía no has visto nada.',
+      'No channels match.': 'Ningún canal coincide.',
+      'The server refused the stream: it may be blocked in your country or need special request headers.':
+        'El servidor rechaza la emisión: puede estar bloqueada en tu país o necesitar cabeceras especiales.',
+      'The stream was not found (404): the channel is offline or its address has changed.':
+        'No se encontró la emisión (404): el canal está fuera de línea o su dirección cambió.',
+      'The stream server reported an error.': 'El servidor de la emisión informa de un error.',
+      'The address answers with a web page, not a video.': 'La dirección devuelve una página web, no un vídeo.',
+      'This stream is protected by DRM and cannot be played here.': 'Esta emisión está protegida con DRM y no se puede reproducir aquí.',
+      'The stream server cannot be reached.': 'No se puede acceder al servidor de la emisión.',
+      'The stream is too slow to start.': 'La emisión tarda demasiado en empezar.',
+      'The stream answers, but the TV could not play it: probably a format it cannot decode.':
+        'La emisión responde, pero el televisor no pudo reproducirla: probablemente un formato que no sabe decodificar.',
+    },
+  };
+  for (var l in add) {
+    TXL[l] = TXL[l] || {};
+    for (var k in add[l]) TXL[l][k] = add[l][k];
+  }
+})();
+function t(k) {
+  var d = TX[LANG],
+    l = TXL[LANG];
+  return (d && d[k]) || (l && l[k]) || k;
+}
+/* a button's label: built-in buttons are translated, buttons you added keep the app's own name */
+function barLabel(o) {
+  return o.action === 'inputs'
+    ? t('Inputs')
+    : o.app === 'com.palm.app.settings'
+      ? t('Settings')
+      : o.action === 'customize'
+        ? t('Customise')
+        : o.action === 'live'
+          ? t('Live TV')
+          : o.label || '';
+}
+function clockOpts() {
+  var c = cfg.clock,
+    o = { hour: 'numeric', minute: '2-digit' };
+  if (c === '24') {
+    o.hourCycle = 'h23';
+  } else if (c === '12') {
+    o.hourCycle = 'h12';
+    o.hour = 'numeric';
+  }
+  return o;
+}
+
+var apps = [],
+  cfg = {},
+  usage = {},
+  warned = false,
+  rows = [],
+  r = 1,
+  c = 0,
+  colors = {},
+  tiles = {},
+  lastSig = '',
+  gSide = 0,
+  gColor = '',
+  gT = 0,
+  saveT = 0;
+function $(id) {
+  return document.getElementById(id);
+}
+var toastT;
+function toast(t) {
+  var e = $('toast');
+  e.textContent = t;
+  e.classList.add('on');
+  clearTimeout(toastT);
+  toastT = setTimeout(function () {
+    e.classList.remove('on');
+  }, 4000);
+}
+var MIN_SERVICE = '1.7.0';
+function oldSvc(v) {
+  var a = String(v).split('.'),
+    b = MIN_SERVICE.split('.');
+  for (var i = 0; i < 3; i++) {
+    var x = +a[i] || 0,
+      y = +b[i] || 0;
+    if (x !== y) return x < y;
+  }
+  return false;
+}
+function api(p, body) {
+  return fetch(API + p, body ? { method: 'POST', body: JSON.stringify(body) } : {}).then(function (x) {
+    return x.json();
+  });
+}
+/* a timing for tools/perf-tv.sh: one line in the service log ("perf launcher ready 412"); nothing waits for it */
+function perfMark(m) {
+  try {
+    var x = new XMLHttpRequest();
+    x.open('GET', API + '/api/log?m=' + encodeURIComponent('perf ' + m));
+    x.send();
+  } catch (e) {}
+}
+var perfReady = false;
+function launch(id, params) {
+  if (id === '__live') return LIVE.enter();
+  if (id === '__hdmi') return hdmiGo();
+  api('/api/launch', { id: id, params: params }).then(function (x) {
+    if (x && x.returnValue === false) toast(t('Could not open') + ' ' + id);
+  });
+}
+function store() {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ apps: apps, cfg: cfg, usage: usage, colors: colors }));
+  } catch (e) {}
+}
+function storeSoon() {
+  clearTimeout(saveT);
+  saveT = setTimeout(store, 1500);
+}
+/* ---------- colour (extracted once per app, then remembered) ---------- */
+function hsl2rgb(h, s, l) {
+  var a = s * Math.min(l, 1 - l);
+  function f(n) {
+    var k = (n + h / 30) % 12;
+    return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1))));
+  }
+  return [f(0), f(8), f(4)];
+}
+function rgb2hsl(R, G, B) {
+  R /= 255;
+  G /= 255;
+  B /= 255;
+  var mx = Math.max(R, G, B),
+    mn = Math.min(R, G, B),
+    l = (mx + mn) / 2,
+    h = 0,
+    s = 0,
+    d = mx - mn;
+  if (d) {
+    s = d / (1 - Math.abs(2 * l - 1));
+    h = mx === R ? (G - B) / d + (G < B ? 6 : 0) : mx === G ? (B - R) / d + 2 : (R - G) / d + 4;
+    h *= 60;
+  }
+  return [h, s, l];
+}
+function hashHue(id) {
+  var h = 0;
+  for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 360;
+  return h;
+}
+/* What the icon looks like, from its alpha: 'full' (art reaches the edges), 'pad' (an opaque, roughly square picture with a transparent
+   margin around it, as many LG icons are) or 'logo' (transparent gaps inside). box is the visible picture, as fractions of the image. */
+function analyse(img) {
+  try {
+    var N = 64,
+      cv = document.createElement('canvas');
+    cv.width = cv.height = N;
+    var x = cv.getContext('2d');
+    x.drawImage(img, 0, 0, N, N);
+    var d = x.getImageData(0, 0, N, N).data,
+      x0 = N,
+      y0 = N,
+      x1 = -1,
+      y1 = -1,
+      xx,
+      yy;
+    for (yy = 0; yy < N; yy++)
+      for (xx = 0; xx < N; xx++)
+        if (d[(yy * N + xx) * 4 + 3] > 128) {
+          if (xx < x0) x0 = xx;
+          if (xx > x1) x1 = xx;
+          if (yy < y0) y0 = yy;
+          if (yy > y1) y1 = yy;
+        }
+    if (x1 < 0) return { k: 'logo' };
+    var bw = x1 - x0 + 1,
+      bh = y1 - y0 + 1,
+      solid = 0;
+    for (yy = y0; yy <= y1; yy++) for (xx = x0; xx <= x1; xx++) if (d[(yy * N + xx) * 4 + 3] >= 230) solid++;
+    function strip(ya, yb) {
+      var R = 0,
+        G = 0,
+        B = 0,
+        n = 0,
+        i;
+      for (var y = ya; y <= yb; y++)
+        for (var x = x0; x <= x1; x++) {
+          i = (y * N + x) * 4;
+          if (d[i + 3] >= 230) {
+            R += d[i];
+            G += d[i + 1];
+            B += d[i + 2];
+            n++;
+          }
+        }
+      return n ? [Math.round(R / n), Math.round(G / n), Math.round(B / n)] : null;
+    }
+    var margin = Math.max(x0, y0, N - 1 - x1, N - 1 - y1) / N,
+      ratio = bw / bh;
+    var k = solid / (bw * bh) < 0.85 || ratio < 0.8 || ratio > 1.25 ? 'logo' : margin < 0.03 ? 'full' : 'pad',
+      edge = null;
+    if (k === 'full') {
+      // art to the edges, but not one flat colour there (a gradient): the tile cannot match it, so the picture fills the tile
+      var sr = 0,
+        sg = 0,
+        sb = 0,
+        n0 = 0,
+        q = 0,
+        ring = [];
+      for (yy = 0; yy < N; yy++)
+        for (xx = 0; xx < N; xx++) {
+          if (yy && yy < N - 1 && xx && xx < N - 1) continue;
+          var j = (yy * N + xx) * 4;
+          if (d[j + 3] >= 230) {
+            ring.push(d[j], d[j + 1], d[j + 2]);
+            sr += d[j];
+            sg += d[j + 1];
+            sb += d[j + 2];
+            n0++;
+          }
+        }
+      if (n0 > 0) {
+        var mr = sr / n0,
+          mg = sg / n0,
+          mb = sb / n0;
+        for (var t0 = 0; t0 < ring.length; t0 += 3)
+          q += Math.abs(ring[t0] - mr) + Math.abs(ring[t0 + 1] - mg) + Math.abs(ring[t0 + 2] - mb);
+        var st = strip(0, 1),
+          sbot = strip(N - 2, N - 1),
+          vert = st && sbot ? Math.abs(st[0] - sbot[0]) + Math.abs(st[1] - sbot[1]) + Math.abs(st[2] - sbot[2]) : 0;
+        if (q / n0 / 3 > 14 || vert > 40) {
+          x0 = 0;
+          x1 = N - 1;
+          return {
+            k: 'pad',
+            box: [0, 0, 1, 1],
+            edge: [Math.round(mr), Math.round(mg), Math.round(mb)],
+            top: strip(0, 1),
+            bot: strip(N - 2, N - 1),
+          };
+        }
+      }
+    }
+    if (k === 'pad') {
+      // the picture's own border colour, from the outer two pixels of the visible box
+      var R = 0,
+        G = 0,
+        B = 0,
+        n = 0;
+      for (yy = y0; yy <= y1; yy++)
+        for (xx = x0; xx <= x1; xx++) {
+          if (yy - y0 > 1 && y1 - yy > 1 && xx - x0 > 1 && x1 - xx > 1) continue;
+          var i = (yy * N + xx) * 4;
+          if (d[i + 3] >= 230) {
+            R += d[i];
+            G += d[i + 1];
+            B += d[i + 2];
+            n++;
+          }
+        }
+      if (n) edge = [Math.round(R / n), Math.round(G / n), Math.round(B / n)];
+      else k = 'logo';
+    }
+    return { k: k, box: [x0 / N, y0 / N, (x1 + 1) / N, (y1 + 1) / N], edge: edge, top: strip(y0, y0 + 1), bot: strip(y1 - 1, y1) };
+  } catch (e) {
+    return null;
+  }
+} // null: the canvas could not be read
+/* returns {c: vibrant colour for the glow, b: tile background (the icon's own edge colour), k and box from analyse}; t is set when the image could not be read */
+function iconColor(img, id) {
+  var glow = null,
+    edge = null,
+    N = 16,
+    tainted = false;
+  try {
+    var cv = document.createElement('canvas');
+    cv.width = cv.height = N;
+    var x = cv.getContext('2d');
+    x.drawImage(img, 0, 0, N, N);
+    var d = x.getImageData(0, 0, N, N).data,
+      R = 0,
+      G = 0,
+      B = 0,
+      W = 0,
+      eR = 0,
+      eG = 0,
+      eB = 0,
+      eN = 0,
+      ring = 0;
+    for (var y = 0; y < N; y++)
+      for (var xx = 0; xx < N; xx++) {
+        var i = (y * N + xx) * 4,
+          a = d[i + 3] / 255;
+        if (y === 0 || y === N - 1 || xx === 0 || xx === N - 1) {
+          ring++;
+          if (a > 0.8) {
+            eR += d[i];
+            eG += d[i + 1];
+            eB += d[i + 2];
+            eN++;
+          }
+        }
+        if (a < 0.4) continue;
+        var hs = rgb2hsl(d[i], d[i + 1], d[i + 2]);
+        var w = a * (0.15 + hs[1] * hs[1]);
+        R += d[i] * w;
+        G += d[i + 1] * w;
+        B += d[i + 2] * w;
+        W += w;
+      }
+    if (eN > ring * 0.5) edge = [Math.round(eR / eN), Math.round(eG / eN), Math.round(eB / eN)];
+    if (W > 0.5) {
+      var h = rgb2hsl(R / W, G / W, B / W);
+      if (h[1] > 0.22) glow = hsl2rgb(h[0], Math.max(0.5, Math.min(h[1], 0.8)), Math.max(0.36, Math.min(h[2], 0.52)));
+    }
+  } catch (e) {
+    tainted = true;
+  }
+  var an = tainted ? null : analyse(img);
+  if (an && an.k === 'pad' && an.edge) edge = an.edge;
+  var fb = hsl2rgb(hashHue(id), 0.42, 0.42);
+  glow = glow || (edge && rgb2hsl(edge[0], edge[1], edge[2])[1] > 0.3 ? edge : fb);
+  var col = { c: glow, b: edge || hsl2rgb(rgb2hsl(glow[0], glow[1], glow[2])[0], 0.4, 0.2) };
+  if (an) {
+    col.k = an.k;
+    if (an.box) col.box = an.box;
+    if (an.top && an.bot) {
+      col.gt = an.top;
+      col.gb = an.bot;
+    }
+  }
+  if (tainted) col.t = 1;
+  return col;
+}
+/* a picture with a transparent margin fills a grid tile (cropped to its visible part); in the wide dock tiles it keeps its size on a tile of its own colour */
+function fit(d, dock) {
+  var i = d._i,
+    c = d._col;
+  if (!i) return;
+  i.removeAttribute('style');
+  d.classList.remove('fill');
+  /* only the gradient this function set is taken away: the tile's other inline styles (a glass tile's position) stay */
+  if (d._grad) {
+    d.style.background = '';
+    d._grad = false;
+  }
+  var ds = document.body.getAttribute('data-dockstyle');
+  if (dock && ds && ds !== 'tile') return; /* a card shows the whole icon in its corner; logo, glass, paper and word docks no picture */
+  if (!c || c.k !== 'pad' || !c.box) return;
+  var bx = c.box,
+    bw = bx[2] - bx[0],
+    bh = bx[3] - bx[1],
+    s = i.style;
+  if (dock) {
+    s.height = 56 / bh + '%';
+    s.maxWidth = 'none';
+    s.width = 'auto';
+    // a gradient picture: the tile takes the same gradient between the picture's top and bottom edges, so no square shows
+    if (c.gt && c.gb && Math.abs(c.gt[0] - c.gb[0]) + Math.abs(c.gt[1] - c.gb[1]) + Math.abs(c.gt[2] - c.gb[2]) > 40) {
+      d.style.background = 'linear-gradient(rgb(' + c.gt.join(',') + ') 22%,rgb(' + c.gb.join(',') + ') 78%)';
+      d._grad = true;
+    }
+    return;
+  }
+  d.classList.add('fill');
+  s.position = 'absolute';
+  s.maxWidth = 'none';
+  s.width = 100 / bw + '%';
+  s.height = 100 / bh + '%';
+  s.left = (-bx[0] / bw) * 100 + '%';
+  s.top = (-bx[1] / bh) * 100 + '%';
+}
+function paint(d, col) {
+  d.style.setProperty('--c', col.c.join(','));
+  d.style.setProperty('--b', col.b.join(','));
+}
+/* ---------- tiles (built once per app, reused across rebuilds) ---------- */
+/* A tile is the picture (.face, which crops a picture that fills it) and its name under it (.cap). A tile is rebuilt when its name or
+   drawn icon changes (calm.js, look); the HDMI card's name follows the inputs and is updated in place (hdmiPaint). */
+function tile(a) {
+  var lk = look(a),
+    sig = lk.glyph + '|' + (a.id === '__hdmi' ? '' : lk.label);
+  if (tiles[a.id] && tiles[a.id]._sig === sig) return tiles[a.id];
+  var d = document.createElement('div'),
+    tint = document.createElement('div'),
+    face = document.createElement('div'),
+    cap = document.createElement('div');
+  d.className = 'tile' + (a.sys ? ' sys' : '');
+  d._a = a;
+  d._sig = sig;
+  tiles[a.id] = d;
+  hit(d);
+  tint.className = 'tint'; /* the app's colour on a focused card (dock.style card) */
+  face.className = 'face';
+  cap.className = 'cap';
+  cap.textContent = lk.label;
+  d.appendChild(tint);
+  d.appendChild(face);
+  d.appendChild(cap);
+  if (a.sys) {
+    face.innerHTML = svg(a.icon) + '<div class="slab">' + 'LG Home' + '</div>';
+    return d;
+  }
+  if (lk.glyph) {
+    glyphTile(d, face, lk.glyph);
+    if (a.id === '__hdmi') hdmiPaint();
+    return d;
+  }
+  var known = colors[a.id];
+  if (known) {
+    paint(d, known);
+    d._col = known;
+  }
+  var i = new Image();
+  i.alt = '';
+  i.decoding = 'async';
+  d._i = i;
+  if (!known) i.crossOrigin = 'anonymous';
+  i.onload = function () {
+    if (!colors[a.id]) {
+      var col = iconColor(i, a.id);
+      d._col = col;
+      paint(d, col);
+      fit(d, !!(d.parentNode && d.parentNode.id === 'dock'));
+      if (!col.t) {
+        colors[a.id] = col;
+        storeSoon();
+      }
+      if (rows[r] && rows[r][c] === d) glowNow(d);
+    }
+  };
+  i.onerror = function () {
+    i.remove();
+    var t = document.createElement('div');
+    t.className = 't';
+    t.textContent = lk.label;
+    face.appendChild(t);
+    if (!colors[a.id]) {
+      var f = hsl2rgb(hashHue(a.id), 0.42, 0.42);
+      paint(d, { c: f, b: hsl2rgb(hashHue(a.id), 0.4, 0.2) });
+    }
+  }; /* not remembered: a failed load must not pin a made-up colour */
+  i.src = a.id === '__live' ? LIVE_ICON : API + '/icon/' + encodeURIComponent(a.id);
+  face.appendChild(i);
+  if (i.decode) i.decode().catch(function () {});
+  return d;
+}
+
+/* ---------- ambient glow: two layers cross-fade, updated only once focus settles ---------- */
+function glowNow(e) {
+  var col = TH.glow || e.style.getPropertyValue('--c') || '74,84,112';
+  if (col === gColor) return;
+  gColor = col;
+  var on = gSide ? $('gB') : $('gA'),
+    off = gSide ? $('gA') : $('gB');
+  gSide ^= 1;
+  on.style.setProperty('--c', col);
+  on.classList.add('on');
+  off.classList.remove('on');
+}
+function glowSoon(e) {
+  clearTimeout(gT);
+  gT = setTimeout(function () {
+    glowNow(e);
+  }, 110);
+}
+/* ---------- theme: the service resolves the chosen theme (manager > Theme) into CSS variables and a few numbers ---------- */
+var TH0 = { cols: 10, tileH: 151, gapY: 26, gt: 350, viewH: 780, dockN: 4, overlay: false, push: null, overlayH: 510, glow: '' },
+  TH = TH0,
+  themeKeys = [],
+  themeAttrs = [
+    'data-bar',
+    'data-labels',
+    'data-clock',
+    'data-grid',
+    'data-galign',
+    'data-dock',
+    'data-shelf',
+    'data-dockstyle',
+    'data-clockpos',
+    'data-datecase',
+    'data-dockfocus',
+    'data-inkmode',
+    'data-accmode',
+  ];
+function applyTheme(t) {
+  var st = document.documentElement.style,
+    b = document.body,
+    k;
+  for (k = 0; k < themeKeys.length; k++) st.removeProperty(themeKeys[k]);
+  themeKeys = [];
+  for (k = 0; k < themeAttrs.length; k++) b.removeAttribute(themeAttrs[k]);
+  b.classList.remove('grid-open');
+  if (!t || !t.vars) {
+    TH = TH0;
+    return;
+  }
+  for (k in t.vars) {
+    st.setProperty(k, t.vars[k]);
+    themeKeys.push(k);
+  }
+  var w = t.wallpaper;
+  /* a scene shipped with the launcher, next to this page, and its blurred copy for glass tiles; calm.js picks the time of day */
+  scene = {
+    name: !w && t.scene && /^[a-z]{1,20}$/.test(t.scene) ? t.scene : '',
+    glass: t.glass && /^[a-z]{1,20}$/.test(t.glass) ? t.glass : '',
+    daily: !!t.daily,
+    period: '',
+  };
+  sceneApply();
+  if (w) {
+    var d = 'rgba(' + t.nightRgb + ',' + w.dim + ')';
+    st.setProperty('--wall', 'linear-gradient(' + d + ',' + d + '),url("' + API + '/api/theme/wallpaper/' + w.id + '/' + w.file + '")');
+    themeKeys.push('--wall');
+  }
+  for (k in t.attrs) b.setAttribute('data-' + k, t.attrs[k]);
+  TH = {
+    cols: t.cols || 10,
+    tileH: t.tileH || 151,
+    gapY: t.gapY || 26,
+    gt: t.gt || 350,
+    viewH: t.viewH || 780,
+    dockN: t.dockN || 4,
+    overlay: !!t.overlay,
+    push: t.push || null,
+    overlayH: t.overlayH || 510,
+    glow: t.glowRgb || '',
+  };
+}
+
+function setFocus(nr, nc, first) {
+  var old = rows[r] && rows[r][c];
+  if (old) old.classList.remove('f');
+  r = nr;
+  c = Math.min(nc, rows[r].length - 1);
+  var e = rows[r][c];
+  e.classList.add('f');
+  var a = e._a,
+    nm = a ? look(a).label : e._o ? barLabel(e._o) : '',
+    n = $('name');
+  if (n.textContent !== nm) n.textContent = nm;
+  if (first) glowNow(e);
+  else glowSoon(e);
+  var sh = 0;
+  if (TH.push) {
+    /* the grid sits under the dock: focusing it scrolls everything up (the dock stops at its 'up' position) and the grid fades in */
+    document.body.classList.toggle('grid-open', r >= 2);
+    var ps = 0;
+    if (r >= 2) {
+      var bot = TH.push.gridTop - TH.push.up + (r - 2) * (TH.tileH + TH.gapY) + TH.tileH,
+        ex = Math.max(0, bot - (1080 - 60));
+      ps = -(TH.push.up + ex);
+    }
+    $('scroll').style.transform = ps ? 'translateY(' + ps + 'px)' : '';
+    $('grid').style.transform = '';
+    return;
+  }
+  if (TH.overlay) {
+    /* the grid is an overlay above the dock: it opens when the focus goes down into it and scrolls on its own */
+    document.body.classList.toggle('grid-open', r >= 2);
+    var gs = 0;
+    if (r >= 2) gs = Math.min(0, TH.overlayH - ((r - 2) * (TH.tileH + TH.gapY) + TH.tileH + 24));
+    $('grid').style.transform = gs ? 'translateY(' + gs + 'px)' : '';
+    $('scroll').style.transform = '';
+    return;
+  }
+  $('grid').style.transform = '';
+  if (r >= 2) {
+    var gr = rows.length - 2,
+      gt = TH.gt;
+    sh = Math.min(0, Math.max(50 - (gt + (r - 2) * (TH.tileH + TH.gapY)), TH.viewH - 54 - (gt + gr * TH.tileH + (gr - 1) * TH.gapY)));
+  } /* row height + gap from the theme: no layout reads */
+  $('scroll').style.transform = sh ? 'translateY(' + sh + 'px)' : '';
+}
+function mapCol(from, to, col) {
+  return from > 1 ? Math.round((col * (to - 1)) / (from - 1)) : 0;
+}
+function posOf(e) {
+  for (var i = 0; i < rows.length; i++) {
+    var j = rows[i].indexOf(e);
+    if (j >= 0) return [i, j];
+  }
+  return null;
+}
+/* ---------- config (edited in the launcher, saved through the helper) ---------- */
+function saveCfg() {
+  api('/api/config', cfg).catch(function () {
+    toast(t('Could not save settings'));
+  });
+  store();
+  rebuild();
+}
+function isHidden(id) {
+  return (cfg.hidden || []).indexOf(id) >= 0;
+}
+function dockIds() {
+  var by = {};
+  apps.forEach(function (a) {
+    by[a.id] = a;
+  });
+  var ids = cfg.dock && cfg.dock.length ? cfg.dock : defaultDock();
+  return ids
+    .filter(function (i) {
+      return by[i] && !isHidden(i);
+    })
+    .slice(0, TH.dockN);
+}
+function setDock(ids) {
+  cfg.dock = ids.slice(0, TH.dockN);
+  saveCfg();
+}
+function hideApp(id) {
+  cfg.hidden = (cfg.hidden || []).concat(id);
+  cfg.dock = dockIds().filter(function (i) {
+    return i !== id;
+  });
+  saveCfg();
+}
+function unhideApp(id) {
+  cfg.hidden = (cfg.hidden || []).filter(function (i) {
+    return i !== id;
+  });
+  saveCfg();
+}
+function topbar() {
+  return cfg.topbar ? cfg.topbar : DEFAULTS.topbar;
+}
+/* Live TV is optional (manager > Live TV): off hides every entry, the saved layout is kept for when it is switched on again */
+function liveOn() {
+  return !(cfg.options && cfg.options.liveTv === false);
+}
+function shownBar() {
+  return liveOn()
+    ? topbar()
+    : topbar().filter(function (o) {
+        return o.action !== 'live';
+      });
+}
+function byOrder(a, b) {
+  if (cfg.sort !== 'alpha') {
+    var d = (usage[b.id] || 0) - (usage[a.id] || 0);
+    if (Math.abs(d) > 1e-9) return d > 0 ? 1 : -1;
+  }
+  return look(a).label.localeCompare(look(b).label);
+}
+function title(id) {
+  for (var i = 0; i < apps.length; i++) if (apps[i].id === id) return look(apps[i]).label;
+  return id;
+}
+
+/* ---------- actions ---------- */
+function act(e) {
+  var a = e._a;
+  if (a) {
+    if (!a.sys) {
+      e.classList.add('launching');
+      setTimeout(function () {
+        e.classList.remove('launching');
+      }, 4000);
+    }
+    return launch(a.id);
+  }
+  var o = e._o || {};
+  if (o.action === 'customize') return customizeMenu();
+  if (o.action === 'live') return LIVE.enter();
+  if (o.action === 'inputs') return inputsMenu();
+  if (o.app) launch(o.app, o.params);
+}
+/* ---------- menus ---------- */
+var stack = [],
+  ovEl = null;
+/* webOS 5's Chromium (68) can leave the old text in the compositor tile when an element's content is replaced, so menu and list text shows
+   twice (issue 4). There the element is swapped for a fresh one instead of rewriting its content; newer engines just set innerHTML. */
+var OLDGPU = (function () {
+  var m = /Chrome\/(\d+)/.exec(navigator.userAgent || '');
+  return !!m && +m[1] < 79;
+})();
+function setHtml(el, h) {
+  if (!OLDGPU || !el.parentNode) {
+    el.innerHTML = h;
+    return el;
+  }
+  var n = el.cloneNode(false);
+  n.innerHTML = h;
+  el.parentNode.replaceChild(n, el);
+  return n;
+}
+function openMenu(title, items) {
+  stack.push({ title: title, items: items, idx: 0 });
+  drawMenu();
+}
+function closeMenus() {
+  stack = [];
+  if (ovEl) {
+    ovEl.remove();
+    ovEl = null;
+  }
+}
+function backMenu() {
+  stack.pop();
+  if (stack.length) drawMenu();
+  else closeMenus();
+}
+function drawMenu() {
+  var m = stack[stack.length - 1],
+    N = 8,
+    start = Math.max(0, Math.min(m.idx - 3, m.items.length - N));
+  if (!ovEl) {
+    ovEl = document.createElement('div');
+    ovEl.id = 'ov';
+    document.body.appendChild(ovEl);
+  }
+  var h = '<div class="panel"><h2></h2><div class="more">' + (start > 0 ? '▲' : '') + '</div>';
+  for (var i = start; i < Math.min(m.items.length, start + N); i++) {
+    var it = m.items[i];
+    h +=
+      '<div class="row' +
+      (i === m.idx ? ' f' : '') +
+      (it.dim ? ' dim' : '') +
+      '" data-i="' +
+      i +
+      '">' +
+      (it.icon ? svg(it.icon) : '') +
+      '<span class="lb"></span>' +
+      (it.sub ? '<span class="st"></span>' : '') +
+      '</div>';
+  }
+  h += '<div class="more">' + (start + N < m.items.length ? '▼' : '') + '</div></div>';
+  ovEl = setHtml(ovEl, h);
+  ovEl.querySelector('h2').textContent = m.title;
+  [].forEach.call(ovEl.querySelectorAll('.row'), function (row) {
+    var it = m.items[+row.getAttribute('data-i')];
+    row.querySelector('.lb').textContent = it.label;
+    if (it.sub) row.querySelector('.st').textContent = it.sub;
+    row.addEventListener('click', function () {
+      m.idx = +row.getAttribute('data-i');
+      pickMenu();
+    });
+  });
+}
+function pickMenu() {
+  var m = stack[stack.length - 1],
+    it = m.items[m.idx];
+  if (it && it.fn) {
+    var n = stack.length;
+    it.fn();
+    if (stack.length === n && !it.stay) closeMenus();
+  }
+}
+function menuKey(k) {
+  var m = stack[stack.length - 1];
+  if (k === 38 && m.idx > 0) {
+    m.idx--;
+    drawMenu();
+  } else if (k === 40 && m.idx < m.items.length - 1) {
+    m.idx++;
+    drawMenu();
+  } else if (k === 13) pickMenu();
+  else if (k === 461 || k === 27 || k === 8) backMenu();
+  else return false;
+  return true;
+}
+
+/* Back on the home screen lists the running apps to close them, as LG's Home does with its Recents on a second Back (issue 16) */
+function runningMenu() {
+  api('/api/running').then(
+    function (x) {
+      if (x.error) return toast(t('Could not read the running apps'));
+      openMenu(t('Running apps'), runningItems(x.apps || []));
+      stack[stack.length - 1].running = true;
+    },
+    function () {
+      toast(t('Could not read the running apps'));
+    }
+  );
+}
+/* the list is only true for the moment it was read: it goes when Home is left, so it is never shown out of date */
+function closeRunningMenu() {
+  if (
+    stack.some(function (m) {
+      return m.running;
+    })
+  )
+    closeMenus();
+}
+function runningItems(list) {
+  if (!list.length) return [{ label: t('No apps are running'), dim: true }];
+  var items = list.map(function (a) {
+    return {
+      label: a.title,
+      sub: t('Close'),
+      stay: true,
+      fn: function () {
+        closeRunning(list, [a.id]);
+      },
+    };
+  });
+  if (list.length > 1)
+    items.push({
+      label: t('Close all'),
+      stay: true,
+      fn: function () {
+        closeRunning(
+          list,
+          list.map(function (a) {
+            return a.id;
+          })
+        );
+      },
+    });
+  return items;
+}
+/* the app manager's running list lags by seconds after a close, so the rows go at once instead of after a new reading */
+function closeRunning(list, ids) {
+  var m = stack[stack.length - 1],
+    left = list.filter(function (a) {
+      return ids.indexOf(a.id) < 0;
+    });
+  api('/api/running/close', ids.length > 1 ? { all: true } : { id: ids[0] }).then(
+    function (x) {
+      if (!x || x.returnValue !== true) toast(t('Could not close'));
+    },
+    function () {
+      toast(t('Could not close'));
+    }
+  );
+  m.items = runningItems(left);
+  m.idx = Math.min(m.idx, m.items.length - 1);
+  drawMenu();
+}
+
+/* the inputs, devices that are on first (calm.js); the one opened is remembered for the HDMI card */
+function inputsMenu() {
+  api('/api/inputs').then(
+    function (x) {
+      showInputs(gotInputs(x));
+    },
+    function () {
+      toast(t('Could not read the inputs'));
+    }
+  );
+}
+
+function appMenu(a) {
+  var di = dockIds(),
+    pos = di.indexOf(a.id),
+    items = [
+      {
+        label: t('Open'),
+        fn: function () {
+          launch(a.id);
+        },
+      },
+    ];
+  if (a.id === '__hdmi') items = items.concat(hdmiItems());
+  if (pos >= 0) {
+    if (pos > 0)
+      items.push({
+        label: t('Move left in dock'),
+        fn: function () {
+          var d = di.slice();
+          d.splice(pos, 1);
+          d.splice(pos - 1, 0, a.id);
+          setDock(d);
+        },
+      });
+    if (pos < di.length - 1)
+      items.push({
+        label: t('Move right in dock'),
+        fn: function () {
+          var d = di.slice();
+          d.splice(pos, 1);
+          d.splice(pos + 1, 0, a.id);
+          setDock(d);
+        },
+      });
+    items.push({
+      label: t('Remove from dock'),
+      fn: function () {
+        setDock(
+          di.filter(function (i) {
+            return i !== a.id;
+          })
+        );
+      },
+    });
+  } else if (di.length < TH.dockN)
+    items.push({
+      label: t('Add to dock'),
+      fn: function () {
+        setDock(di.concat(a.id));
+      },
+    });
+  else
+    items.push({
+      label: t('Add to dock...'),
+      stay: true,
+      fn: function () {
+        openMenu(
+          t('Replace which app?'),
+          di.map(function (id, i) {
+            return {
+              label: title(id),
+              fn: function () {
+                var d = di.slice();
+                d[i] = a.id;
+                setDock(d);
+              },
+            };
+          })
+        );
+      },
+    });
+  if (a.id.charAt(0) !== '_')
+    items.push({
+      label: t('Icon and name...'),
+      stay: true,
+      fn: function () {
+        looksMenu(a);
+      },
+    });
+  items.push({
+    label: t('Hide app'),
+    fn: function () {
+      hideApp(a.id);
+    },
+  });
+  openMenu(look(a).label, items);
+}
+
+function removeButton(o) {
+  cfg.topbar = topbar().filter(function (b) {
+    return b !== o;
+  });
+  saveCfg();
+}
+function barMenu(o) {
+  openMenu(barLabel(o), [
+    {
+      label: t('Remove this button'),
+      fn: function () {
+        removeButton(o);
+      },
+    },
+  ]);
+}
+
+function customizeMenu() {
+  openMenu(t('Customise'), [
+    {
+      label: t('Style'),
+      sub: (cfg.theme && cfg.theme.name) || '',
+      stay: true,
+      fn: styleMenu,
+    },
+    { label: t('Remote buttons'), stay: true, fn: RB.open },
+    idleItem(),
+    nightItem(),
+    weatherItem(),
+    {
+      label: 'Dock',
+      sub: t('hold OK on an app'),
+      stay: true,
+      fn: function () {
+        toast(t('Hold OK on any app to change the dock'));
+      },
+    },
+    { label: t('Top buttons'), stay: true, fn: topButtonsMenu },
+    { label: t('Hidden apps'), stay: true, fn: hiddenMenu },
+    {
+      label: t('App order'),
+      sub: cfg.sort === 'alpha' ? t('A to Z') : t('Most used first'),
+      fn: function () {
+        cfg.sort = cfg.sort === 'alpha' ? 'usage' : 'alpha';
+        saveCfg();
+      },
+    },
+    {
+      label: t('Clock'),
+      sub: cfg.clock === '24' ? t('24-hour') : cfg.clock === '12' ? t('12-hour') : t('Automatic'),
+      fn: function () {
+        cfg.clock = cfg.clock === '24' ? '12' : cfg.clock === '12' ? 'auto' : '24';
+        saveCfg();
+        tick();
+      },
+    },
+    {
+      label: t('Reset customisation'),
+      fn: function () {
+        cfg = {};
+        saveCfg();
+      },
+    },
+  ]);
+}
+function topButtonsMenu() {
+  var items = shownBar().map(function (o) {
+    return {
+      label: barLabel(o),
+      sub: t('OK to remove'),
+      fn: function () {
+        removeButton(o);
+      },
+    };
+  });
+  items.push({ label: t('Add a button...'), stay: true, fn: addButtonMenu });
+  openMenu(t('Top buttons'), items);
+}
+function addButtonMenu() {
+  var items = PRESETS.filter(function (p) {
+    return liveOn() || p.action !== 'live';
+  }).map(function (p) {
+    return {
+      icon: p.icon,
+      label: barLabel(p),
+      fn: function () {
+        cfg.topbar = topbar().concat([p]);
+        saveCfg();
+      },
+    };
+  });
+  items.push({
+    label: t('An app...'),
+    stay: true,
+    fn: function () {
+      openMenu(
+        t('Pick an app'),
+        apps
+          .slice()
+          .sort(function (a, b) {
+            return a.title.localeCompare(b.title);
+          })
+          .map(function (a) {
+            return {
+              label: a.title,
+              fn: function () {
+                cfg.topbar = topbar().concat([{ label: a.title, icon: 'grid', app: a.id }]);
+                saveCfg();
+              },
+            };
+          })
+      );
+    },
+  });
+  openMenu(t('Add a button'), items);
+}
+function hiddenMenu() {
+  var h = (cfg.hidden || []).filter(function (id) {
+    return apps.some(function (a) {
+      return a.id === id;
+    });
+  });
+  if (!h.length) return toast(t('No hidden apps'));
+  openMenu(
+    t('Hidden apps (OK to show again)'),
+    h.map(function (id) {
+      return {
+        label: title(id),
+        fn: function () {
+          unhideApp(id);
+        },
+      };
+    })
+  );
+}
+/* ---------- Calm: the HDMI card, app looks (a name and a drawn icon in place of the app's own), the favourites the dock starts with,
+   and the remote's number and colour keys. Everything here works with any theme. ---------- */
+(function () {
+  var add = {
+    fr: {
+      'All apps': 'Toutes les apps',
+      'No HDMI inputs found': 'Aucune entrée HDMI trouvée',
+      'Could not read the inputs': 'Impossible de lire les entrées',
+      'Automatic (the device that is on)': 'Automatique (l’appareil allumé)',
+      'Always': 'Toujours',
+      'All inputs...': 'Toutes les entrées...',
+      'Icon and name...': 'Icône et nom...',
+      'The app’s own icon': 'L’icône de l’app',
+      'Which input?': 'Quelle entrée ?',
+      'Nothing connected': 'Rien de branché',
+      'Style': 'Style',
+      'Could not change the style': 'Impossible de changer de style',
+      'It will open': 'Il ouvrira',
+      'The first time, LG still does its own thing: then come back to Home.':
+        'La première fois, LG fait encore son action : revenez ensuite à l’accueil.',
+      'Done': 'C’est fait',
+      'Give a button of the remote to an app or an input. It works everywhere, not only here.':
+        'Donnez un bouton de la télécommande à une app ou à une entrée. Il fonctionne partout, pas seulement ici.',
+      'The app buttons (Netflix, Prime Video...) are the obvious ones to give':
+        'Les boutons des apps (Netflix, Prime Video…) sont tout indiqués',
+      "The device's own name": 'Le nom de l’appareil',
+      'Set-top box': 'Décodeur',
+      'TV box': 'Box TV',
+      'Game console': 'Console',
+      'Name...': 'Nom...',
+      'Idle screen': 'Écran de repos',
+      'Night mode': 'Mode nuit',
+      'Weather': 'Météo',
+      'Enabled': 'Activé',
+      'Disabled': 'Désactivé',
+      'after 3 min': 'après 3 min',
+      'after 10 min': 'après 10 min',
+      'Clear': 'Dégagé',
+      'Mostly clear': 'Plutôt dégagé',
+      'Partly cloudy': 'Nuageux',
+      'Overcast': 'Couvert',
+      'Fog': 'Brouillard',
+      'Drizzle': 'Bruine',
+      'Rain': 'Pluie',
+      'Snow': 'Neige',
+      'Showers': 'Averses',
+      'Snow showers': 'Averses de neige',
+      'Thunderstorm': 'Orage',
+      'Which city?': 'Quelle ville ?',
+      'Remote buttons': 'Boutons de la télécommande',
+      'Teach a button...': 'Apprendre un bouton...',
+      'Which app should it open?': 'Quelle app doit-il ouvrir ?',
+      'Button': 'Bouton',
+      'Open another app...': 'Ouvrir une autre app...',
+      'Give it back to LG': 'Le rendre à LG',
+      'The button does what LG intended again': 'Le bouton refait ce que LG prévoyait',
+      'Could not save the button': 'Impossible d’enregistrer le bouton',
+      'Could not read the remote buttons': 'Impossible de lire les boutons',
+      'Press the button': 'Appuyez sur le bouton',
+      'Waiting...': 'En attente...',
+      'If an app opens, come back to Home': 'Si une app s’ouvre, revenez à l’accueil',
+      'Cancel': 'Annuler',
+      'The button now opens': 'Le bouton ouvre maintenant',
+      'This button is kept for its own use: choose another one': 'Ce bouton garde son rôle : choisissez-en un autre',
+      'No button was pressed': 'Aucun bouton n’a été pressé',
+      'The remote cannot be read on this TV': 'La télécommande ne peut pas être lue sur ce téléviseur',
+      'Twelve buttons are already taught': 'Douze boutons sont déjà appris',
+    },
+    de: {
+      'All apps': 'Alle Apps',
+      'No HDMI inputs found': 'Keine HDMI-Eingänge gefunden',
+      'Could not read the inputs': 'Die Eingänge können nicht gelesen werden',
+      'Automatic (the device that is on)': 'Automatisch (das eingeschaltete Gerät)',
+      'Always': 'Immer',
+      'All inputs...': 'Alle Eingänge...',
+      'Icon and name...': 'Symbol und Name...',
+      'The app’s own icon': 'Das Symbol der App',
+      'Which input?': 'Welcher Eingang?',
+      'Nothing connected': 'Nichts angeschlossen',
+      'Style': 'Stil',
+      'Could not change the style': 'Der Stil kann nicht geändert werden',
+      'It will open': 'Sie öffnet',
+      'The first time, LG still does its own thing: then come back to Home.':
+        'Beim ersten Mal tut LG noch das Seine: dann zurück zum Home.',
+      'Done': 'Fertig',
+      'Give a button of the remote to an app or an input. It works everywhere, not only here.':
+        'Gib eine Taste der Fernbedienung einer App oder einem Eingang. Sie wirkt überall, nicht nur hier.',
+      'The app buttons (Netflix, Prime Video...) are the obvious ones to give': 'Die App-Tasten (Netflix, Prime Video…) bieten sich an',
+      "The device's own name": 'Der Name des Geräts',
+      'Set-top box': 'Set-Top-Box',
+      'TV box': 'TV-Box',
+      'Game console': 'Spielkonsole',
+      'Name...': 'Name...',
+      'Idle screen': 'Ruhebildschirm',
+      'Night mode': 'Nachtmodus',
+      'Weather': 'Wetter',
+      'Enabled': 'An',
+      'Disabled': 'Aus',
+      'after 3 min': 'nach 3 Min.',
+      'after 10 min': 'nach 10 Min.',
+      'Clear': 'Klar',
+      'Mostly clear': 'Überwiegend klar',
+      'Partly cloudy': 'Teilweise bewölkt',
+      'Overcast': 'Bedeckt',
+      'Fog': 'Nebel',
+      'Drizzle': 'Nieselregen',
+      'Rain': 'Regen',
+      'Snow': 'Schnee',
+      'Showers': 'Schauer',
+      'Snow showers': 'Schneeschauer',
+      'Thunderstorm': 'Gewitter',
+      'Which city?': 'Welche Stadt?',
+      'Remote buttons': 'Fernbedienungstasten',
+      'Teach a button...': 'Taste anlernen...',
+      'Which app should it open?': 'Welche App soll sie öffnen?',
+      'Button': 'Taste',
+      'Open another app...': 'Andere App öffnen...',
+      'Give it back to LG': 'An LG zurückgeben',
+      'The button does what LG intended again': 'Die Taste macht wieder, was LG vorsah',
+      'Could not save the button': 'Die Taste kann nicht gespeichert werden',
+      'Could not read the remote buttons': 'Die Tasten können nicht gelesen werden',
+      'Press the button': 'Drücke die Taste',
+      'Waiting...': 'Warten...',
+      'If an app opens, come back to Home': 'Öffnet sich eine App, zurück zum Home',
+      'Cancel': 'Abbrechen',
+      'The button now opens': 'Die Taste öffnet jetzt',
+      'This button is kept for its own use: choose another one': 'Diese Taste behält ihre Aufgabe: wähle eine andere',
+      'No button was pressed': 'Keine Taste gedrückt',
+      'The remote cannot be read on this TV': 'Die Fernbedienung kann auf diesem Fernseher nicht gelesen werden',
+      'Twelve buttons are already taught': 'Zwölf Tasten sind schon angelernt',
+    },
+    nl: {
+      'All apps': 'Alle apps',
+      'No HDMI inputs found': 'Geen HDMI-ingangen gevonden',
+      'Could not read the inputs': 'Kan de ingangen niet lezen',
+      'Automatic (the device that is on)': 'Automatisch (het apparaat dat aan staat)',
+      'Always': 'Altijd',
+      'All inputs...': 'Alle ingangen...',
+      'Icon and name...': 'Pictogram en naam...',
+      'The app’s own icon': 'Het eigen pictogram van de app',
+      'Which input?': 'Welke ingang?',
+      'Nothing connected': 'Niets aangesloten',
+      'Style': 'Stijl',
+      'Could not change the style': 'Kan de stijl niet wijzigen',
+      'It will open': 'Hij opent',
+      'The first time, LG still does its own thing: then come back to Home.':
+        'De eerste keer doet LG nog zijn eigen ding: ga daarna terug naar Home.',
+      'Done': 'Klaar',
+      'Give a button of the remote to an app or an input. It works everywhere, not only here.':
+        'Geef een knop van de afstandsbediening aan een app of een ingang. Hij werkt overal, niet alleen hier.',
+      'The app buttons (Netflix, Prime Video...) are the obvious ones to give':
+        'De app-knoppen (Netflix, Prime Video…) liggen voor de hand',
+      "The device's own name": 'De naam van het apparaat',
+      'Set-top box': 'Settopbox',
+      'TV box': 'Tv-box',
+      'Game console': 'Spelconsole',
+      'Name...': 'Naam...',
+      'Idle screen': 'Rustscherm',
+      'Night mode': 'Nachtmodus',
+      'Weather': 'Weer',
+      'Enabled': 'Aan',
+      'Disabled': 'Uit',
+      'after 3 min': 'na 3 min',
+      'after 10 min': 'na 10 min',
+      'Clear': 'Helder',
+      'Mostly clear': 'Vrij helder',
+      'Partly cloudy': 'Half bewolkt',
+      'Overcast': 'Bewolkt',
+      'Fog': 'Mist',
+      'Drizzle': 'Motregen',
+      'Rain': 'Regen',
+      'Snow': 'Sneeuw',
+      'Showers': 'Buien',
+      'Snow showers': 'Sneeuwbuien',
+      'Thunderstorm': 'Onweer',
+      'Which city?': 'Welke stad?',
+      'Remote buttons': 'Knoppen van de afstandsbediening',
+      'Teach a button...': 'Een knop aanleren...',
+      'Which app should it open?': 'Welke app moet hij openen?',
+      'Button': 'Knop',
+      'Open another app...': 'Een andere app openen...',
+      'Give it back to LG': 'Teruggeven aan LG',
+      'The button does what LG intended again': 'De knop doet weer wat LG bedoelde',
+      'Could not save the button': 'Kan de knop niet opslaan',
+      'Could not read the remote buttons': 'Kan de knoppen niet lezen',
+      'Press the button': 'Druk op de knop',
+      'Waiting...': 'Wachten...',
+      'If an app opens, come back to Home': 'Opent er een app, ga dan terug naar Home',
+      'Cancel': 'Annuleren',
+      'The button now opens': 'De knop opent nu',
+      'This button is kept for its own use: choose another one': 'Deze knop houdt zijn eigen taak: kies een andere',
+      'No button was pressed': 'Er is geen knop ingedrukt',
+      'The remote cannot be read on this TV': 'De afstandsbediening kan op deze tv niet worden gelezen',
+      'Twelve buttons are already taught': 'Er zijn al twaalf knoppen aangeleerd',
+    },
+    es: {
+      'All apps': 'Todas las apps',
+      'No HDMI inputs found': 'No se encontraron entradas HDMI',
+      'Could not read the inputs': 'No se pueden leer las entradas',
+      'Automatic (the device that is on)': 'Automático (el aparato encendido)',
+      'Always': 'Siempre',
+      'All inputs...': 'Todas las entradas...',
+      'Icon and name...': 'Icono y nombre...',
+      'The app’s own icon': 'El icono de la app',
+      'Which input?': '¿Qué entrada?',
+      'Nothing connected': 'Nada conectado',
+      'Style': 'Estilo',
+      'Could not change the style': 'No se puede cambiar el estilo',
+      'It will open': 'Abrirá',
+      'The first time, LG still does its own thing: then come back to Home.':
+        'La primera vez, LG hace aún lo suyo: luego vuelve al inicio.',
+      'Done': 'Hecho',
+      'Give a button of the remote to an app or an input. It works everywhere, not only here.':
+        'Da un botón del mando a una app o a una entrada. Funciona en todas partes, no solo aquí.',
+      'The app buttons (Netflix, Prime Video...) are the obvious ones to give':
+        'Los botones de apps (Netflix, Prime Video…) son los indicados',
+      "The device's own name": 'El nombre del aparato',
+      'Set-top box': 'Decodificador',
+      'TV box': 'TV box',
+      'Game console': 'Consola',
+      'Name...': 'Nombre...',
+      'Idle screen': 'Pantalla de reposo',
+      'Night mode': 'Modo noche',
+      'Weather': 'Tiempo',
+      'Enabled': 'Activado',
+      'Disabled': 'Desactivado',
+      'after 3 min': 'tras 3 min',
+      'after 10 min': 'tras 10 min',
+      'Clear': 'Despejado',
+      'Mostly clear': 'Mayormente despejado',
+      'Partly cloudy': 'Parcialmente nublado',
+      'Overcast': 'Cubierto',
+      'Fog': 'Niebla',
+      'Drizzle': 'Llovizna',
+      'Rain': 'Lluvia',
+      'Snow': 'Nieve',
+      'Showers': 'Chubascos',
+      'Snow showers': 'Chubascos de nieve',
+      'Thunderstorm': 'Tormenta',
+      'Which city?': '¿Qué ciudad?',
+      'Remote buttons': 'Botones del mando',
+      'Teach a button...': 'Enseñar un botón...',
+      'Which app should it open?': '¿Qué app debe abrir?',
+      'Button': 'Botón',
+      'Open another app...': 'Abrir otra app...',
+      'Give it back to LG': 'Devolverlo a LG',
+      'The button does what LG intended again': 'El botón vuelve a hacer lo que LG preveía',
+      'Could not save the button': 'No se puede guardar el botón',
+      'Could not read the remote buttons': 'No se pueden leer los botones',
+      'Press the button': 'Pulsa el botón',
+      'Waiting...': 'Esperando...',
+      'If an app opens, come back to Home': 'Si se abre una app, vuelve al inicio',
+      'Cancel': 'Cancelar',
+      'The button now opens': 'El botón ahora abre',
+      'This button is kept for its own use: choose another one': 'Este botón conserva su función: elige otro',
+      'No button was pressed': 'No se pulsó ningún botón',
+      'The remote cannot be read on this TV': 'El mando no se puede leer en este televisor',
+      'Twelve buttons are already taught': 'Ya hay doce botones enseñados',
+    },
+  };
+  for (var l in add) {
+    TXL[l] = TXL[l] || {};
+    for (var k in add[l]) TXL[l][k] = add[l][k];
+  }
+})();
+
+/* ---------- drawn icons: b = the tile, c = the ambient glow, svg = a 64 x 64 drawing in currentColor (white on a colour) ----------
+   The service keeps only these names (helper/apps.js, GLYPHS): add a name there too. */
+var GLYPHS = {
+  youtube: {
+    name: 'YouTube',
+    b: [255, 0, 51],
+    c: [255, 0, 51],
+    svg: '<path fill-rule="evenodd" fill="currentColor" d="M16 14h32a11 11 0 0 1 11 11v14a11 11 0 0 1-11 11H16A11 11 0 0 1 5 39V25a11 11 0 0 1 11-11zM27 23.5v17l14.5-8.5z"/>',
+  },
+  iptv: {
+    name: 'IPTV',
+    b: [84, 66, 230],
+    c: [118, 92, 255],
+    svg:
+      '<circle cx="32" cy="32" r="5.5" fill="currentColor"/>' +
+      '<path d="M21.5 21.5a15 15 0 0 0 0 21M42.5 21.5a15 15 0 0 1 0 21M14 14a25.5 25.5 0 0 0 0 36M50 14a25.5 25.5 0 0 1 0 36" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>',
+  },
+  tv: {
+    name: 'TV',
+    b: [20, 120, 255],
+    c: [30, 130, 255],
+    svg:
+      '<rect x="6" y="11" width="52" height="35" rx="7" fill="none" stroke="currentColor" stroke-width="3.2"/>' +
+      '<path d="M22 54h20" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/><path d="M28 22v13l10.5-6.5z" fill="currentColor"/>',
+  },
+  hdmi: {
+    name: 'HDMI',
+    b: [48, 52, 62],
+    c: [96, 108, 132],
+    svg:
+      '<path d="M7 21h50v13l-8 10H15L7 34z" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/>' +
+      '<path d="M18 30h28" stroke="currentColor" stroke-width="3.6" stroke-dasharray="3 4" fill="none"/>',
+  },
+  film: {
+    name: 'Films',
+    b: [214, 38, 64],
+    c: [226, 48, 74],
+    svg:
+      '<rect x="8" y="25" width="48" height="29" rx="5" fill="none" stroke="currentColor" stroke-width="3.2"/>' +
+      '<path d="M7.5 22.5l45-11.5 2.2 8-45 11.5z" fill="currentColor"/><path d="M27 33v13l10.5-6.5z" fill="currentColor"/>',
+  },
+  music: {
+    name: 'Music',
+    b: [22, 170, 100],
+    c: [31, 196, 110],
+    svg:
+      '<path d="M26 46V16l24-5v29" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/>' +
+      '<circle cx="20" cy="46" r="6.5" fill="currentColor"/><circle cx="44" cy="40" r="6.5" fill="currentColor"/>',
+  },
+  sport: {
+    name: 'Sport',
+    b: [255, 132, 0],
+    c: [255, 140, 20],
+    svg:
+      '<circle cx="32" cy="32" r="22" fill="none" stroke="currentColor" stroke-width="3.2"/>' +
+      '<path d="M32 22l9.5 6.9-3.6 11.1H26.1l-3.6-11.1z" fill="currentColor"/>',
+  },
+};
+var GLYPH_MENU = ['youtube', 'iptv', 'tv', 'film', 'music', 'sport'];
+function glyphSvg(g) {
+  return '<svg class="glyph" viewBox="0 0 64 64">' + GLYPHS[g].svg + '</svg>';
+}
+/* a drawn tile: the class gives it a gradient (home.css), paint() the colours the glow and the fallback background use */
+function glyphTile(d, face, g) {
+  var gl = GLYPHS[g];
+  d.classList.add('gl', 'gl-' + g);
+  d._col = { c: gl.c, b: gl.b };
+  paint(d, d._col);
+  face.innerHTML = glyphSvg(g);
+}
+
+/* ---------- finding the user's apps by their names (ids differ between apps and countries) ---------- */
+var IPTV_RE = /iptv|smarters|stb ?emu|siptv|ott ?(navigator|player)|televizo|tivimate|ibo ?player|stz/i,
+  TVAPP_RE = /sunrise|yallo|swisscom|blue ?tv|salt ?tv|zattoo|teleboy|wilmaa|init7|tv7|quickline/i;
+function findApp(re, not) {
+  var m = apps
+    .filter(function (a) {
+      return a.id.charAt(0) !== '_' && a.id !== not && re.test(a.title || '');
+    })
+    .sort(function (a, b) {
+      return a.title.localeCompare(b.title);
+    });
+  return m.length ? m[0].id : '';
+}
+function iptvId() {
+  return findApp(IPTV_RE, '');
+}
+function tvAppId() {
+  return findApp(TVAPP_RE, iptvId());
+}
+/* the dock before it is changed by hand: the HDMI card, the TV app, YouTube, an IPTV player, then the usual streaming apps */
+function defaultDock() {
+  var out = [];
+  ['__hdmi', tvAppId(), 'youtube.leanback.v4', iptvId()].concat(DEFAULTS.dock).forEach(function (id) {
+    if (id && out.indexOf(id) < 0) out.push(id);
+  });
+  return out;
+}
+
+/* the dock as it starts, with the automatic looks of its apps written out (YouTube, IPTV), so the picker shows the same */
+function saveStartingDock() {
+  var ids = dockIds(),
+    all = {},
+    k;
+  for (k in cfg.tiles || {}) all[k] = cfg.tiles[k];
+  apps.forEach(function (a) {
+    if (ids.indexOf(a.id) < 0 || a.id.charAt(0) === '_' || all[a.id]) return;
+    var au = autoLook(a),
+      o = {};
+    if (au.label) o.label = au.label;
+    if (au.icon) o.icon = au.icon;
+    if (o.label || o.icon) all[a.id] = o;
+  });
+  cfg.tiles = all;
+  setDock(ids);
+}
+
+/* ---------- how an app looks: a name and a drawn icon chosen in the launcher (cfg.tiles), else a few automatic ones ---------- */
+function autoLook(a) {
+  if (a.id === '__hdmi') return { label: hdmiLabel(), icon: 'hdmi' };
+  if (a.id === 'youtube.leanback.v4') return { label: 'YouTube', icon: a.title === 'YouTube' ? '' : 'youtube' }; /* YouTube AdFree */
+  if (a.id.charAt(0) !== '_' && a.id === iptvId()) return { label: 'IPTV', icon: 'iptv' };
+  return {};
+}
+function look(a) {
+  var o = (cfg.tiles && cfg.tiles[a.id]) || {},
+    au = autoLook(a),
+    g = typeof o.icon === 'string' ? o.icon : au.icon || '';
+  return { label: o.label || au.label || a.title, glyph: GLYPHS[g] ? g : '' };
+}
+function setLook(id, o) {
+  var all = {};
+  for (var k in cfg.tiles || {}) all[k] = cfg.tiles[k];
+  all[id] = o;
+  cfg.tiles = all;
+  saveCfg();
+}
+function looksMenu(a) {
+  var items = [
+    {
+      label: t('The app’s own icon'),
+      fn: function () {
+        setLook(a.id, { icon: '', label: a.title.slice(0, 40) });
+      },
+    },
+  ];
+  GLYPH_MENU.forEach(function (g) {
+    items.push({
+      label: GLYPHS[g].name,
+      fn: function () {
+        setLook(a.id, { icon: g, label: GLYPHS[g].name });
+      },
+    });
+  });
+  openMenu(t('Icon and name...').replace(/\.+$/, ''), items);
+}
+
+/* ---------- the HDMI card: OK goes straight to the device that is on ----------
+   Which input: the one chosen in its menu (hold OK: "Always HDMI 2"), else the only input with a device plugged in and powered
+   (hdmiPlugIn), else of those, the one opened last from here, then the only one with a picture (hdmiSignalExist), then the one the TV
+   marks active; when that still leaves a choice, the list opens and the choice is remembered.
+   On an LG C4 (webOS SDK 10.2.2) with three devices, read while an app was showing: hdmiPlugIn was true for a set-top box, a PS4 in rest
+   mode and an unnamed device, hdmiSignalExist and activate false for all. So the list asks once there, and the card then remembers. */
+var inputs = null,
+  inputsAt = 0,
+  hdmiBusy = false,
+  HDMI_LAST = 'cytv.hdmi.last',
+  HDMI_DEVS = 'cytv.hdmi.devs';
+try {
+  inputs = JSON.parse(localStorage.getItem(HDMI_DEVS) || 'null');
+  if (!Array.isArray(inputs)) inputs = null;
+} catch (e) {}
+function hdmiDevs(x) {
+  return ((x && x.devices) || []).filter(function (d) {
+    return d && typeof d.appId === 'string' && /^[\w.\-]+$/.test(d.appId) && +d.port > 0;
+  });
+}
+function portName(d) {
+  return 'HDMI ' + +d.port;
+}
+/* the device's own name (HDMI-CEC, or renamed in LG's settings), else the port */
+function devName(d) {
+  var p = portName(d),
+    l = typeof d.label === 'string' ? d.label.trim() : '';
+  return l && l.replace(/\s+/g, '').toUpperCase() !== p.replace(/\s+/g, '') ? l : p;
+}
+/* on the card, LG's long names lose their second part: "UPC Boîtier décodeur /Box Internet" is "UPC Boîtier décodeur" */
+function cardName(d) {
+  var n = devName(d),
+    cut = n.indexOf(' /');
+  return cut > 0 ? n.slice(0, cut) : n;
+}
+function lastPort() {
+  try {
+    return +localStorage.getItem(HDMI_LAST) || 0;
+  } catch (e) {
+    return 0;
+  }
+}
+function hdmiPin() {
+  return cfg.hdmi && cfg.hdmi !== 'auto' ? +cfg.hdmi || 0 : 0;
+}
+function hdmiPick(devs) {
+  var i,
+    pin = hdmiPin(),
+    last = lastPort();
+  if (!devs || !devs.length) return null;
+  if (pin) for (i = 0; i < devs.length; i++) if (+devs[i].port === pin) return devs[i];
+  var on = devs.filter(function (d) {
+    return !!d.hdmiPlugIn;
+  });
+  if (on.length === 1) return on[0];
+  var pool = on.length ? on : devs;
+  for (i = 0; i < pool.length; i++) if (+pool[i].port === last) return pool[i];
+  var sig = on.filter(function (d) {
+    return !!d.hdmiSignalExist;
+  });
+  if (sig.length === 1) return sig[0];
+  var act = on.filter(function (d) {
+    return !!d.activate;
+  });
+  if (act.length === 1) return act[0];
+  return !on.length && devs.length === 1 ? devs[0] : null;
+}
+function hdmiLabel() {
+  var d = inputs && hdmiPick(inputs);
+  return hdmiName() || (d ? cardName(d) : t('HDMI'));
+}
+/* a name chosen for the card (hold OK > Name...), else the device's */
+function hdmiName() {
+  var o = cfg.tiles && cfg.tiles.__hdmi;
+  return o && typeof o.label === 'string' ? o.label : '';
+}
+var HDMI_NAMES = ['Set-top box', 'TV box', 'Apple TV', 'PlayStation', 'Xbox', 'Game console', 'Chromecast'];
+function hdmiNameMenu() {
+  var cur = hdmiName(),
+    items = [
+      {
+        label: t("The device's own name"),
+        sub: cur ? '' : '\u2713',
+        fn: function () {
+          setHdmiName('');
+        },
+      },
+    ];
+  HDMI_NAMES.forEach(function (n) {
+    items.push({
+      label: t(n),
+      sub: cur === t(n) ? '\u2713' : '',
+      fn: function () {
+        setHdmiName(t(n));
+      },
+    });
+  });
+  openMenu(t('Name...').replace(/\.+$/, ''), items);
+}
+function setHdmiName(n) {
+  var all = {};
+  for (var k in cfg.tiles || {}) if (k !== '__hdmi') all[k] = cfg.tiles[k];
+  if (n) all.__hdmi = { label: n.slice(0, 40) };
+  cfg.tiles = all;
+  saveCfg();
+  hdmiPaint();
+}
+function openInput(d) {
+  try {
+    localStorage.setItem(HDMI_LAST, String(+d.port));
+  } catch (e) {}
+  hdmiPaint(); /* the card takes the name of the input chosen */
+  launch(d.appId);
+}
+function gotInputs(x) {
+  var devs = hdmiDevs(x),
+    s = JSON.stringify(devs);
+  inputs = devs;
+  try {
+    if (localStorage.getItem(HDMI_DEVS) !== s) localStorage.setItem(HDMI_DEVS, s);
+  } catch (e) {}
+  hdmiPaint();
+  return devs;
+}
+/* read when Home is shown, at most every two seconds: the card shows what is on before it is pressed */
+function refreshInputs() {
+  if (Date.now() - inputsAt < 2000) return;
+  inputsAt = Date.now();
+  api('/api/inputs').then(gotInputs, function () {});
+}
+function hdmiGo() {
+  if (hdmiBusy) return;
+  hdmiBusy = true;
+  var free = setTimeout(function () {
+    hdmiBusy = false;
+  }, 5000); /* a request that never ends must not block the card */
+  api('/api/inputs').then(
+    function (x) {
+      clearTimeout(free);
+      hdmiBusy = false;
+      inputsAt = Date.now();
+      var devs = gotInputs(x);
+      if (!devs.length) return toast(t('No HDMI inputs found'));
+      var d = hdmiPick(devs);
+      if (d) openInput(d);
+      else showInputs(devs, t('Which input?'));
+    },
+    function () {
+      clearTimeout(free);
+      hdmiBusy = false;
+      toast(t('Could not read the inputs'));
+    }
+  );
+}
+/* the card's name and its port chip with a dot that is green while the device is on. Elements are swapped, not rewritten (webOS 5). */
+function hdmiPaint() {
+  var d = tiles.__hdmi;
+  if (!d) return;
+  var dev = inputs && hdmiPick(inputs),
+    lab = hdmiName() || (dev ? cardName(dev) : t('HDMI')),
+    cap = d.querySelector('.cap'),
+    old = d.querySelector('.chip');
+  if (cap && cap.textContent !== lab) {
+    var nc = document.createElement('div');
+    nc.className = 'cap';
+    nc.textContent = lab;
+    d.replaceChild(nc, cap);
+  }
+  var chip = null;
+  if (dev) {
+    chip = document.createElement('div');
+    chip.className = 'chip' + (dev.hdmiPlugIn ? ' on' : '');
+    chip.innerHTML = '<i></i><span></span>';
+    chip.lastChild.textContent = portName(dev);
+  }
+  if (old && chip && old.className === chip.className && old.textContent === chip.textContent) return nameIfFocused(d, lab);
+  if (old) old.parentNode.removeChild(old);
+  if (chip) d.appendChild(chip);
+  nameIfFocused(d, lab);
+}
+function nameIfFocused(d, lab) {
+  var n = $('name');
+  if (rows[r] && rows[r][c] === d && n.textContent !== lab) n.textContent = lab;
+}
+function setHdmi(v) {
+  cfg.hdmi = v;
+  saveCfg();
+  hdmiPaint();
+}
+function hdmiItems() {
+  var pin = hdmiPin(),
+    items = [
+      {
+        label: t('Automatic (the device that is on)'),
+        sub: pin ? '' : '✓',
+        fn: function () {
+          setHdmi('auto');
+        },
+      },
+    ];
+  (inputs || []).forEach(function (d) {
+    var nm = devName(d);
+    items.push({
+      label: t('Always') + ' ' + portName(d),
+      sub: (+d.port === pin ? '✓  ' : '') + (nm !== portName(d) ? nm : d.hdmiPlugIn ? t('Connected') : t('Nothing connected')),
+      fn: function () {
+        setHdmi(String(+d.port));
+      },
+    });
+  });
+  items.push({ label: t('All inputs...'), stay: true, fn: inputsMenu });
+  items.push({ label: t('Name...'), sub: hdmiName(), stay: true, fn: hdmiNameMenu });
+  return items;
+}
+/* the Inputs list: devices that are on first */
+function showInputs(devs, title) {
+  if (!devs.length) return toast(t('No HDMI inputs found'));
+  var list = devs.slice().sort(function (a, b) {
+    return (b.hdmiPlugIn ? 1 : 0) - (a.hdmiPlugIn ? 1 : 0) || +a.port - +b.port;
+  });
+  openMenu(
+    title || t('Inputs'),
+    list.map(function (d) {
+      var port = portName(d),
+        named = devName(d) !== port,
+        parts = [];
+      if (named) parts.push(port);
+      if (d.hdmiPlugIn) parts.push(t('Connected'));
+      if (d.activate) parts.push(t('Active'));
+      return {
+        icon: 'hdmi',
+        label: devName(d),
+        sub: parts.join(' · '),
+        dim: !d.hdmiPlugIn,
+        fn: function () {
+          openInput(d);
+        },
+      };
+    })
+  );
+}
+
+/* ---------- number keys 1-9 and the red, green, yellow and blue keys open the dock's apps in order ---------- */
+function dockKey(k) {
+  if (k >= 49 && k <= 57) return k - 48;
+  if (k >= 97 && k <= 105) return k - 96;
+  if (k >= 403 && k <= 406) return k - 402;
+  return 0;
+}
+function openNth(n) {
+  var id = dockIds()[n - 1],
+    e = id && tiles[id],
+    p = e && posOf(e);
+  if (!id) return;
+  if (p) {
+    setFocus(p[0], p[1]);
+    act(e);
+  } else launch(id);
+}
+
+/* "All apps" under the dock, for themes where the grid waits below (push) */
+(function () {
+  var m = $('more');
+  if (!m) return;
+  m.innerHTML = '<span></span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+  m.firstChild.textContent = t('All apps');
+  m.addEventListener('click', function () {
+    if (rows.length > 2) setFocus(2, 0);
+  });
+})();
+
+/* ---------- white logos (dock.style "logo"): made once from each app's icon and remembered. The icon's plain background is taken away
+   and the rest becomes white (and dark, for a focused pill of the accent colour). An icon that is a picture, or nothing but background,
+   gets its name instead: a clean word is better than a blot. ---------- */
+var MONO_KEY = 'cytv.mono.v1',
+  monos = {},
+  monoT = 0;
+try {
+  monos = JSON.parse(localStorage.getItem(MONO_KEY) || '{}') || {};
+} catch (e) {}
+function saveMonos() {
+  clearTimeout(monoT);
+  monoT = setTimeout(function () {
+    try {
+      localStorage.setItem(MONO_KEY, JSON.stringify(monos));
+    } catch (e) {}
+  }, 1500);
+}
+function monoTile(d) {
+  var a = d._a;
+  if (!a || a.sys || d._mono || d.classList.contains('gl')) return;
+  d._mono = true;
+  var box = document.createElement('div');
+  box.className = 'mono';
+  d.appendChild(box);
+  if (monos[a.id]) return fillMono(d, box, monos[a.id]);
+  var i = new Image();
+  i.crossOrigin = 'anonymous';
+  i.onload = function () {
+    var m;
+    try {
+      m = makeMono(i);
+    } catch (e) {
+      m = { fail: 1 };
+    }
+    monos[a.id] = m;
+    saveMonos();
+    fillMono(d, box, m);
+  };
+  i.onerror = function () {
+    fillMono(d, box, { fail: 1 }); /* not remembered: the icon can come back */
+  };
+  i.src = a.id === '__live' ? LIVE_ICON : API + '/icon/' + encodeURIComponent(a.id);
+}
+function fillMono(d, box, m) {
+  if (m && m.w && m.k) {
+    var w = new Image(),
+      k = new Image();
+    w.className = 'mw';
+    k.className = 'mk';
+    w.alt = k.alt = '';
+    w.src = m.w;
+    k.src = m.k;
+    box.appendChild(w);
+    box.appendChild(k);
+    return;
+  }
+  var t = document.createElement('span');
+  t.className = 'mt';
+  t.textContent = look(d._a).label;
+  box.appendChild(t);
+}
+/* the logo of an icon: { w: white PNG, k: dark PNG }, or { fail: 1 } */
+function makeMono(img) {
+  var S = 160,
+    c = document.createElement('canvas');
+  c.width = c.height = S;
+  var g = c.getContext('2d'),
+    iw = img.naturalWidth || S,
+    ih = img.naturalHeight || S,
+    sc = Math.min(S / iw, S / ih),
+    dw = Math.round(iw * sc),
+    dh = Math.round(ih * sc);
+  g.drawImage(img, (S - dw) >> 1, (S - dh) >> 1, dw, dh);
+  var px = g.getImageData(0, 0, S, S).data,
+    x,
+    y,
+    j,
+    x0 = S,
+    y0 = S,
+    x1 = -1,
+    y1 = -1;
+  for (y = 0; y < S; y++)
+    for (x = 0; x < S; x++)
+      if (px[(y * S + x) * 4 + 3] > 200) {
+        if (x < x0) x0 = x;
+        if (x > x1) x1 = x;
+        if (y < y0) y0 = y;
+        if (y > y1) y1 = y;
+      }
+  if (x1 < 0) return { fail: 1 };
+  /* the border of the opaque part: when it is opaque and even, that colour is the background (an icon on a plain tile) */
+  var ring = [];
+  for (x = x0; x <= x1; x++) ring.push((y0 * S + x) * 4, (y1 * S + x) * 4);
+  for (y = y0; y <= y1; y++) ring.push((y * S + x0) * 4, (y * S + x1) * 4);
+  var op = 0,
+    bg = [0, 0, 0];
+  ring.forEach(function (p) {
+    if (px[p + 3] > 200) {
+      op++;
+      bg[0] += px[p];
+      bg[1] += px[p + 1];
+      bg[2] += px[p + 2];
+    }
+  });
+  var plain = op > ring.length * 0.8;
+  if (plain) {
+    bg = [bg[0] / op, bg[1] / op, bg[2] / op];
+    var spread = 0;
+    ring.forEach(function (p) {
+      if (px[p + 3] > 200) spread += dist(px, p, bg);
+    });
+    if (spread / op > 40) return { fail: 1 }; /* a picture, not a logo on a plain background */
+  }
+  var m = [],
+    cov = 0,
+    X0 = S,
+    Y0 = S,
+    X1 = -1,
+    Y1 = -1;
+  for (y = 0; y < S; y++)
+    for (x = 0; x < S; x++) {
+      j = (y * S + x) * 4;
+      var a = px[j + 3] / 255,
+        v = plain ? a * Math.min(1, Math.max(0, (dist(px, j, bg) - 34) / 60)) : a;
+      m.push(v);
+      if (v > 0.5) {
+        cov++;
+        if (x < X0) X0 = x;
+        if (x > X1) X1 = x;
+        if (y < Y0) Y0 = y;
+        if (y > Y1) Y1 = y;
+      }
+    }
+  var area = plain ? (x1 - x0 + 1) * (y1 - y0 + 1) : S * S;
+  if (X1 < 0 || cov < area * 0.01 || cov > area * 0.55) return { fail: 1 };
+  X0 = Math.max(0, X0 - 2);
+  Y0 = Math.max(0, Y0 - 2);
+  X1 = Math.min(S - 1, X1 + 2);
+  Y1 = Math.min(S - 1, Y1 + 2);
+  return { w: maskPng(m, S, X0, Y0, X1, Y1, [255, 255, 255]), k: maskPng(m, S, X0, Y0, X1, Y1, [20, 22, 28]) };
+}
+function dist(px, p, c) {
+  var r = px[p] - c[0],
+    g = px[p + 1] - c[1],
+    b = px[p + 2] - c[2];
+  return Math.sqrt(r * r + g * g + b * b);
+}
+function maskPng(m, S, X0, Y0, X1, Y1, rgb) {
+  var w = X1 - X0 + 1,
+    h = Y1 - Y0 + 1,
+    c = document.createElement('canvas');
+  c.width = w;
+  c.height = h;
+  var g = c.getContext('2d'),
+    id = g.createImageData(w, h),
+    d = id.data;
+  for (var y = 0; y < h; y++)
+    for (var x = 0; x < w; x++) {
+      var o = (y * w + x) * 4;
+      d[o] = rgb[0];
+      d[o + 1] = rgb[1];
+      d[o + 2] = rgb[2];
+      d[o + 3] = Math.round(m[(Y0 + y) * S + X0 + x] * 255);
+    }
+  g.putImageData(id, 0, 0);
+  return c.toDataURL('image/png');
+}
+
+/* ---------- Style (Customise): the built-in looks, switched at once ---------- */
+var STYLES = [
+  { id: 'classic', name: 'Paysage' },
+  { id: 'verre', name: 'Verre' },
+  { id: 'editorial', name: '\u00c9ditorial' },
+  { id: 'lin', name: 'Lin' },
+  { id: 'aurore', name: 'Aurore' },
+  { id: 'calm', name: 'Calm' },
+  { id: 'original', name: 'Original' },
+];
+function styleMenu() {
+  var cur = (cfg.theme && cfg.theme.id) || 'classic';
+  openMenu(
+    t('Style'),
+    STYLES.map(function (st) {
+      return {
+        label: st.name,
+        sub: st.id === cur ? '✓' : '',
+        fn: function () {
+          setStyle(st.id);
+        },
+      };
+    })
+  );
+}
+function setStyle(id) {
+  api('/api/theme/set', { id: id, quick: true }).then(
+    function (x) {
+      if (!x || x.error) return toast(t('Could not change the style'));
+      lastSig = '';
+      load();
+    },
+    function () {
+      toast(t('Could not change the style'));
+    }
+  );
+}
+
+/* ---------- glass tiles: each shows the blurred scene that lies behind it (read once per rebuild, never animated) ---------- */
+function glassAlign(list, on) {
+  list.forEach(function (t) {
+    if (!on) {
+      if (t.style.backgroundPosition) t.style.backgroundPosition = '';
+      return;
+    }
+    var b = t.getBoundingClientRect();
+    t.style.backgroundPosition = '0 0, ' + -Math.round(b.left) + 'px ' + -Math.round(b.top) + 'px';
+  });
+}
+
+/* ---------- Remote buttons (Customise): a button of the remote opens an app or an HDMI input, from anywhere. The service binds it in
+   LG's input service (inputkey.js, /api/remap) and waits for the press itself: the button still does its own thing that once, and
+   Home may be gone by then ---------- */
+function appName(id) {
+  var m = /^com\.webos\.app\.hdmi(\d)$/.exec(id),
+    d;
+  if (!m) return title(id);
+  d = (inputs || []).filter(function (x) {
+    return +x.port === +m[1];
+  })[0];
+  return d && devName(d) !== portName(d) ? cardName(d) + ' · HDMI ' + m[1] : 'HDMI ' + m[1];
+}
+function buttonMenu(b) {
+  openMenu(appName(b.app), [
+    {
+      label: t('Open another app...'),
+      stay: true,
+      fn: function () {
+        targetMenu(t('Which app should it open?'), function (id) {
+          remapPost({ code: b.code, app: id }, t('The button now opens') + ' ' + appName(id));
+        });
+      },
+    },
+    {
+      label: t('Give it back to LG'),
+      stay: true,
+      fn: function () {
+        remapPost({ code: b.code, remove: true }, t('The button does what LG intended again'));
+      },
+    },
+  ]);
+}
+function remapPost(body, done) {
+  api('/api/remap', body).then(
+    function (x) {
+      if (!x || x.error) return toast(t('Could not save the button'));
+      toast(done);
+      closeMenus();
+      RB.refresh();
+    },
+    function () {
+      toast(t('Could not save the button'));
+    }
+  );
+}
+/* what a button can open: the dock's apps, the HDMI inputs by their device, then every app A to Z */
+function targetMenu(heading, cb) {
+  var seen = {},
+    items = [];
+  function add(id, label, sub) {
+    if (seen[id]) return;
+    seen[id] = 1;
+    items.push({
+      label: label,
+      sub: sub || '',
+      stay: true,
+      fn: function () {
+        cb(id);
+      },
+    });
+  }
+  dockIds().forEach(function (id) {
+    if (id.charAt(0) !== '_') add(id, title(id));
+  });
+  (inputs || []).forEach(function (d) {
+    add(d.appId, devName(d) !== portName(d) ? cardName(d) : portName(d), portName(d));
+  });
+  apps
+    .filter(function (a) {
+      return a.id.charAt(0) !== '_';
+    })
+    .sort(function (a, b) {
+      return title(a.id).localeCompare(title(b.id));
+    })
+    .forEach(function (a) {
+      add(a.id, title(a.id));
+    });
+  openMenu(heading, items);
+}
+/* ---------- idle screen: after a few minutes without a key on Home, everything but the background and a dim clock fades away and the
+   clock moves a little each minute, so no picture stays lit on the OLED. The first key only wakes it. ---------- */
+var idleAt = Date.now(),
+  idleOn = false,
+  idleTicks = 0;
+function idleMinutes() {
+  return cfg.idle === 'off' ? 0 : cfg.idle === '10' ? 10 : 3;
+}
+function wake() {
+  idleAt = Date.now();
+  if (!idleOn) return false;
+  idleOn = false;
+  document.body.classList.remove('idle');
+  $('top').style.transform = '';
+  return true;
+}
+function idleCheck() {
+  var m = idleMinutes();
+  if (idleOn) {
+    if (++idleTicks % 3 === 0)
+      $('top').style.transform =
+        'translate(' + (Math.round(Math.random() * 28) - 14) + 'px,' + (Math.round(Math.random() * 18) - 9) + 'px)';
+    return;
+  }
+  if (!m || document.hidden || stack.length || LIVE.on || (window.RB && RB.on)) return;
+  if (Date.now() - idleAt > m * 60000) {
+    idleOn = true;
+    idleTicks = 0;
+    document.body.classList.add('idle');
+  }
+}
+document.addEventListener(
+  'keydown',
+  function (e) {
+    if (wake()) {
+      e.stopImmediatePropagation(); /* the key that wakes Home does nothing else */
+      e.preventDefault();
+    }
+  },
+  true
+);
+document.addEventListener('mousemove', wake, true);
+document.addEventListener('visibilitychange', wake);
+
+/* ---------- night mode: from 22:00 to 6:00 Home is a little darker and warmer ---------- */
+function nightCheck() {
+  var h = new Date().getHours();
+  document.body.classList.toggle('night', cfg.night !== 'off' && (h >= 22 || h < 6));
+}
+setInterval(function () {
+  idleCheck();
+  nightCheck();
+  sceneCheck();
+}, 20000);
+
+/* ---------- weather beside the date (Customise > Weather): the service asks Open-Meteo for the chosen city ---------- */
+var CITIES = [
+  ['geneve', 'Genève'],
+  ['lausanne', 'Lausanne'],
+  ['neuchatel', 'Neuchâtel'],
+  ['fribourg', 'Fribourg'],
+  ['sion', 'Sion'],
+  ['berne', 'Berne'],
+  ['bale', 'Bâle'],
+  ['lucerne', 'Lucerne'],
+  ['zurich', 'Zurich'],
+  ['lugano', 'Lugano'],
+];
+var weatherNow = null,
+  weatherAt = 0;
+function cityName(id) {
+  for (var i = 0; i < CITIES.length; i++) if (CITIES[i][0] === id) return CITIES[i][1];
+  return '';
+}
+function refreshWeather(force) {
+  var c = cfg.weather;
+  if (!c || c === 'off' || !cityName(c)) {
+    if (weatherNow) {
+      weatherNow = null;
+      tick();
+    }
+    return;
+  }
+  if (!force && Date.now() - weatherAt < 10 * 60000 && weatherNow && weatherNow.city === c) return;
+  weatherAt = Date.now();
+  api('/api/weather?city=' + c).then(
+    function (x) {
+      weatherNow = x && typeof x.temp === 'number' ? x : null;
+      tick();
+    },
+    function () {}
+  );
+}
+/* WMO weather codes in words */
+function skyWords(code) {
+  if (code === 0) return t('Clear');
+  if (code === 1) return t('Mostly clear');
+  if (code === 2) return t('Partly cloudy');
+  if (code === 3) return t('Overcast');
+  if (code === 45 || code === 48) return t('Fog');
+  if (code >= 51 && code <= 57) return t('Drizzle');
+  if ((code >= 61 && code <= 67) || code === 80 || code === 81 || code === 82) return code >= 80 ? t('Showers') : t('Rain');
+  if (code >= 71 && code <= 77) return t('Snow');
+  if (code === 85 || code === 86) return t('Snow showers');
+  if (code >= 95) return t('Thunderstorm');
+  return '';
+}
+function weatherText() {
+  if (!weatherNow || weatherNow.city !== cfg.weather) return '';
+  var w = skyWords(weatherNow.code);
+  return ' · ' + weatherNow.temp + '°' + (w ? ' ' + w.toLowerCase() : '');
+}
+
+/* ---------- Customise: idle screen, night mode, weather ---------- */
+function idleItem() {
+  return {
+    label: t('Idle screen'),
+    sub: cfg.idle === 'off' ? t('Disabled') : cfg.idle === '10' ? t('after 10 min') : t('after 3 min'),
+    stay: true,
+    fn: function () {
+      cfg.idle = cfg.idle === 'off' ? '3' : cfg.idle === '10' ? 'off' : '10';
+      saveCfg();
+      refreshCustomise();
+    },
+  };
+}
+/* the Customise menu again, with the focus on the row just changed */
+function refreshCustomise() {
+  var keep = stack.length ? stack[stack.length - 1].idx : 0;
+  closeMenus();
+  customizeMenu();
+  stack[0].idx = keep;
+  drawMenu();
+}
+function nightItem() {
+  return {
+    label: t('Night mode'),
+    sub: cfg.night === 'off' ? t('Disabled') : '22:00–6:00',
+    stay: true,
+    fn: function () {
+      cfg.night = cfg.night === 'off' ? 'on' : 'off';
+      saveCfg();
+      nightCheck();
+      refreshCustomise();
+    },
+  };
+}
+function weatherItem() {
+  return {
+    label: t('Weather'),
+    sub: cityName(cfg.weather) || t('Disabled'),
+    stay: true,
+    fn: function () {
+      var items = [
+        {
+          label: t('Disabled'),
+          sub: cityName(cfg.weather) ? '' : '✓',
+          fn: function () {
+            cfg.weather = 'off';
+            saveCfg();
+            refreshWeather(true);
+          },
+        },
+      ];
+      CITIES.forEach(function (c) {
+        items.push({
+          label: c[1],
+          sub: cfg.weather === c[0] ? '✓' : '',
+          fn: function () {
+            cfg.weather = c[0];
+            saveCfg();
+            refreshWeather(true);
+          },
+        });
+      });
+      openMenu(t('Which city?'), items);
+    },
+  };
+}
+
+/* ---------- the scene of the style (theme.js), at the time of day when the style asks for it ---------- */
+var scene = { name: '', glass: '', daily: false, period: '' };
+function dayPeriod() {
+  var h = new Date().getHours();
+  return h >= 6 && h < 9 ? 'aube' : h >= 9 && h < 17 ? 'jour' : h >= 17 && h < 21 ? '' : 'nuit'; /* '' is dusk, the scene itself */
+}
+function sceneApply() {
+  var st = document.documentElement.style,
+    p = scene.daily ? dayPeriod() : '',
+    suffix = p ? '-' + p : '';
+  scene.period = p;
+  if (scene.name) {
+    st.setProperty('--wall', 'url("scene-' + scene.name + suffix + '.jpg")');
+    if (themeKeys.indexOf('--wall') < 0) themeKeys.push('--wall');
+  }
+  if (scene.glass) {
+    st.setProperty('--glass', 'url("scene-' + scene.glass + (scene.glass === scene.name ? suffix : '') + '-glass.jpg")');
+    if (themeKeys.indexOf('--glass') < 0) themeKeys.push('--glass');
+  }
+}
+function sceneCheck() {
+  if (scene.daily && dayPeriod() !== scene.period) sceneApply();
+}
+
+/* ---------- the Remote buttons screen (Customise): the taught buttons as cards beside a drawing of the remote; teaching a button is a
+   step of its own, with the remote's app buttons pulsing, and ends on a confirmation ---------- */
+var REMOTE_SVG =
+  '<svg class="rb-remote" viewBox="0 0 300 820"><defs><linearGradient id="rbg" x1="0" y1="0" x2="1" y2="1">' +
+  '<stop offset="0" stop-color="#3b3e47"/><stop offset="1" stop-color="#15171c"/></linearGradient></defs>' +
+  '<rect x="40" y="10" width="220" height="800" rx="110" fill="url(#rbg)" stroke="rgba(255,255,255,.18)" stroke-width="2"/>' +
+  '<circle cx="150" cy="80" r="16" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="3"/>' +
+  '<path d="M150 66v14" stroke="rgba(255,255,255,.5)" stroke-width="3" stroke-linecap="round"/>' +
+  [140, 180, 220, 260]
+    .map(function (y) {
+      return [105, 150, 195]
+        .map(function (x) {
+          return '<circle cx="' + x + '" cy="' + y + '" r="11" fill="rgba(255,255,255,.14)"/>';
+        })
+        .join('');
+    })
+    .join('') +
+  '<circle cx="150" cy="384" r="76" fill="rgba(0,0,0,.25)" stroke="rgba(255,255,255,.22)" stroke-width="2"/>' +
+  '<circle cx="150" cy="384" r="34" fill="rgba(255,255,255,.1)" stroke="rgba(255,255,255,.3)" stroke-width="2"/>' +
+  '<circle cx="95" cy="496" r="16" fill="rgba(255,255,255,.12)"/><circle cx="150" cy="496" r="16" fill="rgba(255,255,255,.12)"/>' +
+  '<circle cx="205" cy="496" r="16" fill="rgba(255,255,255,.12)"/>' +
+  '<rect x="78" y="536" width="36" height="96" rx="18" fill="rgba(255,255,255,.12)"/>' +
+  '<rect x="186" y="536" width="36" height="96" rx="18" fill="rgba(255,255,255,.12)"/>' +
+  '<rect x="82" y="664" width="60" height="34" rx="10" fill="rgba(255,255,255,.2)"/>' +
+  '<rect x="158" y="664" width="60" height="34" rx="10" fill="rgba(255,255,255,.2)"/>' +
+  '<rect x="82" y="710" width="60" height="34" rx="10" fill="rgba(255,255,255,.2)"/>' +
+  '<rect x="158" y="710" width="60" height="34" rx="10" fill="rgba(255,255,255,.2)"/>' +
+  '<rect class="rb-hot" x="68" y="650" width="164" height="108" rx="22" fill="none" stroke-width="3"/></svg>';
+var RB = { on: false, mode: 'list', idx: 0, buttons: [], app: '', el: null, poll: 0, back: 0, attached: true };
+function rbEl(tag, cls, text) {
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text) e.textContent = text;
+  return e;
+}
+function rbApp(id) {
+  for (var i = 0; i < apps.length; i++) if (apps[i].id === id) return apps[i];
+  return { id: id, title: id };
+}
+/* an app's mark: its drawn icon, the HDMI mark for an input, or its own icon on its colour; no id is the "+" of Teach a button */
+function rbBadge(id, big) {
+  var b = rbEl('div', 'rb-badge' + (big ? ' big' : '')),
+    g = !id ? 'plus' : /^com\.webos\.app\.hdmi\d$/.test(id) ? 'hdmi' : look(rbApp(id)).glyph;
+  if (g === 'plus') {
+    b.className += ' plus';
+    b.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+  } else if (g) {
+    b.style.background = 'rgb(' + GLYPHS[g].b.join(',') + ')';
+    b.innerHTML = glyphSvg(g);
+  } else {
+    var i = new Image();
+    i.alt = '';
+    i.src = API + '/icon/' + encodeURIComponent(id);
+    if (colors[id]) b.style.background = 'rgb(' + colors[id].b.join(',') + ')';
+    b.appendChild(i);
+  }
+  return b;
+}
+function rbCard(id, name, sub, n, bare) {
+  var c = rbEl('div', 'rb-card' + (n === RB.idx ? ' f' : '')),
+    tx = rbEl('div', 'rb-tx');
+  if (!bare) c.appendChild(rbBadge(id));
+  tx.appendChild(rbEl('div', 'rb-name', name));
+  if (sub) tx.appendChild(rbEl('div', 'rb-sub', sub));
+  c.appendChild(tx);
+  c.addEventListener('click', function () {
+    RB.idx = n;
+    RB.act();
+  });
+  return c;
+}
+RB.open = function () {
+  closeMenus();
+  RB.on = true;
+  RB.mode = 'list';
+  RB.idx = 0;
+  if (!RB.el) {
+    RB.el = rbEl('div');
+    RB.el.id = 'rb';
+    RB.el.innerHTML = '<div class="rb-l"></div><div class="rb-r">' + REMOTE_SVG + '<div class="rb-note"></div></div>';
+    RB.el.querySelector('.rb-note').textContent = t('The app buttons (Netflix, Prime Video...) are the obvious ones to give');
+    document.body.appendChild(RB.el);
+  }
+  RB.draw();
+  RB.refresh();
+};
+RB.close = function () {
+  if (RB.mode === 'teach') api('/api/remap', { cancel: true }).catch(function () {});
+  RB.on = false;
+  clearInterval(RB.poll);
+  clearTimeout(RB.back);
+  if (RB.el) RB.el.parentNode.removeChild(RB.el);
+  RB.el = null;
+};
+RB.refresh = function () {
+  api('/api/remap').then(
+    function (x) {
+      RB.buttons = (x && x.buttons) || [];
+      RB.attached = !x || x.attached !== false;
+      if (RB.on && RB.mode === 'list') {
+        RB.idx = Math.min(RB.idx, RB.buttons.length);
+        RB.draw();
+      }
+    },
+    function () {
+      toast(t('Could not read the remote buttons'));
+    }
+  );
+};
+/* the left side is built anew and swapped in (webOS 5 keeps old text when content is rewritten) */
+RB.draw = function () {
+  if (!RB.el) return;
+  var l = rbEl('div', 'rb-l');
+  if (RB.mode === 'list') {
+    l.appendChild(rbEl('div', 'rb-eyebrow', t('Customise')));
+    l.appendChild(rbEl('h2', '', t('Remote buttons')));
+    l.appendChild(
+      rbEl(
+        'p',
+        'rb-p',
+        RB.attached
+          ? t('Give a button of the remote to an app or an input. It works everywhere, not only here.')
+          : t('The remote cannot be read on this TV')
+      )
+    );
+    var list = rbEl('div', 'rb-list');
+    RB.buttons.forEach(function (b, i) {
+      list.appendChild(rbCard(b.app, appName(b.app), t('Button') + ' ' + (i + 1), i));
+    });
+    list.appendChild(rbCard('', t('Teach a button...'), '', RB.buttons.length));
+    l.appendChild(list);
+  } else {
+    l.appendChild(rbBadge(RB.app, true));
+    if (RB.mode === 'teach') {
+      l.appendChild(rbEl('h2', '', t('Press the button')));
+      l.appendChild(rbEl('p', 'rb-p', t('It will open') + ' ' + appName(RB.app) + '.'));
+      l.appendChild(rbEl('p', 'rb-p rb-small', t('The first time, LG still does its own thing: then come back to Home.')));
+      var cancel = rbEl('div', 'rb-list');
+      cancel.appendChild(rbCard('', t('Cancel'), '', 0, true));
+      l.appendChild(cancel);
+    } else {
+      l.appendChild(rbEl('h2', '', t('Done')));
+      l.appendChild(rbEl('p', 'rb-p', t('The button now opens') + ' ' + appName(RB.app) + '.'));
+    }
+  }
+  RB.el.replaceChild(l, RB.el.firstChild);
+  RB.el.className = RB.mode;
+};
+RB.count = function () {
+  return RB.mode === 'list' ? RB.buttons.length + 1 : RB.mode === 'teach' ? 1 : 0;
+};
+RB.act = function () {
+  if (RB.mode === 'teach') return RB.stopTeach();
+  if (RB.mode !== 'list') return;
+  var b = RB.buttons[RB.idx];
+  if (b) return buttonMenu(b);
+  targetMenu(t('Which app should it open?'), function (id) {
+    closeMenus();
+    RB.teach(id);
+  });
+};
+RB.key = function (k, rep) {
+  if (k === 38 && RB.idx > 0) RB.idx--;
+  else if (k === 40 && RB.idx < RB.count() - 1) RB.idx++;
+  else if (k === 13) {
+    if (!rep) RB.act();
+    return;
+  } else if (k === 461 || k === 27 || k === 8) {
+    if (RB.mode === 'list') return RB.close();
+    if (RB.mode === 'teach') return RB.stopTeach();
+    RB.mode = 'list';
+    RB.idx = 0;
+  } else return;
+  RB.draw();
+};
+RB.teach = function (id) {
+  api('/api/remap', { learn: id }).then(
+    function (x) {
+      if (x && x.error === 'unsupported') return toast(t('The remote cannot be read on this TV'));
+      if (x && x.error === 'full') return toast(t('Twelve buttons are already taught'));
+      if (!x || x.error) return toast(t('Could not save the button'));
+      RB.mode = 'teach';
+      RB.app = id;
+      RB.idx = 0;
+      RB.draw();
+      clearInterval(RB.poll);
+      RB.poll = setInterval(RB.check, 700);
+    },
+    function () {
+      toast(t('Could not save the button'));
+    }
+  );
+};
+RB.stopTeach = function () {
+  clearInterval(RB.poll);
+  api('/api/remap', { cancel: true }).catch(function () {});
+  RB.mode = 'list';
+  RB.idx = RB.buttons.length;
+  RB.draw();
+};
+/* the result also arrives after a trip through the app the button opened */
+RB.check = function () {
+  api('/api/remap').then(
+    function (x) {
+      var l = x && x.learning;
+      if (!l || l.state === 'waiting' || RB.mode !== 'teach') return;
+      clearInterval(RB.poll);
+      RB.buttons = (x && x.buttons) || RB.buttons;
+      if (l.state === 'saved') {
+        RB.mode = 'done';
+        RB.app = l.app;
+        RB.draw();
+        clearTimeout(RB.back);
+        RB.back = setTimeout(function () {
+          if (RB.on && RB.mode === 'done') {
+            RB.mode = 'list';
+            RB.idx = 0;
+            RB.draw();
+          }
+        }, 2600);
+        return;
+      }
+      if (l.state === 'taken') toast(t('This button is kept for its own use: choose another one'));
+      else if (l.state === 'timeout') toast(t('No button was pressed'));
+      else if (l.state === 'unsupported') toast(t('The remote cannot be read on this TV'));
+      RB.mode = 'list';
+      RB.draw();
+    },
+    function () {}
+  );
+};
+/* ---------- layout ---------- */
+function rebuild() {
+  var by = {};
+  apps.forEach(function (a) {
+    by[a.id] = a;
+  });
+  var di = dockIds(),
+    dock = di.map(function (i) {
+      return by[i];
+    });
+  var rest = apps
+    .filter(function (a) {
+      return !isHidden(a.id) && di.indexOf(a.id) < 0;
+    })
+    .sort(byOrder);
+  var oldE = rows[r] && rows[r][c],
+    keep = oldE && oldE._a ? oldE._a.id : null;
+  if (oldE) oldE.classList.remove('f');
+  var dk = $('dock'),
+    gd = $('grid'),
+    bar = $('bar');
+  dk.textContent = '';
+  gd.textContent = '';
+  bar.textContent = '';
+  var d = dock.map(function (a) {
+    var t = tile(a);
+    dk.appendChild(t);
+    fit(t, true);
+    return t;
+  });
+  var g = rest.map(function (a) {
+    var t = tile(a);
+    gd.appendChild(t);
+    fit(t, false);
+    return t;
+  });
+  document.body.classList.toggle('has-grid', g.length > 0);
+  var ds = document.body.getAttribute('data-dockstyle');
+  if (ds === 'logo' || ds === 'glass' || ds === 'paper') d.forEach(monoTile);
+  glassAlign(g, false); /* a tile that left a glass dock for the grid loses its glass position */
+  glassAlign(d, ds === 'glass');
+  var tb = shownBar()
+    .concat([{ label: 'Customise', icon: 'edit', action: 'customize', fixed: true }])
+    .map(function (o) {
+      var p = document.createElement('div');
+      p.className = 'pill';
+      p._o = o;
+      p.innerHTML = svg(o.icon) + '<span></span>';
+      p.lastChild.textContent = barLabel(o);
+      p.setAttribute('data-label', barLabel(o)); /* shown under a round button when it has the focus */
+      hit(p);
+      bar.appendChild(p);
+      return p;
+    });
+  rows = [tb, d.length ? d : tb];
+  for (var i = 0; i < g.length; i += TH.cols) rows.push(g.slice(i, i + TH.cols));
+  var nr = Math.min(r, rows.length - 1),
+    nc = c;
+  if (keep && tiles[keep]) {
+    var p = posOf(tiles[keep]);
+    if (p) {
+      nr = p[0];
+      nc = p[1];
+    }
+  }
+  setFocus(nr, nc, true);
+}
+
+function load() {
+  api('/api/apps')
+    .then(function (x) {
+      refreshInputs();
+      setTimeout(refreshWeather, 0); /* after cfg is read below */
+      if (x.version && oldSvc(x.version) && !warned) {
+        warned = true;
+        toast('The service (' + x.version + ') is older than this launcher needs: update it in the CleanYourTV manager');
+      }
+      usage = x.usage || {};
+      var rank = Object.keys(usage).sort(function (a, b) {
+        return usage[b] - usage[a];
+      });
+      var sig = JSON.stringify([
+        x.apps.map(function (a) {
+          return a.id;
+        }),
+        x.config,
+        rank,
+      ]);
+      if (sig === lastSig) return;
+      lastSig = sig;
+      apps = x.apps.map(function (a) {
+        return { id: a.id, title: a.title };
+      });
+      cfg = x.config || {};
+      applyTheme(cfg.theme);
+      apps.push({ id: '__hdmi', title: 'HDMI' });
+      if (liveOn()) apps.push({ id: '__live', title: t('Live TV') });
+      store();
+      rebuild();
+      /* the favourites the dock starts with, and their automatic looks, are saved once: the Input key's picker reads them */
+      if (!cfg.dock && dockIds().length) saveStartingDock();
+      if (!perfReady) {
+        perfReady = true;
+        perfMark('launcher ready ' + Math.round(performance.now()));
+      }
+    })
+    .catch(function () {
+      toast(t('Helper not reachable, retrying...'));
+      setTimeout(load, 3000);
+    });
+}
+/* ---------- input: tap OK to open, hold OK for options ---------- */
+var lastMove = 0,
+  snapT = 0,
+  downT = 0,
+  held = false,
+  downEnter = false,
+  swallowUp = false,
+  pressT = 0,
+  lastKey = 0,
+  lastMX = -1,
+  lastMY = -1,
+  lastEnter = 0;
+function hit(e) {
+  e.addEventListener('mousedown', function () {
+    held = false;
+    clearTimeout(pressT);
+    pressT = setTimeout(function () {
+      held = true;
+      options(e);
+    }, 650);
+  });
+  e.addEventListener('mouseup', function () {
+    clearTimeout(pressT);
+  });
+  e.addEventListener('click', function () {
+    if (held) {
+      held = false;
+      return;
+    }
+    act(e);
+  });
+}
+function options(e) {
+  if (e._a && !e._a.sys) appMenu(e._a);
+  else if (e._o && !e._o.fixed) barMenu(e._o);
+}
+
+/* Pointer focus follows real pointer movement only: a tile sliding under a still cursor, a cursor jitter when
+   the remote is picked up, or a pointer move right after a button press must not steal the focus. */
+document.addEventListener('mousemove', function (ev) {
+  if (stack.length || LIVE.on || Date.now() - lastKey < 1500) return;
+  if (lastMX < 0) {
+    lastMX = ev.clientX;
+    lastMY = ev.clientY;
+    return;
+  }
+  if (Math.abs(ev.clientX - lastMX) + Math.abs(ev.clientY - lastMY) < 24) return;
+  lastMX = ev.clientX;
+  lastMY = ev.clientY;
+  var el = ev.target.closest ? ev.target.closest('.tile,.pill') : null,
+    p = el && posOf(el);
+  if (p && !(p[0] === r && p[1] === c)) setFocus(p[0], p[1]);
+});
+
+document.addEventListener('keydown', function (e) {
+  var k = e.keyCode;
+  lastKey = Date.now();
+  if (LIVE.on) {
+    LIVE.key(e);
+    return;
+  }
+  if (stack.length) {
+    if (k === 13) {
+      if (downEnter && Date.now() - lastEnter < 1500) {
+        lastEnter = Date.now();
+        e.preventDefault();
+        return;
+      }
+      downEnter = true;
+      lastEnter = Date.now();
+      swallowUp = true;
+    }
+    if (menuKey(k)) e.preventDefault();
+    return;
+  }
+  if (RB.on) {
+    RB.key(k, e.repeat); /* the Remote buttons screen */
+    e.preventDefault();
+    return;
+  }
+  if ((TH.overlay || TH.push) && r >= 2 && (k === 461 || k === 27 || k === 8)) {
+    setFocus(1, Math.min(c, rows[1].length - 1));
+    e.preventDefault();
+    return;
+  } /* Back closes the grid overlay */
+  if (k === 461 || k === 27 || k === 8) {
+    runningMenu();
+    e.preventDefault();
+    return;
+  } /* Back on the home screen: the running apps */
+  var n = dockKey(k);
+  if (n) {
+    if (!e.repeat) openNth(n); /* 1-9 and the colour keys: the dock's apps */
+    e.preventDefault();
+    return;
+  }
+  var len = rows[r].length;
+  if (k >= 37 && k <= 40) {
+    var tn = performance.now();
+    if (e.repeat || tn - lastMove < 90) {
+      document.body.classList.add('snap');
+      clearTimeout(snapT);
+      snapT = setTimeout(function () {
+        document.body.classList.remove('snap');
+      }, 180);
+    }
+    lastMove = tn;
+  }
+  if (k === 37 && c > 0) setFocus(r, c - 1);
+  else if (k === 39 && c < len - 1) setFocus(r, c + 1);
+  else if (k === 38 && r > 0) setFocus(r - 1, mapCol(len, rows[r - 1].length, c));
+  else if (k === 40 && r < rows.length - 1) setFocus(r + 1, mapCol(len, rows[r + 1].length, c));
+  else if (k === 13) {
+    /* webOS repeats keydown while OK is held, sometimes without e.repeat: only the first one starts the hold timer */
+    if (!downEnter || Date.now() - lastEnter > 1500) {
+      downEnter = true;
+      held = false;
+      clearTimeout(downT);
+      var t = rows[r][c];
+      t.classList.add('press');
+      downT = setTimeout(function () {
+        held = true;
+        t.classList.remove('press');
+        options(t);
+      }, 650);
+    }
+    lastEnter = Date.now();
+  } else return;
+  e.preventDefault();
+});
+document.addEventListener('keyup', function (e) {
+  if (e.keyCode !== 13) return;
+  lastKey = Date.now();
+  clearTimeout(downT);
+  var pr = document.querySelector('.press');
+  if (pr) pr.classList.remove('press');
+  if (swallowUp) {
+    swallowUp = false;
+    downEnter = false;
+    return;
+  }
+  if (downEnter && !held) act(rows[r][c]);
+  downEnter = false;
+  held = false;
+});
+/* launching Home with {inputs:true} opens the Inputs list */
+function wantInputs() {
+  var p = {};
+  try {
+    p = JSON.parse(webOSSystem.launchParams || '{}');
+  } catch (e) {}
+  if (p && p.inputs) {
+    closeMenus();
+    inputsMenu();
+  } else if (p && p.live && liveOn()) {
+    closeMenus();
+    LIVE.enter(!!p.guide);
+  }
+}
+document.addEventListener('webOSRelaunch', function () {
+  var p = {};
+  try {
+    p = JSON.parse(webOSSystem.launchParams || '{}');
+  } catch (e) {}
+  if (LIVE.on && p && p.guide && liveOn()) {
+    LIVE.toggleGuide();
+    return;
+  } /* the Guide button while Live TV is open */
+  if (LIVE.on) LIVE.exit();
+  load();
+  wantInputs();
+});
+document.addEventListener('visibilitychange', function () {
+  if (document.hidden) {
+    if (LIVE.on) LIVE.exit();
+    closeRunningMenu();
+  } else load();
+});
+
+function tick() {
+  var d = new Date();
+  try {
+    $('time').textContent = d.toLocaleTimeString(LOC, clockOpts());
+    $('date').textContent = d.toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' }) + weatherText();
+  } catch (e) {
+    $('time').textContent = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+  }
+}
+setInterval(tick, 15000);
+tick();
+/* ---------- Live TV (plays the user's M3U playlist in the TV's own video player) ---------- */
+var LIVE_ICON =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 130"><rect width="130" height="130" fill="#ef4f5f"/><rect x="25" y="36" width="80" height="54" rx="13" fill="none" stroke="#fff" stroke-width="8"/><path d="M58 52 L58 74 L77 63 Z" fill="#fff"/><path d="M48 104 H82" stroke="#fff" stroke-width="8" stroke-linecap="round"/></svg>'
+  );
+var LIVE = (function () {
+  var chans = [],
+    groups = [],
+    byNum = {},
+    byKey = {},
+    cur = 0,
+    epgNow = {},
+    video = null,
+    variants = [],
+    vi = 0,
+    beginT = 0,
+    pend = false,
+    osdT = 0,
+    numT = 0,
+    numBuf = '',
+    spinT = 0,
+    failed = false,
+    loaded = false,
+    setupT = 0,
+    fetchT = 0;
+  var streams = [],
+    si = 0,
+    reloads = 0,
+    started = false,
+    stallT = 0,
+    playedT = 0,
+    gen = 0,
+    tuneT = 0,
+    toastT = 0,
+    statsT = 0;
+  var S = { fav: [], recent: [], failed: {} },
+    F = { cc: '', lang: '', q: '' },
+    Q = '',
+    fac = { cc: [], lang: [], q: [] },
+    searching = false,
+    stats = false;
+  var L = { open: false, g: 0, col: 'c', ci: 0, list: [] },
+    FP = { open: false, i: 0 },
+    M = { open: false, i: 0, items: [] },
+    o = { on: false };
+  var tuneAt = 0; /* when the channel was chosen, for the timing in perfMark */
+  var START_MS = 15000,
+    STALL_MS = 8000;
+  function lesc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function layer(id, on) {
+    $(id).classList.toggle('on', !!on);
+  }
+  function msg(h) {
+    setHtml($('lv-msg'), h);
+    layer('lv-msg', true);
+  }
+  function toastL(s) {
+    var e = $('lv-toast');
+    e.textContent = s;
+    layer('lv-toast', true);
+    clearTimeout(toastT);
+    toastT = setTimeout(function () {
+      layer('lv-toast', false);
+    }, 2200);
+  }
+  /* A plain .m3u8 address is set as the element's src (the type is not needed); anything else keeps its <source type> variants. */
+  function variantsFor(url) {
+    var v = [];
+    if (/\.m3u8(\?|$)/.test(url)) return [{ src: url, type: '' }];
+    /* An Xtream .ts link plays at once as a plain src (1-2 s); the provider's HLS and a typed .ts on webOS 5/6 only stall until START_MS.
+       They stay as fallbacks (issues 9 and 13). */
+    if (/\/live\/.+\.ts(\?|$)/.test(url)) {
+      v.push({ src: url, type: '' });
+      v.push({ src: url.replace(/\.ts(\?|$)/, '.m3u8$1'), type: 'application/x-mpegURL' });
+      v.push({ src: url, type: 'application/x-mpegURL' });
+      return v;
+    }
+    v.push({ src: url, type: 'application/x-mpegURL' });
+    v.push({ src: url, type: '' });
+    return v;
+  }
+
+  /* ---------- what the viewer did (kept in the service) ---------- */
+  function isFav(c) {
+    return S.fav.indexOf(c.key) >= 0;
+  }
+  function post(b) {
+    api('/api/live/state', b).catch(function () {});
+  }
+  function toggleFav(c) {
+    if (!c || !c.key) return;
+    var on = !isFav(c);
+    S.fav = S.fav.filter(function (k) {
+      return k !== c.key;
+    });
+    if (on) S.fav.unshift(c.key);
+    post({ op: 'fav', key: c.key, on: on });
+    toastL(t(on ? 'Added to favourites' : 'Removed from favourites'));
+    if (L.open) {
+      L.list = listFor(L.g);
+      L.ci = Math.max(0, Math.min(L.ci, L.list.length - 1));
+      drawList();
+    }
+  }
+  function markPlayed(c) {
+    if (!c || !c.key) return;
+    S.recent = [c.key]
+      .concat(
+        S.recent.filter(function (k) {
+          return k !== c.key;
+        })
+      )
+      .slice(0, 30);
+    post({ op: 'recent', key: c.key });
+    if (S.failed[c.key]) {
+      delete S.failed[c.key];
+      post({ op: 'failed', key: c.key, on: false });
+    }
+  }
+
+  /* ---------- the player: one <video>, several streams per channel, tuning screen, recovery ---------- */
+  /* One <video> element for the whole session: creating and destroying it on every channel change makes the TV rebuild its video plane. */
+  var lastTime = -1;
+  function ensureVideo() {
+    if (video) return video;
+    var v = document.createElement('video');
+    v.autoplay = true;
+    video = v;
+    /* Not every TV fires 'playing' again after 'waiting' (or at all for some streams), so moving picture time counts as playing too */
+    function onPlaying() {
+      clearTimeout(spinT);
+      clearTimeout(stallT);
+      layer('lv-spin', false);
+      layer('lv-tune', false);
+      if (!started) {
+        started = true;
+        perfMark('live playing ' + (Date.now() - tuneAt) + ' variant ' + vi + (variants[vi] && variants[vi].type ? ' typed' : ' src'));
+        clearTimeout(playedT);
+        var c = byNum[cur];
+        playedT = setTimeout(function () {
+          markPlayed(c);
+        }, 3000);
+      }
+    }
+    v.addEventListener('playing', onPlaying);
+    v.addEventListener('timeupdate', function () {
+      if (v.currentTime !== lastTime) {
+        lastTime = v.currentTime;
+        if (v.currentTime > 0) onPlaying();
+      }
+    });
+    v.addEventListener('waiting', function () {
+      layer('lv-spin', true);
+      if (started) {
+        clearTimeout(stallT);
+        stallT = setTimeout(stalled, STALL_MS);
+      }
+    });
+    /* capture: a failing <source> reports on the <source>, and that event does not bubble; an old, removed <source> is ignored */
+    v.addEventListener(
+      'error',
+      function (e) {
+        if (e.target === v || e.target.parentNode === v) onError();
+      },
+      true
+    );
+    $('lv-stage').appendChild(v);
+    return v;
+  }
+  function release() {
+    clearTimeout(spinT);
+    clearTimeout(beginT);
+    clearTimeout(stallT);
+    clearTimeout(playedT);
+    clearTimeout(tuneT);
+    pend = false;
+    if (video) {
+      try {
+        video.pause();
+        video.removeAttribute('src');
+        while (video.firstChild) video.removeChild(video.firstChild);
+        video.load();
+      } catch (e) {}
+      if (video.parentNode) video.parentNode.removeChild(video);
+      video = null;
+    }
+  }
+  function tuneText() {
+    var c = byNum[cur];
+    return t('Tuning...') + (streams.length > 1 ? '  ' + t('Stream') + ' ' + (si + 1) + '/' + streams.length : '');
+  }
+  function showTune() {
+    var c = byNum[cur];
+    $('lv-tune').textContent = (c ? c.name + '  ' : '') + tuneText();
+    layer('lv-tune', true);
+  }
+  function stalled() {
+    /* a live stream that stopped: reload it once, then move on */
+    if (!video || pend || !started) return;
+    if (reloads < 1) {
+      reloads++;
+      startVariant();
+    } else onError();
+  }
+  function onError() {
+    if (!video || pend) return;
+    if (vi < variants.length - 1) {
+      vi++;
+      startVariant();
+      return;
+    }
+    if (si < streams.length - 1) {
+      si++;
+      reloads = 0;
+      variants = variantsFor(streams[si].url);
+      vi = 0;
+      startVariant();
+      return;
+    } /* the channel's next stream */
+    giveUp();
+  }
+  function startVariant() {
+    clearTimeout(spinT);
+    clearTimeout(stallT);
+    pend = false;
+    started = false;
+    lastTime = -1;
+    var v = ensureVideo(),
+      d = variants[vi];
+    layer('lv-spin', true);
+    showTune();
+    while (v.firstChild) v.removeChild(v.firstChild);
+    if (!d.type) {
+      v.src = d.src;
+    } else {
+      v.removeAttribute('src');
+      var src = document.createElement('source');
+      src.src = d.src;
+      src.type = d.type;
+      v.appendChild(src);
+      v.load();
+    }
+    spinT = setTimeout(function () {
+      if (v === video && !started && !failed && !(v.readyState >= 3 && !v.paused)) onError();
+    }, START_MS);
+  }
+  var WHY = {
+    refused: 'The server refused the stream: it may be blocked in your country or need special request headers.',
+    gone: 'The stream was not found (404): the channel is offline or its address has changed.',
+    server: 'The stream server reported an error.',
+    notvideo: 'The address answers with a web page, not a video.',
+    drm: 'This stream is protected by DRM and cannot be played here.',
+    unreachable: 'The stream server cannot be reached.',
+    slow: 'The stream is too slow to start.',
+    ok: 'The stream answers, but the TV could not play it: probably a format it cannot decode.',
+    unknown: 'This channel is not available.',
+  };
+  function giveUp() {
+    clearTimeout(spinT);
+    clearTimeout(stallT);
+    layer('lv-spin', false);
+    layer('lv-tune', false);
+    failed = true;
+    var c = byNum[cur],
+      g = gen;
+    if (!c) return;
+    if (c.key && !S.failed[c.key]) {
+      S.failed[c.key] = Date.now();
+      post({ op: 'failed', key: c.key, on: true });
+    }
+    var head = '<b>' + lesc(c.name) + '</b>',
+      tail = '<div class="small">' + t('Press OK to try again.') + '</div>';
+    msg(head + '<div>' + t('This channel is not available.') + '</div><div class="small">' + t('Checking why...') + '</div>');
+    api('/api/live/probe?key=' + encodeURIComponent(c.key) + '&i=0').then(
+      function (r) {
+        if (g !== gen || !failed) return;
+        msg(head + '<div>' + t(WHY[r.reason] || WHY.unknown) + '</div>' + tail);
+      },
+      function () {
+        if (g === gen && failed) msg(head + '<div>' + t(WHY.unknown) + '</div>' + tail);
+      }
+    );
+  }
+  /* defer: while zapping (Up/Down) the new channel starts only once the keys have paused, so skipped channels never reach the provider */
+  function play(num, quiet, defer) {
+    var c = byNum[num];
+    if (!c) return;
+    gen++;
+    cur = num;
+    try {
+      localStorage.setItem('live.last', String(num));
+    } catch (e) {}
+    tuneAt = Date.now();
+    streams = [{ url: c.url, q: c.q }].concat(c.alt);
+    si = 0;
+    reloads = 0;
+    failed = false;
+    variants = variantsFor(c.url);
+    vi = 0;
+    layer('lv-msg', false);
+    clearTimeout(beginT);
+    clearTimeout(spinT);
+    clearTimeout(stallT);
+    clearTimeout(playedT);
+    if (defer) {
+      pend = true;
+      if (video) {
+        try {
+          video.pause();
+        } catch (e) {}
+      }
+      layer('lv-spin', true);
+      showTune();
+      beginT = setTimeout(function () {
+        startVariant();
+        loadEpg([c.id]);
+      }, defer);
+    } else {
+      startVariant();
+      loadEpg([c.id]);
+    }
+    if (!quiet) showOsd();
+    else fillOsd();
+  }
+  function pickStream(i) {
+    var c = byNum[cur];
+    if (!c || i < 0 || i >= streams.length) return;
+    gen++;
+    failed = false;
+    si = i;
+    reloads = 0;
+    variants = variantsFor(streams[si].url);
+    vi = 0;
+    layer('lv-msg', false);
+    startVariant();
+  }
+
+  /* ---------- the banner ---------- */
+  function hm(ts) {
+    var d = new Date(ts * 1000);
+    return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+  }
+  function facts(c) {
+    var a = [];
+    if (c.cc) a.push(cname(c.cc));
+    if (c.lang) a.push(c.lang);
+    if (c.q) a.push(c.q);
+    if (c.alt.length) a.push(c.alt.length + 1 + ' ' + t('streams'));
+    return a.join('  ·  ');
+  }
+  function fillOsd() {
+    var c = byNum[cur];
+    if (!c) return;
+    $('lv-onum').textContent = c.num;
+    $('lv-oname').textContent = c.name;
+    var lg = $('lv-ologo');
+    if (c.logo) {
+      lg.src = c.logo;
+      lg.style.display = '';
+    } else lg.style.display = 'none';
+    var e = epgNow[c.id],
+      now = Math.floor(Date.now() / 1000),
+      f = facts(c);
+    if (e && e.now) {
+      $('lv-onow').textContent = hm(e.now[0]) + '  ' + e.now[2];
+      $('lv-obar').style.width = Math.max(0, Math.min(100, ((now - e.now[0]) / (e.now[1] - e.now[0])) * 100)) + '%';
+    } else {
+      $('lv-onow').textContent = e ? '' : t('No guide data');
+      $('lv-obar').style.width = '0';
+    }
+    $('lv-onext').textContent = e && e.next ? t('Next') + '  ' + hm(e.next[0]) + '  ' + e.next[2] : f;
+    $('lv-ofacts').textContent = e && e.next ? f : '';
+  }
+  function showOsd() {
+    fillOsd();
+    layer('lv-osd', true);
+    clearTimeout(osdT);
+    osdT = setTimeout(function () {
+      layer('lv-osd', false);
+    }, 5500);
+  }
+  function loadEpg(ids, cb) {
+    ids = ids.filter(function (i) {
+      return i;
+    });
+    if (!ids.length) {
+      cb && cb();
+      return;
+    }
+    api('/api/live/epg?ids=' + encodeURIComponent(ids.join(',')))
+      .then(function (x) {
+        for (var k in x) epgNow[k] = x[k];
+        if (byNum[cur] && ids.indexOf(byNum[cur].id) >= 0) fillOsd();
+        cb && cb();
+      })
+      .catch(function () {
+        cb && cb();
+      });
+  }
+  setInterval(function () {
+    if (o.on && byNum[cur]) loadEpg([byNum[cur].id]);
+  }, 30000);
+
+  /* ---------- the guide: tabs, favourites, recents, filters, search ---------- */
+  var full = {};
+  function cname(code) {
+    try {
+      if (window.Intl && Intl.DisplayNames) {
+        var n = new Intl.DisplayNames([LOC], { type: 'region' }).of(code);
+        if (n && n !== code) return n;
+      }
+    } catch (e) {}
+    return code;
+  }
+  function passes(c) {
+    if (F.cc && c.cc !== F.cc) return false;
+    if (F.lang && c.lang !== F.lang) return false;
+    if (F.q && c.q !== F.q) return false;
+    if (Q) {
+      var s = (c.name + ' ' + c.cc + ' ' + cname(c.cc || '') + ' ' + c.lang + ' ' + c.cats.join(' ')).toLowerCase();
+      if (s.indexOf(Q) < 0) return false;
+    }
+    return true;
+  }
+  function baseList(g) {
+    if (g === 0) return chans;
+    if (g === 1)
+      return S.fav
+        .map(function (k) {
+          return byKey[k];
+        })
+        .filter(Boolean);
+    if (g === 2)
+      return S.recent
+        .map(function (k) {
+          return byKey[k];
+        })
+        .filter(Boolean);
+    var n = groups[g - 3];
+    return chans.filter(function (c) {
+      return c.cats.indexOf(n) >= 0;
+    });
+  }
+  function listFor(g) {
+    return baseList(g).filter(passes);
+  }
+  function tabNames() {
+    return [t('All channels'), t('Favourites'), t('Recent')].concat(groups);
+  }
+  function gcolor() {
+    var n = tabNames()[L.g],
+      c = hsl2rgb(hashHue(n), 0.5, 0.42);
+    $('lv-glow').style.setProperty('--c', c.join(','));
+  }
+  function openList() {
+    L.open = true;
+    var c = byNum[cur];
+    L.g = 0;
+    if (c && c.cats[0]) {
+      var gi = groups.indexOf(c.cats[0]);
+      if (gi >= 0) L.g = gi + 3;
+    }
+    L.list = listFor(L.g);
+    L.ci = Math.max(0, L.list.indexOf(c));
+    drawList();
+    $('lv').classList.add('gd');
+    layer('lv-guide', true);
+    fetchVisible();
+  }
+  function closeList() {
+    L.open = false;
+    endSearch(false);
+    FP.open = false;
+    layer('lv-filter', false);
+    $('lv').classList.remove('gd');
+    layer('lv-guide', false);
+  }
+  function pct(p, now) {
+    return Math.max(0, Math.min(100, ((now - p[0]) / (p[1] - p[0])) * 100));
+  }
+  var STAR = '<svg class="st" viewBox="0 0 24 24"><path d="M12 2l3 7 7 .6-5.3 4.7 1.7 7.2L12 17.8 5.6 21.5l1.7-7.2L2 9.6 9 9z"/></svg>';
+  function badges(c) {
+    var h = '';
+    if (isFav(c)) h += STAR;
+    if (c.q) h += '<span class="bd">' + c.q + '</span>';
+    if (c.fl & 1) h += '<span class="bd w">GEO</span>';
+    if (c.fl & 2) h += '<span class="bd w">NOT 24/7</span>';
+    if (c.fl & 4) h += '<span class="bd w">HEADERS</span>';
+    if (c.alt.length) h += '<span class="bd">×' + (c.alt.length + 1) + '</span>';
+    if (c.key && S.failed[c.key]) h += '<span class="bd w">!</span>';
+    return h ? '<div class="bds">' + h + '</div>' : '';
+  }
+  function filterText() {
+    var a = [];
+    if (F.cc) a.push(cname(F.cc));
+    if (F.lang) a.push(F.lang);
+    if (F.q) a.push(F.q);
+    if (Q) a.push('“' + Q + '”');
+    return a.join('  ·  ');
+  }
+  function drawList() {
+    var now = Math.floor(Date.now() / 1000),
+      names = tabNames();
+    $('lv-gtitle').textContent = t('Live TV');
+    var d = new Date(),
+      tabs = '';
+    if (L.g > 0) tabs += '<div class="ctab m">‹</div><div class="ctab">' + lesc(names[L.g - 1]) + '</div>';
+    tabs += '<div class="ctab on">' + lesc(names[L.g]) + '</div>';
+    if (L.g < names.length - 1) tabs += '<div class="ctab">' + lesc(names[L.g + 1]) + '</div><div class="ctab m">›</div>';
+    var ft = filterText();
+    if (ft) tabs += '<div class="ctab f">' + lesc(t('Filters') + ': ' + ft) + '</div>';
+    setHtml($('lv-gtabs'), tabs);
+    $('lv-gclock').textContent = d.toLocaleTimeString(LOC, clockOpts());
+    gcolor();
+    var N = 7,
+      cs = Math.max(0, Math.min(L.ci - 3, L.list.length - N)),
+      h = '';
+    for (var j = cs; j < Math.min(L.list.length, cs + N); j++) {
+      var c = L.list[j],
+        e = epgNow[c.id],
+        pn = e && e.now;
+      h +=
+        '<div class="crow' +
+        (j === L.ci ? ' f' : '') +
+        (c.num === cur ? ' cur' : '') +
+        '"><div class="n">' +
+        c.num +
+        '</div>' +
+        (c.logo ? '<img class="lg" src="' + lesc(c.logo) + '" alt="">' : '<div class="lg"></div>') +
+        '<div class="t"><div class="nm">' +
+        lesc(c.name) +
+        '</div><div class="nw">' +
+        (pn ? lesc(hm(pn[0]) + '  ' + pn[2]) : e ? '' : lesc(t('No guide data'))) +
+        '</div>' +
+        (pn ? '<div class="pbar"><i style="width:' + pct(pn, now) + '%"></i></div>' : '') +
+        '</div>' +
+        badges(c) +
+        '</div>';
+    }
+    if (!L.list.length)
+      h =
+        '<div class="empty">' +
+        lesc(
+          t(
+            L.g === 1 && !S.fav.length
+              ? 'No favourites yet. Press the green button on a channel.'
+              : L.g === 2 && !S.recent.length
+                ? 'Nothing watched yet.'
+                : 'No channels match.'
+          )
+        ) +
+        '</div>';
+    setHtml($('lv-rows'), h);
+    drawDetail();
+  }
+  function drawDetail() {
+    var c = L.list[L.ci];
+    if (!c) {
+      setHtml($('lv-detail'), '');
+      return;
+    }
+    var f = full[c.id],
+      now = Math.floor(Date.now() / 1000),
+      h =
+        '<div class="dn">' +
+        lesc(c.name) +
+        '</div><div class="dg">' +
+        lesc(c.cats.join(', ')) +
+        '</div><div class="dg">' +
+        lesc(facts(c)) +
+        '</div>';
+    if (f && f.list && f.list.length) {
+      var p = f.list[0],
+        live = p[0] <= now;
+      h +=
+        '<div class="card"><div class="dt">' +
+        lesc(hm(p[0]) + ' – ' + hm(p[1])) +
+        '</div><div class="dp">' +
+        lesc(p[2]) +
+        '</div>' +
+        (p[3] ? '<div class="dd">' + lesc(p[3]) + '</div>' : '') +
+        (live ? '<div class="pbar"><i style="width:' + pct(p, now) + '%"></i></div>' : '') +
+        '</div>';
+      if (f.list.length > 1) {
+        h += '<h3>' + t('Later') + '</h3>';
+        for (var i = 1; i < Math.min(5, f.list.length); i++)
+          h += '<div class="up"><div class="tm">' + hm(f.list[i][0]) + '</div><div class="tt">' + lesc(f.list[i][2]) + '</div></div>';
+      }
+    } else h += '<div class="card"><div class="dt">' + lesc(f ? t('No guide data') : '…') + '</div></div>';
+    setHtml($('lv-detail'), h);
+  }
+  function fetchVisible() {
+    clearTimeout(fetchT);
+    fetchT = setTimeout(function () {
+      var cs = Math.max(0, Math.min(L.ci - 3, L.list.length - 7)),
+        ids = L.list
+          .slice(cs, cs + 7)
+          .map(function (c) {
+            return c.id;
+          })
+          .filter(function (i) {
+            return i && !epgNow[i];
+          });
+      if (ids.length)
+        loadEpg(ids, function () {
+          if (L.open) drawList();
+        });
+      var c = L.list[L.ci];
+      if (c && c.id && !full[c.id])
+        api('/api/live/epg?full=1&ids=' + encodeURIComponent(c.id))
+          .then(function (x) {
+            full[c.id] = x[c.id] || { list: [] };
+            if (L.open) drawDetail();
+          })
+          .catch(function () {});
+    }, 160);
+  }
+  function relist() {
+    L.list = listFor(L.g);
+    L.ci = 0;
+    drawList();
+    fetchVisible();
+  }
+
+  /* search: the TV's own keyboard types into an input; the list follows what is typed */
+  function startSearch() {
+    searching = true;
+    if (L.g > 2) {
+      L.g = 0;
+      L.list = listFor(0);
+      L.ci = 0;
+      drawList();
+    } /* a search looks through all channels, not one category */
+    var i = $('lv-search');
+    i.value = Q;
+    i.placeholder = t('Search...');
+    i.style.display = 'block';
+    i.focus();
+  }
+  function endSearch(keep) {
+    if (!searching) return;
+    searching = false;
+    var i = $('lv-search');
+    if (!keep) {
+      Q = '';
+      i.value = '';
+    }
+    i.style.display = 'none';
+    i.blur();
+    if (L.open) relist();
+  }
+  $('lv-search').addEventListener('input', function () {
+    Q = this.value.trim().toLowerCase();
+    if (L.open) relist();
+  });
+
+  /* filters */
+  function fvals(k) {
+    return [''].concat(fac[k]);
+  }
+  function filterRows() {
+    return [
+      { k: 'cc', label: t('Country'), val: F.cc ? cname(F.cc) : t('All') },
+      { k: 'lang', label: t('Language'), val: F.lang || t('All') },
+      { k: 'q', label: t('Quality'), val: F.q || t('All') },
+      { k: 'clear', label: t('Clear filters'), val: '' },
+    ];
+  }
+  function drawFilter() {
+    var r = filterRows(),
+      h = '<h3>' + lesc(t('Filters')) + '</h3>';
+    for (var i = 0; i < r.length; i++)
+      h +=
+        '<div class="mrow' +
+        (i === FP.i ? ' f' : '') +
+        '"><div class="ml">' +
+        lesc(r[i].label) +
+        '</div><div class="mv">' +
+        (r[i].k === 'clear' ? '' : '‹ ') +
+        lesc(r[i].val) +
+        (r[i].k === 'clear' ? '' : ' ›') +
+        '</div></div>';
+    setHtml($('lv-filter'), h);
+  }
+  function stepFilter(k, d) {
+    var v = fvals(k),
+      i = v.indexOf(F[k]);
+    i = (i + d + v.length) % v.length;
+    F[k] = v[i];
+    relist();
+    drawFilter();
+  }
+  function filterKey(k) {
+    if (k === 38) {
+      if (FP.i > 0) FP.i--;
+    } else if (k === 40) {
+      if (FP.i < 3) FP.i++;
+    } else if (k === 37 || k === 39) {
+      var r = filterRows()[FP.i];
+      if (r.k !== 'clear') stepFilter(r.k, k === 37 ? -1 : 1);
+      return;
+    } else if (k === 13) {
+      var r2 = filterRows()[FP.i];
+      if (r2.k === 'clear') {
+        F = { cc: '', lang: '', q: '' };
+        relist();
+      } else FP.open = false;
+    } else if (k === 405 || k === 461 || k === 27 || k === 8) {
+      FP.open = false;
+    }
+    if (!FP.open) {
+      layer('lv-filter', false);
+      drawList();
+      return;
+    }
+    drawFilter();
+  }
+
+  /* the player menu (Yellow while watching) */
+  function menuItems() {
+    var c = byNum[cur],
+      it = [
+        {
+          label: t('Favourite'),
+          sub: t(isFav(c) ? 'On' : 'Off'),
+          fn: function () {
+            toggleFav(c);
+            drawMenu();
+          },
+        },
+      ];
+    if (streams.length > 1)
+      streams.forEach(function (s, i) {
+        it.push({
+          label: t('Stream') + ' ' + (i + 1) + (s.q ? '  ' + s.q : ''),
+          sub: i === si ? '✓' : '',
+          fn: function () {
+            M.open = false;
+            layer('lv-menu', false);
+            pickStream(i);
+          },
+        });
+      });
+    it.push({
+      label: t('Statistics'),
+      sub: t(stats ? 'On' : 'Off'),
+      fn: function () {
+        setStats(!stats);
+        drawMenu();
+      },
+    });
+    it.push({
+      label: t('Close'),
+      sub: '',
+      fn: function () {
+        M.open = false;
+        layer('lv-menu', false);
+      },
+    });
+    return it;
+  }
+  function drawMenu() {
+    M.items = menuItems();
+    if (M.i >= M.items.length) M.i = M.items.length - 1;
+    var h = '<h3>' + lesc(byNum[cur].name) + '</h3>';
+    for (var i = 0; i < M.items.length; i++)
+      h +=
+        '<div class="mrow' +
+        (i === M.i ? ' f' : '') +
+        '"><div class="ml">' +
+        lesc(M.items[i].label) +
+        '</div><div class="mv">' +
+        lesc(M.items[i].sub) +
+        '</div></div>';
+    setHtml($('lv-menu'), h);
+  }
+  function openMenu() {
+    M.open = true;
+    M.i = 0;
+    drawMenu();
+    layer('lv-menu', true);
+  }
+  function menuKey(k) {
+    if (k === 38) {
+      if (M.i > 0) M.i--;
+    } else if (k === 40) {
+      if (M.i < M.items.length - 1) M.i++;
+    } else if (k === 13) {
+      M.items[M.i].fn();
+      return;
+    } else if (k === 405 || k === 461 || k === 27 || k === 8) {
+      M.open = false;
+      layer('lv-menu', false);
+      return;
+    }
+    drawMenu();
+  }
+
+  /* statistics (Blue while watching): what the TV tells a web page about the picture */
+  function statsText() {
+    var v = video;
+    if (!v) return '';
+    var q = v.getVideoPlaybackQuality ? v.getVideoPlaybackQuality() : null,
+      ahead = 0;
+    try {
+      if (v.buffered && v.buffered.length) ahead = v.buffered.end(v.buffered.length - 1) - v.currentTime;
+    } catch (e) {}
+    return (
+      (v.videoWidth ? v.videoWidth + '×' + v.videoHeight : 'no picture') +
+      '\n' +
+      t('buffer') +
+      ' ' +
+      ahead.toFixed(1) +
+      ' s\n' +
+      (q ? t('frames') + ' ' + q.totalVideoFrames + ', ' + t('dropped') + ' ' + q.droppedVideoFrames + '\n' : '') +
+      t('Stream') +
+      ' ' +
+      (si + 1) +
+      '/' +
+      streams.length +
+      (reloads ? '  (' + t('reloaded') + ')' : '')
+    );
+  }
+  function setStats(on) {
+    stats = on;
+    clearInterval(statsT);
+    layer('lv-stats', on);
+    if (on) {
+      $('lv-stats').textContent = statsText();
+      statsT = setInterval(function () {
+        $('lv-stats').textContent = statsText();
+      }, 1000);
+    }
+  }
+
+  function digit(d) {
+    numBuf += d;
+    if (numBuf.length > 5) numBuf = numBuf.slice(-5);
+    $('lv-numin').textContent = numBuf;
+    layer('lv-numin', true);
+    clearTimeout(numT);
+    numT = setTimeout(function () {
+      var n = parseInt(numBuf, 10);
+      numBuf = '';
+      layer('lv-numin', false);
+      if (byNum[n]) play(n);
+      else showOsd();
+    }, 1800);
+  }
+  function setup() {
+    api('/api/live/pair', {}).then(function (p) {
+      msg(
+        '<b>' +
+          t('Set up Live TV') +
+          '</b><div>' +
+          t('Open this address on your phone or computer:') +
+          '</div><b>' +
+          lesc(p.url) +
+          '</b><div>' +
+          t('and enter this code:') +
+          '</div><b>' +
+          lesc(p.code) +
+          '</b><div class="small">' +
+          t('Then paste your M3U playlist address. This page closes by itself.') +
+          '</div>'
+      );
+      clearInterval(setupT);
+      setupT = setInterval(function () {
+        if (!o.on) {
+          clearInterval(setupT);
+          return;
+        }
+        api('/api/live/status').then(function (s) {
+          if (s.configured) {
+            clearInterval(setupT);
+            boot();
+          }
+        });
+      }, 2500);
+    });
+  }
+  function facets() {
+    function top(k) {
+      var n = {};
+      chans.forEach(function (c) {
+        if (c[k]) n[c[k]] = (n[c[k]] || 0) + 1;
+      });
+      return Object.keys(n)
+        .sort(function (a, b) {
+          return n[b] - n[a] || (a < b ? -1 : 1);
+        })
+        .slice(0, 40);
+    }
+    fac = {
+      cc: top('cc'),
+      lang: top('lang'),
+      q: ['SD', 'HD', 'FHD', '4K'].filter(function (q) {
+        return chans.some(function (c) {
+          return c.q === q;
+        });
+      }),
+    };
+  }
+  function boot() {
+    msg('<div>' + t('Loading channels...') + '</div>');
+    api('/api/live/status')
+      .then(function (s) {
+        if (!s.configured) {
+          setup();
+          return;
+        }
+        var tries = 0;
+        (function load() {
+          if (!o.on) return;
+          api('/api/live/channels').then(function (x) {
+            if (!x.channels.length) {
+              if (++tries > 40) {
+                msg('<div>' + lesc(s.error || 'No channels') + '</div>');
+                return;
+              }
+              setTimeout(load, 2000);
+              return;
+            }
+            groups = x.groups;
+            chans = x.channels.map(function (r) {
+              return {
+                num: r[0],
+                id: r[1],
+                name: r[2],
+                group: r[3],
+                logo: r[4],
+                url: r[5],
+                key: r[6] || '',
+                cc: r[7] || '',
+                lang: r[8] || '',
+                q: r[9] || '',
+                fl: r[10] || 0,
+                cats: r[11] || (r[3] ? [r[3]] : []),
+                alt: (r[12] || []).map(function (a) {
+                  return { url: a[0], q: a[1] };
+                }),
+              };
+            });
+            byNum = {};
+            byKey = {};
+            chans.forEach(function (c) {
+              byNum[c.num] = c;
+              if (c.key) byKey[c.key] = c;
+            });
+            loaded = true;
+            facets();
+            var last = 0;
+            try {
+              last = parseInt(localStorage.getItem('live.last'), 10);
+            } catch (e) {}
+            api('/api/live/state')
+              .then(
+                function (st) {
+                  S = { fav: st.fav || [], recent: st.recent || [], failed: st.failed || {} };
+                },
+                function () {}
+              )
+              .then(function () {
+                layer('lv-msg', false);
+                play(byNum[last] ? last : chans[0].num);
+                if (guideNext) {
+                  guideNext = false;
+                  openList();
+                }
+              });
+          });
+        })();
+      })
+      .catch(function () {
+        msg('<div>' + t('The helper is not reachable.') + '</div>');
+        setTimeout(function () {
+          if (o.on) boot();
+        }, 3000);
+      });
+  }
+  function step(d) {
+    var i = chans.indexOf(byNum[cur]);
+    i = (i + d + chans.length) % chans.length;
+    play(chans[i].num, false, 180);
+  }
+  var guideNext = false;
+  o.enter = function (guide) {
+    o.on = true;
+    guideNext = !!guide;
+    $('lv').classList.add('on');
+    if (loaded && byNum[cur]) {
+      play(cur);
+      if (guideNext) {
+        guideNext = false;
+        openList();
+      }
+    } else boot();
+  };
+  o.toggleGuide = function () {
+    if (!loaded) return;
+    if (L.open) closeList();
+    else {
+      M.open = false;
+      layer('lv-menu', false);
+      openList();
+    }
+  };
+  o.exit = function () {
+    o.on = false;
+    closeList();
+    M.open = false;
+    layer('lv-menu', false);
+    setStats(false);
+    full = {};
+    release();
+    clearTimeout(osdT);
+    clearTimeout(numT);
+    clearTimeout(toastT);
+    clearInterval(setupT);
+    layer('lv-osd', false);
+    layer('lv-numin', false);
+    layer('lv-msg', false);
+    layer('lv-spin', false);
+    layer('lv-tune', false);
+    layer('lv-toast', false);
+    $('lv').classList.remove('on');
+  };
+  o.key = function (e) {
+    var k = e.keyCode;
+    if (searching) {
+      /* the input has the keys; only Enter and Back are ours */
+      if (k === 13) {
+        e.preventDefault();
+        endSearch(true);
+      } else if (k === 461 || k === 27) {
+        e.preventDefault();
+        if (Q) endSearch(false);
+        else endSearch(true);
+      }
+      return;
+    }
+    e.preventDefault();
+    if (!loaded) {
+      if (k === 461 || k === 27 || k === 8) o.exit();
+      return;
+    }
+    if (FP.open) {
+      filterKey(k);
+      return;
+    }
+    if (M.open) {
+      menuKey(k);
+      return;
+    }
+    if (L.open) {
+      var n7 = 7;
+      if (k === 38) {
+        if (L.ci > 0) L.ci--;
+      } else if (k === 40) {
+        if (L.ci < L.list.length - 1) L.ci++;
+      } else if (k === 33 || k === 427) {
+        L.ci = Math.max(0, L.ci - n7);
+      } else if (k === 34 || k === 428) {
+        L.ci = Math.min(L.list.length - 1, L.ci + n7);
+      } else if (k === 37) {
+        if (L.g > 0) {
+          L.g--;
+          L.list = listFor(L.g);
+          L.ci = 0;
+        }
+      } else if (k === 39) {
+        if (L.g < groups.length + 2) {
+          L.g++;
+          L.list = listFor(L.g);
+          L.ci = 0;
+        }
+      } else if (k === 13) {
+        if (L.list[L.ci]) {
+          var n = L.list[L.ci].num;
+          closeList();
+          play(n);
+          return;
+        }
+      } else if (k === 458) {
+        closeList();
+        return;
+      } else if (k === 404) {
+        toggleFav(L.list[L.ci]);
+        return;
+      } else if (k === 405) {
+        FP.open = true;
+        FP.i = 0;
+        drawFilter();
+        layer('lv-filter', true);
+        return;
+      } else if (k === 403) {
+        startSearch();
+        return;
+      } else if (k === 461 || k === 27 || k === 8) {
+        if (Q || F.cc || F.lang || F.q) {
+          Q = '';
+          F = { cc: '', lang: '', q: '' };
+          relist();
+          return;
+        }
+        closeList();
+        return;
+      } else if (k >= 48 && k <= 57) {
+        closeList();
+        digit(k - 48);
+        return;
+      } else return;
+      drawList();
+      fetchVisible();
+      return;
+    }
+    if (k === 13) {
+      if (failed) play(cur);
+      else openList();
+    } else if (k === 404) toggleFav(byNum[cur]);
+    else if (k === 405) openMenu();
+    else if (k === 406) setStats(!stats);
+    else if (k === 38 || k === 33 || k === 427) step(1);
+    else if (k === 40 || k === 34 || k === 428) step(-1);
+    else if (k === 458) openList();
+    else if (k === 457 || k === 37 || k === 39) showOsd();
+    else if (k >= 48 && k <= 57) digit(k - 48);
+    else if (k >= 96 && k <= 105) digit(k - 96);
+    else if (k === 461 || k === 27 || k === 8) o.exit();
+  };
+  return o;
+})();
+/* first paint straight from the last known layout, then refresh from the helper */
+try {
+  var cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+  if (cached && cached.apps && cached.apps.length) {
+    apps = cached.apps;
+    cfg = cached.cfg || {};
+    applyTheme(cfg.theme);
+    usage = cached.usage || {};
+    colors = cached.colors || {};
+    rebuild();
+    perfMark('launcher cached ' + Math.round(performance.now()));
+  }
+} catch (e) {}
+load();
+wantInputs();
+api('/api/frontend-ok', { version: VERSION }).catch(function () {}); // lets the manager know an updated launcher started
+</script></body></html>

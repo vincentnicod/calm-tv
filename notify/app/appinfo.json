@@ -1,0 +1,1 @@
+{"id":"com.cleanyourtv.notify","version":"1.0.4","vendor":"cleanyourtv","type":"web","main":"index.html","title":"Notification","icon":"icon.png","largeIcon":"largeIcon.png","defaultWindowType":"topui","transparent":true,"visible":false,"noSplashOnLaunch":true,"disableBackHistoryAPI":true,"class":{"hidden":true},"bgColor":"#00000000"}

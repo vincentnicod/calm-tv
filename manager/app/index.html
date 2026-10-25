@@ -1,0 +1,2418 @@
+<!doctype html>
+<!-- Built by tools/build-pages.js from manager/src: edit the files there, not this one. -->
+<html><head><meta charset="utf-8"><title>CleanYourTV</title>
+<meta name="viewport" content="width=1920">
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+:root {
+  --ink: #f5f6f8;
+  --ink2: rgba(245, 246, 248, 0.62);
+  --night: #07080b;
+  --font: "LG Smart UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+html,
+body {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: var(--night);
+  color: var(--ink);
+  font-family: var(--font);
+}
+#head {
+  position: absolute;
+  left: 96px;
+  top: 70px;
+  width: 640px;
+}
+#head h1 {
+  font-size: 76px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+#head p {
+  margin-top: 18px;
+  font-size: 28px;
+  color: var(--ink2);
+  line-height: 1.4;
+}
+#pv {
+  display: none;
+  margin-top: 36px;
+  width: 640px;
+  height: 360px;
+  object-fit: cover;
+  border-radius: 28px;
+  background: #14161b;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+#info {
+  margin-top: 40px;
+  font-size: 30px;
+  line-height: 1.5;
+  color: var(--ink2);
+}
+#info b {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 38px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ink);
+}
+#panel {
+  position: absolute;
+  left: 820px;
+  top: 60px;
+  width: 1000px;
+  height: 960px;
+  display: flex;
+  flex-direction: column;
+}
+#panel > * + * {
+  margin-top: 12px;
+}
+#listwrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+#list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  transition: transform 0.15s ease-out;
+}
+#listwrap.mu::before,
+#listwrap.md::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 70px;
+  z-index: 2;
+  pointer-events: none;
+}
+#listwrap.mu::before {
+  top: 0;
+  background: linear-gradient(var(--night), rgba(7, 8, 11, 0));
+}
+#listwrap.md::after {
+  bottom: 0;
+  background: linear-gradient(rgba(7, 8, 11, 0), var(--night));
+}
+#banner {
+  min-height: 64px;
+  padding: 16px 34px;
+  border-radius: 30px;
+  font-size: 28px;
+  line-height: 1.3;
+  background: #1c1e24;
+  color: var(--ink2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+#banner.work {
+  color: var(--ink);
+}
+#banner.err {
+  color: #ff9a8a;
+}
+#banner.ok {
+  color: #9be3b0;
+}
+.row {
+  display: flex;
+  align-items: center;
+  height: 84px;
+  padding: 0 34px;
+  border-radius: 30px;
+  font-size: 30px;
+  font-weight: 500;
+  background: #1a1c22;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.row > * + * {
+  margin-left: 22px;
+}
+.row .lb {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.row .st {
+  font-size: 24px;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+.row.dim {
+  opacity: 0.55;
+}
+.row.f {
+  background: var(--ink);
+  color: #0b0c10;
+  opacity: 1;
+}
+.sep {
+  height: 14px;
+}
+#share {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  background: var(--night);
+  display: none;
+  z-index: 10;
+}
+#share h2 {
+  position: absolute;
+  left: 96px;
+  top: 90px;
+  font-size: 64px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+#share ol {
+  position: absolute;
+  left: 96px;
+  top: 210px;
+  width: 760px;
+  font-size: 34px;
+  line-height: 1.5;
+  padding-left: 44px;
+  color: var(--ink2);
+}
+#share ol b {
+  color: var(--ink);
+  font-weight: 600;
+}
+#sharemsg {
+  position: absolute;
+  left: 96px;
+  top: 660px;
+  width: 900px;
+  font-size: 28px;
+  line-height: 1.4;
+  color: var(--ink2);
+}
+#shareurl {
+  position: absolute;
+  left: 96px;
+  top: 760px;
+  width: 900px;
+  font-size: 30px;
+  word-break: break-all;
+  color: var(--ink);
+}
+#qrbox {
+  position: absolute;
+  left: 1120px;
+  top: 170px;
+  width: 680px;
+  height: 680px;
+  border-radius: 44px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#qrbox canvas {
+  width: 600px;
+  height: 600px;
+}
+#shareclose {
+  position: absolute;
+  left: 96px;
+  top: 880px;
+  padding: 0 44px;
+  height: 84px;
+  border-radius: 30px;
+  font-size: 30px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  background: var(--ink);
+  color: #0b0c10;
+}
+</style><script src="qrcode.js"></script></head><body>
+<div id="head"><h1>CleanYourTV</h1><p id="sub"></p><img id="pv" alt=""><div id="info"></div></div>
+<div id="panel"><div id="banner"></div><div id="listwrap"><div id="list"></div></div></div>
+<div id="share"><h2>Share the log</h2>
+  <ol><li>Phone on the <b>same Wi-Fi</b> as the TV.</li><li>Scan the code with the camera.</li><li>Tap <b>Copy</b> on the page and paste it into your message.</li></ol>
+  <div id="sharemsg"></div><div id="shareurl"></div><div id="shareclose">Close</div>
+  <div id="qrbox"><canvas id="qr"></canvas></div></div>
+<script>
+var kFlow = 'input',
+  kText = '',
+  kRows = [],
+  kTimer = 0,
+  upd = null,
+  checkedOffline = false,
+  forceOffer = false,
+  API = 'http://127.0.0.1:8765',
+  SVC = '/media/developer/apps/usr/palm/services/com.cleanyourtv.manager.service';
+var napi = null,
+  lv = null,
+  th = null,
+  vo = null,
+  mdl = [],
+  agl = [],
+  tst = null,
+  shareMode = 'log',
+  pairBase = 0,
+  idxStack = [],
+  setupIdx = 0,
+  updIdx = 0,
+  st = null,
+  rows = [],
+  idx = 0,
+  view = 'main',
+  pending = null,
+  pollT = 0,
+  setup = { debloat: true, inputKey: true },
+  offline = false,
+  busyMsg = '';
+function $(i) {
+  return document.getElementById(i);
+}
+function api(p, body, ms) {
+  return new Promise(function (res, rej) {
+    var x = new XMLHttpRequest();
+    x.open(body ? 'POST' : 'GET', API + p);
+    x.timeout = ms || 30000;
+    x.onload = function () {
+      try {
+        res(JSON.parse(x.responseText));
+      } catch (e) {
+        rej(e);
+      }
+    };
+    x.onerror = x.ontimeout = function () {
+      rej(new Error('no answer'));
+    };
+    x.send(body ? JSON.stringify(body) : null);
+  });
+}
+function rootExec(cmd) {
+  return new Promise(function (res) {
+    try {
+      var b = new PalmServiceBridge();
+      b.onservicecallback = function (m) {
+        res(m);
+      };
+      b.call('luna://org.webosbrew.hbchannel.service/exec', JSON.stringify({ command: cmd }));
+    } catch (e) {
+      res(JSON.stringify({ returnValue: false, errorText: String(e) }));
+    }
+  });
+}
+function launch(id, params) {
+  try {
+    var b = new PalmServiceBridge();
+    b.onservicecallback = function () {};
+    b.call('luna://com.webos.applicationManager/launch', JSON.stringify({ id: id, params: params || {} }));
+  } catch (e) {}
+}
+function onoff(v) {
+  return v ? 'On' : 'Off';
+}
+function banner(text, cls) {
+  var b = $('banner');
+  b.textContent = text || '';
+  b.className = cls || '';
+  b.style.display = text ? '' : 'none';
+}
+
+function push(v) {
+  idxStack.push([view, idx]);
+  view = v;
+  idx = 0;
+  build();
+  draw();
+} // into a screen; pop returns to the row we left
+function pop() {
+  var p = idxStack.pop() || ['main', 0];
+  view = p[0];
+  idx = p[1];
+  build();
+  draw();
+}
+function build() {
+  rows = [];
+  if (view === 'share') {
+    rows.push({ label: 'Close', fn: closeShare });
+    return;
+  }
+  if (view === 'keys') {
+    rows = kRows;
+    return;
+  }
+  if (view === 'notifyhow' || view === 'voicehow') {
+    rows.push({ label: 'Back', fn: pop });
+    return;
+  }
+  if (view === 'theme') {
+    var tc = (th && th.current) || { id: 'classic', accent: '' };
+    ((th && th.themes) || []).forEach(function (x) {
+      rows.push({
+        label: x.name,
+        sub: x.id === tc.id ? 'selected' : x.installed ? '' : 'on GitHub',
+        pv: x.preview ? x.id : '',
+        info: {
+          t: x.name,
+          d:
+            x.description +
+            (x.author ? '\n\nBy ' + x.author : '') +
+            (x.installed || x.id === 'classic' ? '' : '\n\nDownloaded from GitHub when you choose it.'),
+        },
+        fn: function () {
+          setTheme({ id: x.id, name: x.name });
+        },
+      });
+    });
+    rows.push({ sep: true });
+    var an = 'Theme default';
+    ((th && th.accents) || []).forEach(function (a) {
+      if (a.hex === tc.accent) an = a.name;
+    });
+    rows.push({
+      label: 'Theme options',
+      sub: 'accent colour \u00B7 ' + an,
+      fn: function () {
+        push('themeopts');
+      },
+    });
+    rows.push({ sep: true });
+    rows.push({ label: 'Back', fn: pop });
+    return;
+  }
+  if (view === 'themeopts') {
+    var to = (th && th.current) || { id: 'classic', accent: '' },
+      an2 = 'Theme default';
+    ((th && th.accents) || []).forEach(function (a) {
+      if (a.hex === to.accent) an2 = a.name;
+    });
+    rows.push({
+      label: 'Accent colour',
+      sub: an2,
+      fn: function () {
+        push('accent');
+      },
+    });
+    rows.push({
+      label: 'Go back to the previous theme',
+      sub: th && th.previous ? th.previous.id : 'nothing to go back to',
+      dim: !(th && th.previous),
+      fn: function () {
+        if (th && th.previous) themeCall('/api/theme/revert', {}, 'Previous theme restored');
+      },
+    });
+    rows.push({ sep: true });
+    rows.push({ label: 'Back', fn: pop });
+    return;
+  }
+  if (view === 'accent') {
+    var ta = (th && th.current && th.current.accent) || '';
+    ((th && th.accents) || []).forEach(function (a) {
+      rows.push({
+        label: a.name,
+        sub: a.hex === ta ? 'selected' : a.hex || '',
+        fn: function () {
+          themeCall('/api/theme/set', { accent: a.hex }, a.name === 'Theme default' ? 'Accent: theme default' : 'Accent: ' + a.name, true);
+        },
+      });
+    });
+    rows.push({ sep: true });
+    rows.push({ label: 'Back', fn: pop });
+    return;
+  }
+  if (view === 'channel') {
+    var cc = (st && st.channel) || '';
+    rows.push({
+      label: 'Stable releases',
+      sub: (cc ? '' : 'selected \u00B7 ') + 'the latest published release',
+      fn: function () {
+        setChannel('');
+      },
+    });
+    ((tst && tst.builds) || []).forEach(function (b) {
+      rows.push({
+        label: 'Test: ' + b.branch,
+        sub:
+          (b.tag === cc ? 'selected \u00B7 ' : '') +
+          (b.build ? 'build ' + b.build : '') +
+          (b.published ? (b.build ? ' \u00B7 ' : '') + String(b.published).slice(0, 10) : ''),
+        fn: function () {
+          setChannel(b.tag);
+        },
+      });
+    });
+    if (!tst || !tst.builds || !tst.builds.length)
+      rows.push({
+        label: 'No test builds right now',
+        sub: tst && tst.error ? String(tst.error) : 'a test build appears when a branch is pushed',
+        dim: true,
+        fn: null,
+      });
+    rows.push({ sep: true });
+    rows.push({ label: 'Back', fn: pop });
+    return;
+  }
+  if (view === 'models') {
+    var cur = ((vo || {}).llm || {}).model;
+    mdl.forEach(function (x) {
+      rows.push({
+        label: x.name,
+        sub: x.id + (x.price != null ? ' \u00B7 $' + x.price + ' per million words in' : '') + (x.id === cur ? ' \u00B7 selected' : ''),
+        fn: function () {
+          pickModel(x.id);
+        },
+      });
+    });
+    rows.push({ sep: true });
+    rows.push({ label: 'Back', fn: pop });
+    return;
+  }
+  if (view === 'agents') {
+    var ca = ((vo || {}).ha || {}).agent || '';
+    rows.push({
+      label: 'Default agent',
+      sub: 'Home Assistant\u2019s own' + (ca ? '' : ' \u00B7 selected'),
+      fn: function () {
+        pickAgent('');
+      },
+    });
+    agl.forEach(function (x) {
+      rows.push({
+        label: x.name,
+        sub: x.id + (x.id === ca ? ' \u00B7 selected' : ''),
+        fn: function () {
+          pickAgent(x.id);
+        },
+      });
+    });
+    rows.push({ sep: true });
+    rows.push({ label: 'Back', fn: pop });
+    return;
+  }
+  if (view === 'voice') {
+    var v = vo || {},
+      wk = v.job && v.job.state === 'working';
+    var vk = (st.keys && st.keys.voice) || '',
+      lm = v.llm || {};
+    var ha = v.ha || {},
+      haOk = !!ha.configured,
+      HR = { 'ha-first': 'Home Assistant first, then the AI', 'ha-only': 'Home Assistant only', 'ai-only': 'The AI only' };
+    if (!v.installed) {
+      rows.push({
+        label: 'Install voice',
+        sub: wk ? 'installing…' : 'downloads about 80 MB',
+        dim: wk,
+        fn: function () {
+          if (wk) return;
+          api('/api/voice/install', {}).then(
+            function (x) {
+              vo = x;
+              build();
+              draw();
+              voiceRefresh();
+            },
+            function () {
+              banner('The service did not answer', 'err');
+            }
+          );
+        },
+      });
+    } else {
+      rows.push({
+        label: 'Listen on the voice button',
+        sub: vk ? onoff(v.enabled) : 'learn a button first',
+        dim: !vk,
+        fn: function () {
+          if (!vk) return;
+          api('/api/voice/set', { enabled: !v.enabled })
+            .then(function (x) {
+              vo = x;
+              return api('/api/manager/status');
+            })
+            .then(
+              function (s2) {
+                st = s2;
+                build();
+                draw();
+              },
+              function () {
+                banner('The service did not answer', 'err');
+              }
+            );
+        },
+      });
+      rows.push({
+        label: 'Learn the voice button',
+        sub: vk ? 'now: ' + vk : 'not learned',
+        fn: function () {
+          openKeys('voice');
+        },
+      });
+      rows.push({
+        label: 'Try it now',
+        sub: v.listening ? 'listening…' : 'speak when the card appears',
+        dim: v.listening,
+        fn: function () {
+          if (v.listening) return;
+          api('/api/voice/listen', {}).then(
+            function (x) {
+              if (x.error) banner(x.error, 'err');
+              else banner('Speak now…', 'work');
+              voiceRefresh();
+            },
+            function () {
+              banner('The service did not answer', 'err');
+            }
+          );
+        },
+      });
+      rows.push({
+        label: 'Switch off LG\u2019s voice assistant',
+        sub: onoff(v.suppressLg) + (v.suppressLg && v.enabled && !v.lgPaused ? ' \u00B7 not paused yet' : ''),
+        fn: function () {
+          api('/api/voice/set', { suppressLg: !v.suppressLg }).then(
+            function (x) {
+              vo = x;
+              build();
+              draw();
+            },
+            function () {
+              banner('The service did not answer', 'err');
+            }
+          );
+        },
+      });
+    }
+    rows.push({ sep: true });
+    rows.push({
+      label: 'Home Assistant (Assist)',
+      sub: haOk
+        ? ha.url.replace(/^https?:\/\//, '').replace(/\/.*/, '') + ' \u00B7 ' + HR[ha.route]
+        : 'not set \u00B7 set up from your phone',
+      fn: function () {
+        if (!haOk) {
+          openPair();
+          return;
+        }
+        haTest();
+      },
+    });
+    rows.push({
+      label: 'Which answers first',
+      sub: HR[ha.route || 'ha-first'],
+      fn: function () {
+        var o = ['ha-first', 'ha-only', 'ai-only'],
+          n = o[(o.indexOf(ha.route || 'ha-first') + 1) % 3];
+        api('/api/voice/set', { ha: { route: n } }).then(
+          function (x) {
+            if (x.error) {
+              banner(x.error, 'err');
+              return;
+            }
+            vo = x;
+            build();
+            draw();
+          },
+          function () {
+            banner('The service did not answer', 'err');
+          }
+        );
+      },
+    });
+    rows.push({
+      label: 'Assist agent',
+      sub: haOk ? ha.agent || 'default' : 'set up Home Assistant first',
+      dim: !haOk,
+      fn: function () {
+        if (haOk) openAgents();
+      },
+    });
+    rows.push({
+      label: 'AI chat (OpenRouter)',
+      sub: lm.hasKey ? onoff(lm.enabled) + ' \u00B7 ' + lm.model : 'no key set',
+      fn: function () {
+        if (!lm.hasKey) {
+          openPair();
+          return;
+        }
+        api('/api/voice/set', { llm: { enabled: !lm.enabled } }).then(
+          function (x) {
+            if (x.error) {
+              banner(x.error, 'err');
+              return;
+            }
+            vo = x;
+            build();
+            draw();
+          },
+          function () {
+            banner('The service did not answer', 'err');
+          }
+        );
+      },
+    });
+    rows.push({ label: 'Model', sub: lm.model || 'openrouter/auto', fn: openModels });
+    rows.push({
+      label: 'Send the text to',
+      sub: v.url ? v.url.replace(/^(https?:\/\/[^\/]+).*/, '$1') : 'not set · shows a card only',
+      fn: function () {
+        kText =
+          'Set the address of your server (from a shell on the TV):\n\ncurl -X POST localhost:8765/api/voice/set -d \'{"url":"http://server:port/path","token":"optional secret"}\'\n\nThe TV sends: POST, JSON {"text":"..."}, with "Authorization: Bearer <token>" when a token is set. If your server answers with JSON {"text":"..."} (or plain text), the answer is shown as a card. Only the recognised text is sent, never audio.';
+        push('voicehow');
+      },
+    });
+    rows.push({ sep: true });
+    rows.push({ label: 'Set up from your phone', sub: 'key, model, Home Assistant, server', fn: openPair });
+    rows.push({
+      label: 'Set up with commands',
+      sub: 'for scripts and ssh',
+      fn: function () {
+        kText = aiHelp();
+        push('voicehow');
+      },
+    });
+    rows.push({
+      label: 'Forget the conversation',
+      fn: function () {
+        api('/api/voice/forget', {}).then(
+          function () {
+            banner('Conversation cleared', 'ok');
+          },
+          function () {
+            banner('The service did not answer', 'err');
+          }
+        );
+      },
+    });
+    if (v.installed) {
+      rows.push({ sep: true });
+      rows.push({
+        label: 'Remove voice',
+        sub: 'deletes the ' + Math.round((v.bytes || 0) / 1048576) + ' MB download',
+        fn: function () {
+          api('/api/voice/uninstall', {})
+            .then(function (x) {
+              vo = x;
+              return api('/api/manager/status');
+            })
+            .then(
+              function (s2) {
+                st = s2;
+                banner('Voice removed', 'ok');
+                build();
+                draw();
+              },
+              function () {
+                banner('The service did not answer', 'err');
+              }
+            );
+        },
+      });
+    }
+    rows.push({ sep: true });
+    rows.push({ label: 'Back', fn: pop });
+    return;
+  }
+  if (view === 'notifyapi') {
+    rows.push({
+      label: 'Accept notifications from the network',
+      sub: onoff(napi && napi.enabled),
+      fn: function () {
+        api('/api/manager/notify-api', { enabled: !(napi && napi.enabled) }).then(
+          function (n) {
+            napi = n;
+            api('/api/manager/status').then(function (s2) {
+              st = s2;
+              build();
+              draw();
+            });
+          },
+          function () {
+            banner('The service did not answer', 'err');
+          }
+        );
+      },
+    });
+    if (napi && napi.enabled) {
+      rows.push({
+        label: 'How to send',
+        sub: 'address, token, example',
+        fn: function () {
+          kText =
+            'Send a POST request:\nhttp://' +
+            napi.ip +
+            ':' +
+            napi.port +
+            '/notify\n\nHeader:\nAuthorization: Bearer ' +
+            napi.token +
+            '\n\nBody (JSON):\n{"title":"Front door","text":"Someone is at the door","image":"http://…/snapshot.jpg","seconds":15}';
+          push('notifyhow');
+        },
+      });
+      rows.push({ label: 'Show as QR code', sub: 'scan with a phone to copy the address and token', fn: openNotifyQr });
+      rows.push({
+        label: 'New token',
+        sub: 'the old one stops working',
+        fn: function () {
+          api('/api/manager/notify-api', { regenerate: true }).then(function (n) {
+            napi = n;
+            banner('New token created. Open \u201CHow to send\u201D to see it.', 'ok');
+            build();
+            draw();
+          });
+        },
+      });
+    }
+    rows.push({ sep: true });
+    rows.push({ label: 'Back', fn: pop });
+    return;
+  }
+  if (offline) {
+    // before the setup: a newer package first, then choose, set up, then the extras
+    updIdx = 0;
+    if (upd) {
+      rows.push({ label: 'Update to ' + upd.updateTo, sub: 'recommended first · installed ' + upd.installed, fn: offlineUpdate });
+      rows.push({ sep: true });
+    }
+    rows.push({
+      label: 'Debloat LG’s ads and telemetry',
+      sub: onoff(setup.debloat),
+      fn: function () {
+        setup.debloat = !setup.debloat;
+        build();
+        draw();
+      },
+    });
+    rows.push({
+      label: 'Take over the Input key',
+      sub: onoff(setup.inputKey),
+      fn: function () {
+        setup.inputKey = !setup.inputKey;
+        build();
+        draw();
+      },
+    });
+    rows.push({ sep: true });
+    setupIdx = rows.length;
+    rows.push({
+      label: 'Set up now',
+      sub: 'the screen blinks once',
+      fn: function () {
+        doSetup(false);
+      },
+    });
+    if (forceOffer)
+      rows.push({
+        label: 'Set up anyway',
+        sub: 'untested firmware; a failed start restarts the TV',
+        fn: function () {
+          doSetup(true);
+        },
+      });
+    rows.push({ sep: true });
+    rows.push({ label: 'Check for updates', sub: 'works without the service', fn: offlineCheck });
+    rows.push({ label: 'Share log', sub: 'QR code for your phone', fn: openShare });
+    return;
+  }
+  if (view === 'confirm-home' || view === 'confirm-uninstall') {
+    var un = view === 'confirm-uninstall',
+      on = !(st.home && st.home.enabled);
+    rows.push({ label: 'Cancel', fn: pop });
+    rows.push({
+      label: un ? 'Yes, remove CleanYourTV' : on ? 'Yes, use CleanYourTV as Home' : 'Yes, use LG’s Home',
+      sub: un ? 'settings and apps are deleted; the TV restarts' : 'the TV restarts',
+      fn: function () {
+        api(un ? '/api/manager/uninstall' : '/api/manager/home', un ? {} : { enabled: on }).catch(function () {});
+        banner(
+          un
+            ? 'Removing CleanYourTV… the TV restarts in a moment and LG’s Home comes back.'
+            : on
+              ? 'Switching to CleanYourTV… the TV restarts in a moment.'
+              : 'Switching to LG’s Home… the TV restarts in a moment.',
+          'work'
+        );
+      },
+    });
+    return;
+  }
+  if (view === 'livetv') {
+    var lo = st.options.liveTv !== false,
+      l2 = lv || {},
+      gk = (st.keys && st.keys.guide) || '';
+    rows.push({
+      label: 'Show Live TV',
+      sub: onoff(lo),
+      fn: function () {
+        opt({ liveTv: !lo });
+      },
+    });
+    rows.push({
+      label: 'Playlist',
+      sub: l2.configured
+        ? l2.channels +
+          ' channels' +
+          (l2.epg ? ' \u00B7 guide for ' + l2.epg + ' programmes' : '') +
+          (l2.state && l2.state !== 'idle' ? ' \u00B7 ' + l2.state : '')
+        : 'not set \u00B7 set up from your phone',
+      fn: openLivePair,
+    });
+    rows.push({
+      label: 'Refresh playlist and guide',
+      sub: l2.error ? String(l2.error).slice(0, 70) : '',
+      dim: !l2.configured,
+      fn: function () {
+        if (!l2.configured) return;
+        banner('Refreshing\u2026', 'work');
+        api('/api/live/refresh', {}).then(
+          function () {
+            banner('Refreshing in the background', 'ok');
+            setTimeout(liveRefresh, 3000);
+          },
+          function () {
+            banner('The service did not answer', 'err');
+          }
+        );
+      },
+    });
+    rows.push({
+      label: 'Learn the Guide key',
+      sub: lo ? (gk ? 'now: ' + gk : 'not learned \u00B7 LG\u2019s guide stays') : 'Live TV is off',
+      dim: !lo,
+      fn: function () {
+        if (lo) openKeys('guide');
+      },
+    });
+    rows.push({ sep: true });
+    rows.push({
+      label: 'Clear recent channels',
+      fn: function () {
+        api('/api/live/state', { op: 'clear' }).then(
+          function () {
+            banner('Recent channels cleared', 'ok');
+          },
+          function () {
+            banner('The service did not answer', 'err');
+          }
+        );
+      },
+    });
+    rows.push({
+      label: 'Remove the playlist',
+      sub: l2.configured ? '' : 'nothing to remove',
+      dim: !l2.configured,
+      fn: function () {
+        if (l2.configured) push('confirm-live-reset');
+      },
+    });
+    rows.push({ sep: true });
+    rows.push({ label: 'Back', fn: pop });
+    return;
+  }
+  if (view === 'confirm-live-reset') {
+    rows.push({
+      label: 'Yes, remove the playlist',
+      sub: 'the address, the channel list, the guide and your favourites are deleted',
+      fn: function () {
+        api('/api/live/reset', {}).then(
+          function () {
+            banner('Playlist removed', 'ok');
+            pop();
+            liveRefresh();
+          },
+          function () {
+            banner('The service did not answer', 'err');
+          }
+        );
+      },
+    });
+    rows.push({ label: 'No, keep it', fn: pop });
+    return;
+  }
+  if (view === 'inputkey') {
+    var hk = st.inputhook || {},
+      na = hk.hook && !hk.hook.attached;
+    rows.push({
+      label: 'Input key opens our Inputs list',
+      sub: na ? 'not available on this firmware' : onoff(st.options.inputKey),
+      fn: function () {
+        opt({ inputKey: !st.options.inputKey });
+      },
+    });
+    rows.push({
+      label: 'Learn the Input key',
+      sub: st.keys && st.keys.inputIsDefault ? 'default (' + st.keys.input + ')' : 'learned: ' + (st.keys && st.keys.input),
+      fn: function () {
+        openKeys('input');
+      },
+    });
+    var pk = st.picker || {},
+      pkMode = pk.mode || 'overlay',
+      PKT = {
+        overlay: 'over the running app, ready in the background (instant)',
+        ondemand: 'over the running app, started when pressed',
+        launcher: 'the launcher\u2019s Inputs list',
+      };
+    rows.push({
+      label: 'Input key shows',
+      sub:
+        (pk.released ? 'LG\u2019s own list: CleanYourTV is not the Home' : PKT[pkMode]) +
+        (pk.reason && !pk.released ? ' \u00B7 ' + pk.reason : ''),
+      fn: function () {
+        var o = ['overlay', 'ondemand', 'launcher'];
+        opt({ pickerMode: o[(o.indexOf(pkMode) + 1) % 3] });
+      },
+    });
+    rows.push({
+      label: 'Learn the Home key',
+      sub: 'optional · ' + (st.keys && st.keys.home ? 'now: ' + st.keys.home : 'not learned'),
+      fn: function () {
+        openKeys('home');
+      },
+    });
+    rows.push({ sep: true });
+    rows.push({ label: 'Back', fn: pop });
+    return;
+  }
+  var fe = st.frontend,
+    sv = st.service,
+    busy = st.job && st.job.state === 'working';
+  var uptxt = function (u) {
+    return u
+      ? 'Update to ' + u + (st.channel ? ' (test build)' : '')
+      : st.checking
+        ? 'Checking…'
+        : st.checkError
+          ? /no release/.test(st.checkError)
+            ? 'No release yet'
+            : 'Cannot check'
+          : 'Up to date';
+  };
+  // updates, then the settings, then support; the destructive row last
+  rows.push({
+    label: 'Launcher ' + fe.version,
+    sub: uptxt(fe.updateTo),
+    dim: busy,
+    fn: fe.updateTo
+      ? function () {
+          run('/api/manager/update-frontend', { version: fe.updateTo });
+        }
+      : null,
+  });
+  rows.push({
+    label: 'Service ' + sv.version,
+    sub: uptxt(sv.updateTo),
+    dim: busy,
+    fn: sv.updateTo
+      ? function () {
+          run('/api/manager/update-service', { version: sv.updateTo });
+        }
+      : null,
+  });
+  rows.push({
+    label: 'Check for updates',
+    dim: busy,
+    fn: function () {
+      banner('Checking…', 'work');
+      api('/api/manager/check', {}).then(refreshDone, refreshDone);
+    },
+  });
+  rows.push({
+    label: 'Update channel',
+    sub: st.channel ? 'Test: ' + st.channel.replace(/^test-/, '') : 'Stable releases',
+    dim: busy,
+    fn: openChannel,
+  });
+  if (fe.previous)
+    rows.push({
+      label: 'Go back to launcher ' + fe.previous,
+      dim: busy,
+      fn: function () {
+        run('/api/manager/rollback-frontend', {});
+      },
+    });
+  rows.push({ sep: true });
+  rows.push({
+    label: 'CleanYourTV as Home',
+    sub: onoff(st.home && st.home.enabled),
+    fn: function () {
+      push('confirm-home');
+    },
+  });
+  rows.push({
+    label: 'Theme',
+    sub: (function () {
+      var n = '';
+      ((th && th.themes) || []).forEach(function (x) {
+        if (th.current && x.id === th.current.id) n = x.name;
+      });
+      return n;
+    })(),
+    fn: openTheme,
+  });
+  rows.push({ label: 'Live TV', sub: onoff(st.options.liveTv !== false), fn: openLiveTv });
+  rows.push({
+    label: 'Input key',
+    sub: st.inputhook && st.inputhook.hook && !st.inputhook.hook.attached ? 'not available' : onoff(st.options.inputKey),
+    fn: function () {
+      push('inputkey');
+    },
+  });
+  rows.push({ sep: true });
+  rows.push({
+    label: 'Voice',
+    sub: st.voice ? (st.voice.installed ? onoff(st.voice.enabled) : 'not installed') : '',
+    fn: function () {
+      api('/api/voice/status').then(
+        function (v) {
+          vo = v;
+          push('voice');
+          if ((v.job && v.job.state === 'working') || v.listening) voiceRefresh();
+        },
+        function () {
+          banner('The service did not answer', 'err');
+        }
+      );
+    },
+  });
+  rows.push({
+    label: 'Network notifications',
+    sub: onoff(st.notifyApi && st.notifyApi.enabled),
+    fn: function () {
+      api('/api/manager/notify-api').then(
+        function (n) {
+          napi = n;
+          push('notifyapi');
+        },
+        function () {
+          banner('The service did not answer', 'err');
+        }
+      );
+    },
+  });
+  rows.push({
+    label: 'Debloat LG’s ads and telemetry',
+    sub: onoff(st.options.debloat),
+    fn: function () {
+      opt({ debloat: !st.options.debloat });
+    },
+  });
+  rows.push({ sep: true });
+  rows.push({ label: 'Share log', sub: 'QR code for your phone', fn: openShare });
+  rows.push({
+    label: 'Uninstall',
+    fn: function () {
+      push('confirm-uninstall');
+    },
+  });
+}
+/* what each row does, shown on the left for the focused row */
+var INFO = {
+  'Launcher':
+    'The home screen you see. Updates come from GitHub releases and are checked against a SHA-256 file before they are installed. If a new launcher does not start, the previous one is put back.',
+  'Service':
+    'The background service behind the launcher: Live TV, picture notifications, the Input key, these updates. A failed update restores the previous files.',
+  'Check for updates': 'Looks for a newer release on GitHub. Nothing is installed until you choose an update.',
+  'Update channel':
+    'Stable releases are what most people want. A test build is a change someone asks you to try, built from a branch of the repository; it can be less finished. Choose a test build here, then use the Launcher and Service rows to install it. Going back to Stable offers the latest release again.',
+  'Go back to launcher': 'Swaps the previous launcher version back in. The newer one stays available as an update.',
+  'CleanYourTV as Home':
+    'On: the Home button opens this launcher. Off: LG\u2019s own Home. Switching restarts the TV (about a minute); the service keeps running either way.',
+  'Debloat LG\u2019s ads and telemetry':
+    'Stops LG\u2019s ad, recommendation and telemetry services and blocks a few ad servers. Nothing is uninstalled, and it only applies while this launcher is Home.',
+
+  'Theme':
+    'Choose how the home screen looks: colours, the size of tiles and text, the number of columns, the clock, the ambient glow, animation speed and a wallpaper. Themes are small data files bundled with the package; the accent colour can be changed on top of any of them.',
+  'Theme options': 'More choices for the theme: the accent colour, and going back to the previous theme.',
+  'Accent colour':
+    'The colour of the focus ring and of the highlighted button or menu row. \u201CTheme default\u201D uses the theme\u2019s own colour.',
+  'Network notifications':
+    'Lets other devices on your network send picture notifications to this TV with a POST request and a secret token. Off by default.',
+  'Accept notifications from the network':
+    'On: the TV listens on port 8767 for POST /notify with the token. Anyone who has the token and network access can show cards on this screen.',
+  'How to send': 'Shows the address, the token and an example request.',
+  'Show as QR code':
+    'Shows a QR code. A phone that scans it opens a page, served by the TV for ten minutes, that shows the notification address and the token with Copy buttons (for Home Assistant, for example). The token is a secret.',
+  'New token': 'Creates a new secret token. Devices using the old one stop working.',
+  'Voice':
+    'Optional. Speak into the remote and the TV turns it into text on the TV itself (Moonshine, English). The text can be sent to a server you run. Audio never leaves the TV. Needs a download of about 80 MB.',
+  'Install voice':
+    'Downloads the speech engine, a 64-bit C library and the model (checksums are verified), then tests them. About a minute. Nothing is installed in the system folders.',
+  'Listen on the voice button': 'On: pressing the button you learned starts listening. A card shows what was heard.',
+  'AI chat (OpenRouter)':
+    'On: what you say is also sent as text to a language model through OpenRouter and the answer is shown on screen. Needs your OpenRouter key; the text goes to OpenRouter and the model provider, never audio.',
+  'Set up from your phone':
+    'Shows a QR code. Scan it with a phone on the same Wi-Fi to enter your OpenRouter key, choose a model, write instructions and set a server address. Nothing is typed on the TV.',
+  'Model':
+    'Choose the model that answers. The list is read from OpenRouter: the newest models of the main providers, with the price per million words in. The phone page lists every model.',
+  'Set up with commands': 'Shows the commands to set the key, model and instructions from a shell, and how to ask by text.',
+  'Forget the conversation': 'The AI and Home Assistant remember the last turns for ten minutes. This clears them.',
+  'Home Assistant (Assist)':
+    'Sends what you say as text to Home Assistant\u2019s Assist and shows its answer. Needs the address and a long-lived access token (Home Assistant profile page), entered on your phone. Choosing this row tests the connection.',
+  'Which answers first':
+    'Home Assistant first, then the AI: Assist gets the text; if it does not understand, the AI answers. Home Assistant only: never the AI. The AI only: Home Assistant is not asked. Choose to switch.',
+  'Assist agent':
+    'Which Home Assistant conversation agent answers. The default is the built-in one; others (for example a language-model agent) are listed from your Home Assistant.',
+  'Switch off LG\u2019s voice assistant':
+    'LG\u2019s own assistant reacts to the same button and sends the audio to LG. On: it is paused while voice is on. A reboot or switching this off undoes it.',
+  'Learn the voice button':
+    'Records the code of the remote button that starts listening. Try the microphone button first; any spare button works.',
+  'Try it now': 'Starts listening without the button: speak when the card appears.',
+  'Send the text to':
+    'Where the recognised text goes. Shows how to set the address of your server. Without one, the text is only shown on screen.',
+  'Remove voice': 'Deletes the downloaded engine and model. The rest of CleanYourTV is not affected.',
+  'Input key':
+    'The remote\u2019s Input button opens our Inputs list over the running app instead of LG\u2019s picker. Open this screen to switch it off or to learn the button.',
+  'Share log':
+    'Shows a QR code. Scan it with a phone on the same Wi-Fi to copy a report for a bug report. Addresses and URL paths are masked; the page closes after ten minutes.',
+  'Uninstall': 'Removes the apps, the boot scripts and your settings, then restarts the TV so LG\u2019s Home comes back.',
+  'Input key opens our Inputs list': 'On: pressing Input shows our Inputs list. Off: LG\u2019s picker comes back at once.',
+  'Learn the Input key':
+    'Reads the code of your remote\u2019s Input button from the hook, then tests that our list opens. The default is 241. Clear goes back to it.',
+  'Live TV': 'Settings for Live TV: switch it on or off, set up or remove your playlist, refresh the guide and learn the Guide key.',
+  'Show Live TV':
+    'On: the launcher has a Live TV button and tile, the Inputs list has Live TV, and the Guide key can open the channel guide. Off: all of that is hidden and LG\u2019s own player and guide are used. Your playlist is kept.',
+  'Playlist':
+    'Your M3U playlist and its XMLTV guide. Choose it to set up: a QR code opens a page on your phone where you enter the playlist address and the 6-digit code shown here.',
+  'Refresh playlist and guide': 'Downloads the playlist and the programme guide again now. It also happens twice a day.',
+  'Clear recent channels': 'Empties the Recent tab and the list of channels that failed. Favourites stay.',
+  'Remove the playlist': 'Deletes the playlist address, the channel list, the guide and your favourites from the TV.',
+  'Yes, remove the playlist': 'Deletes the playlist and everything stored for it on the TV. You can set it up again.',
+  'Learn the Guide key':
+    'Records the Guide button\u2019s code. Afterwards it opens the Live TV channel guide over whatever is running (only while Live TV is on). Clear it to get LG\u2019s guide back.',
+  'Input key shows':
+    'How the Input button shows the Inputs. Over the running app, ready in the background: instant, tested on webOS 25. Over the running app, started when pressed: nothing runs hidden, so it cannot keep the remote; the default on older webOS, where the background one showed a loading circle. The launcher\u2019s Inputs list: the TV goes to our Home (needs CleanYourTV as Home; otherwise the key stays with LG). Choose to go to the next one.',
+  'Learn the Home key': 'Optional. Records the Home button\u2019s code. The Home key keeps working exactly as before.',
+  'Back': 'Back to the main list.',
+  'Cancel': 'Nothing changes.',
+  'Yes, remove CleanYourTV': 'Deletes the apps, the boot scripts and the settings, then restarts the TV.',
+  'Yes, use CleanYourTV as Home': 'Restarts the TV; this launcher is Home after it starts.',
+  'Yes, use LG\u2019s Home': 'Restarts the TV; LG\u2019s own Home is Home after it starts. You can switch back here.',
+  'Update to': 'A newer package is available. Install it before the setup: it may contain fixes for your firmware.',
+  'Take over the Input key': 'The remote\u2019s Input button opens our Inputs list instead of LG\u2019s picker. You can change this later.',
+  'Set up now':
+    'Installs the launcher, replaces LG\u2019s Home at boot and starts the service. About a minute; the screen blinks once. If the new Home does not come up, the setup removes itself and restarts the TV.',
+  'Set up anyway':
+    'Your firmware is not in the compatibility list and LG\u2019s Home looks different. This tries it anyway; a failed start restarts the TV with LG\u2019s Home.',
+};
+function infoFor(r) {
+  if (!r || r.sep) return null;
+  if (r.info) return r.info;
+  var k = r.label.replace(/ [0-9][0-9.]*$/, '');
+  if (k === 'Check for updates' && offline)
+    return 'Works without the service: looks for a newer package and installs it through the root service.';
+  if (k === 'CleanYourTV as Home' && st.home && st.home.fullhome)
+    return {
+      t: k,
+      d:
+        INFO[k] +
+        ' This TV also has LG\u2019s full-screen Home: if the Home button opens that instead of this launcher, set TV Settings > General > Home Settings > Home Style to Basic.',
+    };
+  return INFO[k] ? { t: k, d: INFO[k] } : null;
+}
+var listY = 0;
+/* the list can be taller than the screen: keep the focused row in view and show a fade where more rows are hidden */
+function scrollList() {
+  var wrap = $('listwrap'),
+    list = $('list'),
+    el = list.children[idx],
+    wh = wrap.clientHeight,
+    lh = list.scrollHeight;
+  if (el && wh) {
+    var top = el.offsetTop,
+      bot = top + el.offsetHeight;
+    if (top - 50 < listY) listY = Math.max(0, top - 50);
+    else if (bot + 50 > listY + wh) listY = bot + 50 - wh;
+    listY = Math.max(0, Math.min(listY, Math.max(0, lh - wh)));
+  } else listY = 0;
+  list.style.transform = listY ? 'translateY(' + -listY + 'px)' : '';
+  wrap.classList.toggle('mu', listY > 0);
+  wrap.classList.toggle('md', listY + wh < lh - 2);
+}
+function draw() {
+  var h = '';
+  rows.forEach(function (r, i) {
+    h += r.sep
+      ? '<div class="sep"></div>'
+      : '<div class="row' +
+        (i === idx ? ' f' : '') +
+        (r.dim ? ' dim' : '') +
+        '" data-i="' +
+        i +
+        '"><span class="lb"></span>' +
+        (r.sub ? '<span class="st"></span>' : '') +
+        '</div>';
+  });
+  $('list').innerHTML = h;
+  scrollList();
+  var el = $('list').children;
+  rows.forEach(function (r, i) {
+    if (r.sep) return;
+    el[i].querySelector('.lb').textContent = r.label;
+    if (r.sub) el[i].querySelector('.st').textContent = r.sub;
+  });
+  var pvEl = $('pv'),
+    pvId = rows[idx] && rows[idx].pv;
+  if (pvId) {
+    var pu = API + '/api/theme/preview/' + pvId;
+    if (pvEl.getAttribute('data-id') !== pvId) {
+      pvEl.setAttribute('data-id', pvId);
+      pvEl.src = pu;
+    }
+    pvEl.style.display = 'block';
+  } else {
+    pvEl.style.display = 'none';
+    pvEl.removeAttribute('data-id');
+  }
+  var inf = infoFor(rows[idx]),
+    ie = $('info');
+  ie.textContent = '';
+  $('sub').style.wordBreak = '';
+  if (view === 'notifyhow' || view === 'voicehow') {
+    $('sub').textContent = kText;
+    $('sub').style.whiteSpace = 'pre-line';
+    $('sub').style.wordBreak = 'break-all';
+    return;
+  }
+  if (view === 'notifyapi') {
+    $('sub').textContent = 'Network notifications';
+    return;
+  }
+  if (view === 'models') {
+    $('sub').textContent = 'Choose the model that answers';
+    return;
+  }
+  if (view === 'agents') {
+    $('sub').textContent = 'Choose the Home Assistant agent';
+    return;
+  }
+  if (view === 'channel') {
+    $('sub').textContent = 'Where updates come from';
+    return;
+  }
+  if (view === 'livetv') {
+    $('sub').textContent = 'Live TV: your own playlist';
+    return;
+  }
+  if (view === 'confirm-live-reset') {
+    $('sub').textContent = 'Remove the playlist?';
+    return;
+  }
+  if (view === 'themeopts') {
+    $('sub').textContent = 'Theme options';
+    return;
+  }
+  if (view === 'theme') {
+    $('sub').textContent = 'Choose how Home looks. The change shows the next time you open Home.';
+    return;
+  }
+  if (view === 'accent') {
+    $('sub').textContent = 'The colour of the focus ring and highlights';
+    return;
+  }
+  if (view === 'voice') {
+    var vv = vo || {},
+      ls = vv.last
+        ? vv.last.text
+          ? 'Last heard: \u201C' +
+            vv.last.text +
+            '\u201D' +
+            (vv.last.ms ? ' (' + (vv.last.ms / 1000).toFixed(1) + ' s)' : '') +
+            (vv.last.error ? '\nNot sent: ' + vv.last.error : '')
+          : 'Last try: ' + vv.last.state + (vv.last.error ? '\n' + vv.last.error : '')
+        : '';
+    $('sub').textContent = 'Voice \u00B7 ' + (vv.engine || '') + (ls ? '\n' + ls : '');
+    $('sub').style.whiteSpace = 'pre-line';
+    if (inf) {
+      var b2 = document.createElement('b');
+      b2.textContent = inf.t;
+      ie.appendChild(b2);
+      ie.appendChild(document.createTextNode(inf.d));
+    }
+    return;
+  }
+  if (view === 'keys') {
+    $('sub').textContent = kText;
+    $('sub').style.whiteSpace = 'pre-line';
+    return;
+  }
+  if (inf) {
+    var b = document.createElement('b');
+    b.textContent = inf.t;
+    ie.appendChild(b);
+    ie.appendChild(document.createTextNode(inf.d));
+  }
+  if (view === 'inputkey') {
+    $('sub').textContent = 'Input key';
+    return;
+  }
+  if (view === 'confirm-home' || view === 'confirm-uninstall') {
+    $('sub').textContent = view === 'confirm-uninstall' ? 'Remove CleanYourTV?' : 'Switch Home?';
+    return;
+  }
+  if (!offline && st) {
+    var m = [];
+    m.push('Launcher ' + st.frontend.version + ' · service ' + st.service.version);
+    if (st.checkError) m.push('Updates: ' + st.checkError);
+    else if (st.release) m.push('Latest release ' + st.release.version);
+    $('sub').textContent = m.join('\n');
+    $('sub').style.whiteSpace = 'pre-line';
+  } else
+    $('sub').textContent = offline
+      ? 'The service is not running. Set it up to replace LG’s Home, take over the Input key and keep everything up to date.'
+      : '';
+}
+function next(dir) {
+  var n = rows.length,
+    i = idx;
+  do {
+    i = (i + dir + n) % n;
+  } while (rows[i].sep);
+  idx = i;
+  draw();
+}
+function act() {
+  var r = rows[idx];
+  if (r && r.fn && !(st && st.job && st.job.state === 'working' && r.dim)) r.fn();
+}
+function aiHelp() {
+  return 'Chat with a language model through OpenRouter. Run these on the TV (ssh):\n\ncurl -X POST localhost:8765/api/voice/set -d \'{"llm":{"key":"sk-or-...","model":"openrouter/auto"}}\'\ncurl -X POST localhost:8765/api/voice/set -d \'{"llm":{"enabled":true}}\'\n\nOptional: "system" sets the instructions. Ask by text from anywhere on the TV:\ncurl -X POST localhost:8765/api/voice/ask -d \'{"text":"What is the capital of Peru?"}\'\n\nSpoken and typed questions go to OpenRouter and the model you chose; no audio does. The key stays on the TV.\n\nHome Assistant (Assist), with a long-lived access token:\ncurl -X POST localhost:8765/api/voice/set -d \'{"ha":{"url":"http://homeassistant.local:8123","token":"..."}}\'\nOptional: "route" is ha-first, ha-only or ai-only; "selfSigned":true accepts a self-signed certificate; "agent" is a conversation entity.';
+}
+function liveRefresh() {
+  api('/api/live/status').then(
+    function (r) {
+      lv = r;
+      if (view === 'livetv') {
+        build();
+        if (idx >= rows.length) idx = 0;
+        draw();
+      }
+    },
+    function () {}
+  );
+}
+function openNotifyQr() {
+  if (!napi || !napi.enabled) {
+    banner('Switch notifications on first', 'err');
+    return;
+  }
+  shareMode = 'notify';
+  push('share');
+  $('share').style.display = 'block';
+  $('shareurl').textContent = '';
+  $('qrbox').style.visibility = 'hidden';
+  $('share').querySelector('h2').textContent = 'Notification address and token';
+  $('share').querySelector('ol').innerHTML =
+    '<li>Phone on the <b>same Wi-Fi</b> as the TV.</li><li>Scan the code with the camera and open the page: it shows the address and the token with <b>Copy</b> buttons.</li><li>The token is a <b>secret</b>: anyone who sees this code while it is open can read it.</li>';
+  $('sharemsg').textContent = 'Preparing\u2026';
+  api('/api/manager/notify-api', { page: true }).then(
+    function (r) {
+      if (view !== 'share') return;
+      if (!r.pageUrl) {
+        $('sharemsg').textContent = 'The notification listener is not running.';
+        return;
+      }
+      drawQr(r.pageUrl);
+      $('qrbox').style.visibility = 'visible';
+      $('shareurl').textContent = r.pageUrl;
+      $('sharemsg').textContent =
+        'The page opens for ten minutes. It is not encrypted: the token travels over your Wi-Fi, so use a network you trust.';
+    },
+    function () {
+      $('sharemsg').textContent = 'The service did not answer.';
+    }
+  );
+}
+function openLiveTv() {
+  api('/api/live/status').then(
+    function (r) {
+      lv = r;
+      push('livetv');
+    },
+    function () {
+      lv = null;
+      push('livetv');
+    }
+  );
+}
+function openLivePair() {
+  shareMode = 'live';
+  push('share');
+  $('share').style.display = 'block';
+  $('shareurl').textContent = '';
+  $('qrbox').style.visibility = 'hidden';
+  $('share').querySelector('h2').textContent = 'Set up Live TV';
+  $('share').querySelector('ol').innerHTML =
+    '<li>Phone on the <b>same Wi-Fi</b> as the TV.</li><li>Scan the code with the camera.</li><li>Enter the <b>code</b> below and your playlist address.</li>';
+  $('sharemsg').textContent = 'Preparing\u2026';
+  api('/api/live/pair', {}).then(
+    function (r) {
+      if (view !== 'share') return;
+      drawQr(r.url);
+      $('qrbox').style.visibility = 'visible';
+      $('shareurl').textContent = r.url + '   code ' + r.code;
+      $('sharemsg').textContent =
+        'The page stays open for ten minutes. It is not encrypted: the playlist address, which may hold an access key, travels over your Wi-Fi.';
+      (function poll(n) {
+        if (view !== 'share' || shareMode !== 'live') return;
+        api('/api/live/status').then(
+          function (s2) {
+            if (s2.configured && (!lv || !lv.configured || s2.channels !== lv.channels)) {
+              lv = s2;
+              closeShare();
+              banner('Playlist saved', 'ok');
+              return;
+            }
+            if (n < 300)
+              setTimeout(function () {
+                poll(n + 1);
+              }, 2000);
+          },
+          function () {
+            setTimeout(function () {
+              poll(n + 1);
+            }, 3000);
+          }
+        );
+      })(0);
+    },
+    function () {
+      $('sharemsg').textContent = 'The service did not answer.';
+    }
+  );
+}
+function openTheme() {
+  banner('Loading themes\u2026', 'work');
+  api('/api/theme/list').then(
+    function (r) {
+      if (r.error) {
+        banner(r.error, 'err');
+        return;
+      }
+      banner(
+        r.catalogue && !r.catalogue.ok ? 'Could not reach GitHub (' + r.catalogue.error + '): showing the themes on this TV.' : '',
+        r.catalogue && !r.catalogue.ok ? 'err' : ''
+      );
+      th = r;
+      push('theme');
+      for (var k = 0; k < rows.length; k++)
+        if (rows[k].sub && /^selected/.test(rows[k].sub)) {
+          idx = k;
+          draw();
+          break;
+        }
+    },
+    function () {
+      banner('The service did not answer', 'err');
+    }
+  );
+}
+function setTheme(b) {
+  var n = b.name;
+  delete b.name;
+  banner('Getting ' + n + '\u2026', 'work');
+  themeCall('/api/theme/set', b, n + ' applied. Open Home to see it.');
+}
+function themeCall(path, b, msg, back) {
+  api(path, b, 60000).then(
+    function (r) {
+      if (r.error) {
+        banner(r.error, 'err');
+        return;
+      }
+      th = r;
+      banner(msg, 'ok');
+      if (back) pop();
+      else {
+        build();
+        draw();
+      }
+    },
+    function () {
+      banner('The service did not answer', 'err');
+    }
+  );
+}
+function openChannel() {
+  banner('Looking for test builds\u2026', 'work');
+  api('/api/manager/tests').then(
+    function (r) {
+      banner('');
+      tst = r;
+      push('channel');
+      for (var k = 0; k < rows.length; k++)
+        if (rows[k].sub && /^selected/.test(rows[k].sub)) {
+          idx = k;
+          draw();
+          break;
+        }
+    },
+    function () {
+      banner('The service did not answer', 'err');
+    }
+  );
+}
+function setChannel(tag) {
+  banner('Switching\u2026', 'work');
+  api('/api/manager/channel', { tag: tag }).then(
+    function (s) {
+      if (s.error) {
+        banner(s.error, 'err');
+        return;
+      }
+      st = s;
+      pop();
+      banner(
+        tag
+          ? 'Following ' + tag.replace(/^test-/, '') + '. If the Launcher or Service row offers an update, that is the test build.'
+          : 'Back on the stable releases',
+        'ok'
+      );
+    },
+    function () {
+      banner('The service did not answer', 'err');
+    }
+  );
+}
+function openModels() {
+  banner('Loading the model list\u2026', 'work');
+  api('/api/voice/models').then(
+    function (r) {
+      if (r.error) {
+        banner(r.error, 'err');
+        return;
+      }
+      banner('');
+      mdl = [{ id: 'openrouter/auto', name: 'Auto (OpenRouter picks)', price: null }].concat(r.picks);
+      var cur = ((vo || {}).llm || {}).model;
+      if (
+        cur &&
+        !mdl.some(function (x) {
+          return x.id === cur;
+        })
+      )
+        mdl.splice(1, 0, { id: cur, name: cur, price: null });
+      push('models');
+      for (var k = 0; k < rows.length; k++)
+        if (rows[k].sub && /selected$/.test(rows[k].sub)) {
+          idx = k;
+          draw();
+          break;
+        }
+    },
+    function () {
+      banner('The service did not answer', 'err');
+    }
+  );
+}
+function haTest() {
+  banner('Asking Home Assistant\u2026', 'work');
+  api('/api/voice/ha-test', {}).then(
+    function (r) {
+      if (r.error) {
+        banner(r.error, 'err');
+        return;
+      }
+      banner('Connected to ' + (r.name || 'Home Assistant') + (r.version ? ' ' + r.version : ''), 'ok');
+    },
+    function () {
+      banner('The service did not answer', 'err');
+    }
+  );
+}
+function openAgents() {
+  banner('Asking Home Assistant\u2026', 'work');
+  api('/api/voice/ha-agents').then(
+    function (r) {
+      if (r.error) {
+        banner(r.error, 'err');
+        return;
+      }
+      banner('');
+      agl = r.agents || [];
+      push('agents');
+      var cur = ((vo || {}).ha || {}).agent;
+      for (var k = 0; k < rows.length; k++)
+        if (rows[k].sub && /selected$/.test(rows[k].sub)) {
+          idx = k;
+          draw();
+          break;
+        }
+    },
+    function () {
+      banner('The service did not answer', 'err');
+    }
+  );
+}
+function pickAgent(id) {
+  api('/api/voice/set', { ha: { agent: id } }).then(
+    function (x) {
+      if (x.error) {
+        banner(x.error, 'err');
+        return;
+      }
+      vo = x;
+      banner(id ? 'Agent: ' + id : 'Default agent', 'ok');
+      pop();
+    },
+    function () {
+      banner('The service did not answer', 'err');
+    }
+  );
+}
+function pickModel(id) {
+  api('/api/voice/set', { llm: { model: id } }).then(
+    function (x) {
+      if (x.error) {
+        banner(x.error, 'err');
+        return;
+      }
+      vo = x;
+      banner('Model: ' + id, 'ok');
+      pop();
+    },
+    function () {
+      banner('The service did not answer', 'err');
+    }
+  );
+}
+function openPair() {
+  shareMode = 'pair';
+  pairBase = (vo && vo.pairedAt) || 0;
+  push('share');
+  $('share').style.display = 'block';
+  $('shareurl').textContent = '';
+  $('qrbox').style.visibility = 'hidden';
+  $('share').querySelector('h2').textContent = 'Set up from your phone';
+  $('share').querySelector('ol').innerHTML =
+    '<li>Phone on the <b>same Wi-Fi</b> as the TV.</li><li>Scan the code with the camera.</li><li>Enter your <b>OpenRouter key</b> and model, or your <b>Home Assistant</b> address and access token, and tap <b>Save</b>.</li>';
+  $('sharemsg').textContent = 'Preparing\u2026';
+  api('/api/voice/pair', {}).then(
+    function (r) {
+      if (view !== 'share') return;
+      drawQr(r.url);
+      $('qrbox').style.visibility = 'visible';
+      $('shareurl').textContent = r.url;
+      $('sharemsg').textContent =
+        'The page stays open for ten minutes, or until you save. It is not encrypted: the key travels over your Wi-Fi, so use a network you trust.';
+      pollPair(0);
+    },
+    function () {
+      $('sharemsg').textContent = 'The service did not answer.';
+    }
+  );
+}
+function pollPair(n) {
+  if (view !== 'share' || shareMode !== 'pair') return;
+  api('/api/voice/status').then(
+    function (v) {
+      if (v.pairedAt > pairBase) {
+        vo = v;
+        closeShare();
+        banner('Saved', 'ok');
+        return;
+      }
+      if (!v.pairing && n > 1) {
+        $('sharemsg').textContent = 'The page has closed. Close this and try again.';
+        return;
+      }
+      setTimeout(function () {
+        pollPair(n + 1);
+      }, 2000);
+    },
+    function () {
+      setTimeout(function () {
+        pollPair(n + 1);
+      }, 3000);
+    }
+  );
+}
+function voiceRefresh() {
+  clearTimeout(pollT);
+  api('/api/voice/status').then(
+    function (v) {
+      vo = v;
+      var j = v.job || {};
+      if (j.state === 'working') banner(j.message, 'work');
+      else if (j.state === 'error') banner(j.message, 'err');
+      else if (v.listening) banner('Listening…', 'work');
+      else banner('');
+      if (view === 'voice') {
+        build();
+        if (idx >= rows.length) idx = 0;
+        draw();
+      }
+      if (j.state === 'working' || v.listening) pollT = setTimeout(voiceRefresh, 1000);
+      else
+        api('/api/manager/status').then(function (s) {
+          st = s;
+        });
+    },
+    function () {
+      pollT = setTimeout(voiceRefresh, 2000);
+    }
+  );
+}
+function refreshDone() {
+  load(true);
+}
+function run(path, body) {
+  api(path, body).then(
+    function (r) {
+      if (r.error) banner(r.error, 'err');
+      else poll();
+    },
+    function () {
+      banner('The service did not answer', 'err');
+    }
+  );
+}
+function opt(o) {
+  api('/api/manager/options', o).then(
+    function (s) {
+      st = s;
+      build();
+      draw();
+    },
+    function () {
+      banner('The service did not answer', 'err');
+    }
+  );
+}
+function poll() {
+  clearTimeout(pollT);
+  api('/api/manager/status').then(
+    function (s) {
+      st = s;
+      var j = s.job || {};
+      if (j.state === 'working') {
+        banner(j.message, 'work');
+        build();
+        draw();
+        pollT = setTimeout(poll, 1000);
+      } else {
+        if (j.state === 'error') banner(j.message, 'err');
+        else if (j.state === 'done') banner(j.message, 'ok');
+        else banner('');
+        build();
+        draw();
+      }
+    },
+    function () {
+      banner('Waiting for the service…', 'work');
+      pollT = setTimeout(poll, 2000);
+    }
+  );
+}
+function load(keep) {
+  api('/api/manager/status').then(
+    function (s) {
+      offline = false;
+      st = s;
+      if (s.job && s.job.state === 'working') {
+        poll();
+        return;
+      }
+      if (!keep) banner('');
+      build();
+      if (idx >= rows.length) idx = 0;
+      draw();
+      if (s.checking)
+        setTimeout(function () {
+          load(true);
+        }, 2000);
+    },
+    function () {
+      offline = true;
+      build();
+      idx = setupIdx;
+      draw();
+      banner('');
+      if (!checkedOffline) {
+        checkedOffline = true;
+        setupDefaults();
+        offlineCheck();
+      }
+    }
+  );
+}
+/* setting up again (after an update by script, or when the service stopped) starts from the choices already saved, not from the defaults
+   (issues 6 and 7: the Input key came back on) */
+function setupDefaults() {
+  rootExec('cat /media/developer/cleanyourtv/config.json 2>/dev/null').then(function (m) {
+    var o = null;
+    try {
+      o = JSON.parse(execOut(m).out).options;
+    } catch (x) {}
+    if (!o) return;
+    if (o.debloat === false) setup.debloat = false;
+    if (o.inputKey === false) setup.inputKey = false;
+    if (offline) {
+      build();
+      draw();
+    }
+  });
+}
+/* before the setup (or when it failed) the service is not running: update the package through the root service instead */
+function execOut(m) {
+  var o = {};
+  try {
+    o = JSON.parse(m);
+  } catch (e) {}
+  return { ok: o.returnValue !== false, out: String(o.stdoutString || ''), err: String(o.stderrString || o.errorText || '') };
+}
+function offlineCheck() {
+  banner('Checking for updates\u2026', 'work');
+  rootExec('node ' + SVC + '/helper/selfupdate.js check').then(function (m) {
+    var e = execOut(m),
+      r = null;
+    try {
+      r = JSON.parse(e.out);
+    } catch (x) {}
+    if (!r || r.error) {
+      banner('Could not check: ' + ((r && r.error) || e.err || 'no answer'), 'err');
+      return;
+    }
+    upd = r.updateTo ? r : null;
+    build();
+    if (upd) idx = updIdx;
+    draw();
+    banner(
+      r.updateTo ? 'Version ' + r.updateTo + ' is available; this one is ' + r.installed + '.' : 'Up to date (' + r.installed + ').',
+      r.updateTo ? 'ok' : ''
+    );
+  });
+}
+function offlineUpdate() {
+  if (!upd) return;
+  banner('Updating to ' + upd.updateTo + '\u2026', 'work');
+  rootExec('rm -f /tmp/cytv-selfupdate.log; nohup node ' + SVC + '/helper/selfupdate.js install > /tmp/cytv-selfupdate.log 2>&1 &').then(
+    function () {
+      pollUpdate(0);
+    }
+  );
+}
+function pollUpdate(n) {
+  rootExec('tail -n 3 /tmp/cytv-selfupdate.log 2>/dev/null').then(function (m) {
+    var t = execOut(m).out.trim(),
+      last = t.split('\n').pop();
+    if (/^DONE/.test(last)) {
+      upd = null;
+      banner(last.replace(/^DONE /, ''), 'ok');
+      build();
+      draw();
+      return;
+    }
+    if (/^ERROR/.test(last)) {
+      banner('Update failed: ' + last.replace(/^ERROR /, ''), 'err');
+      return;
+    }
+    if (n > 120) {
+      banner('The update is taking too long. Log: /tmp/cytv-selfupdate.log on the TV.', 'err');
+      return;
+    }
+    if (last) banner('Updating\u2026 ' + last, 'work');
+    setTimeout(function () {
+      pollUpdate(n + 1);
+    }, 2000);
+  });
+}
+/* the remote's Input and Home buttons differ between remotes and firmware: learn their codes from the hook, then test */
+function kShow(text, list) {
+  kText = text;
+  kRows = list;
+  build();
+  idx = 0;
+  draw();
+}
+function openKeys(flow) {
+  kFlow = flow || 'input';
+  if (view !== 'keys') push('keys');
+  kStep(kFlow === 'home' || kFlow === 'voice' || kFlow === 'guide' ? kFlow : 'input');
+}
+function closeKeys() {
+  clearTimeout(kTimer);
+  banner('');
+  pop();
+  load(true);
+}
+function kName(n) {
+  return n === 'input' ? 'Input' : n === 'voice' ? 'voice' : n === 'guide' ? 'Guide' : 'Home';
+}
+function kStep(n) {
+  clearTimeout(kTimer);
+  var k = (st && st.keys) || { input: '241', home: '' };
+  if (n === 'input')
+    return kShow('The Input key.\nChoose Start, then press the Input button on your remote.', [
+      {
+        label: 'Start',
+        sub: k.inputIsDefault ? 'default: ' + k.input : 'learned: ' + k.input,
+        fn: function () {
+          kLearn('input');
+        },
+      },
+      {
+        label: 'Skip',
+        fn: function () {
+          kStep('test');
+        },
+      },
+      {
+        label: 'Clear',
+        sub: 'back to the default (241)',
+        dim: k.inputIsDefault,
+        fn: function () {
+          if (!k.inputIsDefault) kClear('input');
+        },
+      },
+      { label: 'Close', fn: closeKeys },
+    ]);
+  if (n === 'home')
+    return kShow('The Home key (optional).\nChoose Start, then press the Home button on your remote.', [
+      {
+        label: 'Start',
+        sub: k.home ? 'now: ' + k.home : '',
+        fn: function () {
+          kLearn('home');
+        },
+      },
+      {
+        label: 'Clear',
+        sub: 'forget the code',
+        dim: !k.home,
+        fn: function () {
+          if (k.home) kClear('home');
+        },
+      },
+      { label: 'Close', fn: closeKeys },
+    ]);
+  if (n === 'voice')
+    return kShow(
+      'The voice button.\nChoose Start, then press the button you want to use for voice. The remote\u2019s microphone button may not reach the hook; any spare button works.',
+      [
+        {
+          label: 'Start',
+          sub: k.voice ? 'now: ' + k.voice : '',
+          fn: function () {
+            kLearn('voice');
+          },
+        },
+        {
+          label: 'Clear',
+          sub: 'forget the code',
+          dim: !k.voice,
+          fn: function () {
+            if (k.voice) kClear('voice');
+          },
+        },
+        { label: 'Close', fn: closeKeys },
+      ]
+    );
+  if (n === 'guide')
+    return kShow(
+      'The Guide key.\nChoose Start, then press the Guide button on your remote. It then opens the Live TV channel guide instead of LG\u2019s guide. Clear it to get LG\u2019s guide back.',
+      [
+        {
+          label: 'Start',
+          sub: k.guide ? 'now: ' + k.guide : '',
+          fn: function () {
+            kLearn('guide');
+          },
+        },
+        {
+          label: 'Clear',
+          sub: 'LG\u2019s guide again',
+          dim: !k.guide,
+          fn: function () {
+            if (k.guide) kClear('guide');
+          },
+        },
+        { label: 'Close', fn: closeKeys },
+      ]
+    );
+  if (n === 'test') return kTest();
+  if (n === 'done')
+    return api('/api/manager/keys-done', {})
+      .then(function () {
+        return api('/api/manager/status');
+      })
+      .then(
+        function (s) {
+          st = s;
+          kShow(
+            'Done.\nInput key ' +
+              ((s.keys || {}).input || '241') +
+              '.\nThe Home key is optional: learn it from the main list if you want it recorded.',
+            [{ label: 'Close', fn: closeKeys }]
+          );
+        },
+        function () {
+          closeKeys();
+        }
+      );
+}
+function kClear(name) {
+  api('/api/manager/clear-key', { name: name })
+    .then(function () {
+      return api('/api/manager/status');
+    })
+    .then(
+      function (s) {
+        st = s;
+        kShow(
+          name === 'input'
+            ? 'Input key cleared.\nIt uses the default code (' + ((s.keys || {}).input || '241') + ').'
+            : name === 'voice'
+              ? 'Voice button cleared.'
+              : name === 'guide'
+                ? 'Guide key cleared. LG\u2019s guide is back.'
+                : 'Home key cleared.',
+          [{ label: 'Close', fn: closeKeys }]
+        );
+      },
+      function () {
+        closeKeys();
+      }
+    );
+}
+function kLearn(name) {
+  api('/api/manager/learn-key', { name: name }).then(function () {
+    kShow('Press the ' + kName(name) + ' button now\u2026', [
+      {
+        label: 'Cancel',
+        fn: function () {
+          kStep(name);
+        },
+      },
+    ]);
+    (function poll() {
+      kTimer = setTimeout(function () {
+        api('/api/manager/learn-state').then(
+          function (l) {
+            if (view !== 'keys') return;
+            if (l.state === 'got') {
+              kShow(kName(name) + ' key learned: code ' + l.code + '.', [
+                {
+                  label: name === 'input' ? 'Continue to the test' : 'Close',
+                  fn: function () {
+                    api('/api/manager/status').then(function (s) {
+                      st = s;
+                      if (name === 'input') kStep('test');
+                      else closeKeys();
+                    });
+                  },
+                },
+              ]);
+              return;
+            }
+            if (l.state === 'unsupported') {
+              api('/api/manager/options', { inputKey: false });
+              kShow(
+                'The hook did not attach on this firmware, so keys cannot be learned. The Input key stays with LG\u2019s picker.\nUse Share log to report this.',
+                [{ label: 'Close', fn: closeKeys }]
+              );
+              return;
+            }
+            if (l.state === 'timeout') {
+              kShow('Nothing was pressed.', [
+                {
+                  label: 'Try again',
+                  fn: function () {
+                    kLearn(name);
+                  },
+                },
+                {
+                  label: name === 'input' ? 'Skip' : 'Close',
+                  fn: function () {
+                    if (name === 'input') kStep('test');
+                    else closeKeys();
+                  },
+                },
+              ]);
+              return;
+            }
+            poll();
+          },
+          function () {
+            poll();
+          }
+        );
+      }, 500);
+    })();
+  });
+}
+function kTest() {
+  api('/api/manager/test-key').then(function (t0) {
+    kShow('Test.\nPress the Input button once more. Our Inputs list should open over this screen.', [
+      {
+        label: 'Skip',
+        fn: function () {
+          kStep('done');
+        },
+      },
+    ]);
+    var until = Date.now() + 40000;
+    (function poll() {
+      kTimer = setTimeout(function () {
+        api('/api/manager/test-key').then(
+          function (t) {
+            if (view !== 'keys') return;
+            if (t.pickerShownAt > t0.now) {
+              kShow('The Inputs list opened: the Input key works.', [
+                {
+                  label: 'Continue',
+                  fn: function () {
+                    kStep('done');
+                  },
+                },
+              ]);
+              return;
+            }
+            if (Date.now() > until) {
+              kShow(
+                'The Inputs list did not open.\nIf LG\u2019s own picker showed, the Input key is not mapped: learn it again or switch the Input key off.',
+                [
+                  {
+                    label: 'Learn again',
+                    fn: function () {
+                      kStep('input');
+                    },
+                  },
+                  {
+                    label: 'Skip',
+                    fn: function () {
+                      kStep('done');
+                    },
+                  },
+                ]
+              );
+              return;
+            }
+            poll();
+          },
+          function () {
+            poll();
+          }
+        );
+      }, 700);
+    })();
+  });
+}
+function drawQr(url) {
+  var q = qrcode(0, 'M');
+  q.addData(url);
+  q.make();
+  var n = q.getModuleCount(),
+    cell = Math.max(4, Math.floor(640 / (n + 8))),
+    cv = $('qr'),
+    size = cell * (n + 8),
+    g;
+  cv.width = cv.height = size;
+  g = cv.getContext('2d');
+  g.fillStyle = '#fff';
+  g.fillRect(0, 0, size, size);
+  g.fillStyle = '#000';
+  for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (q.isDark(r, c)) g.fillRect((c + 4) * cell, (r + 4) * cell, cell, cell);
+}
+function openShare() {
+  shareMode = 'log';
+  push('share');
+  $('share').querySelector('h2').textContent = 'Share the log';
+  $('share').querySelector('ol').innerHTML =
+    '<li>Phone on the <b>same Wi-Fi</b> as the TV.</li><li>Scan the code with the camera.</li><li>Tap <b>Copy</b> on the page and paste it into your message.</li>';
+  $('share').style.display = 'block';
+  $('shareurl').textContent = '';
+  $('qrbox').style.visibility = 'hidden';
+  $('sharemsg').textContent = 'Preparing the report\u2026';
+  rootExec('rm -f /tmp/cytv-sharelog.json; nohup node ' + SVC + '/helper/sharelog.js > /tmp/cytv-sharelog.out 2>&1 &').then(function () {
+    pollShare(0);
+  });
+}
+function pollShare(n) {
+  if (view !== 'share') return;
+  rootExec('cat /tmp/cytv-sharelog.json 2>/dev/null').then(function (m) {
+    var st = null;
+    try {
+      st = JSON.parse(JSON.parse(m).stdoutString || 'null');
+    } catch (e) {}
+    if (st && st.url) {
+      drawQr(st.url);
+      $('qrbox').style.visibility = 'visible';
+      $('shareurl').textContent = st.url;
+      $('sharemsg').textContent =
+        'The page is open for ten minutes. It lists versions, the setup log and the service log; addresses and URL paths are masked.';
+      return;
+    }
+    if (n > 45) {
+      $('sharemsg').textContent = 'Could not prepare the report (is the Homebrew Channel installed?).';
+      return;
+    }
+    setTimeout(function () {
+      pollShare(n + 1);
+    }, 1000);
+  });
+}
+function closeShare() {
+  $('share').style.display = 'none';
+  if (shareMode === 'notify') {
+    pop();
+    return;
+  }
+  if (shareMode === 'live') {
+    pop();
+    liveRefresh();
+    return;
+  }
+  if (shareMode === 'pair') {
+    api('/api/voice/pair-stop', {}).catch(function () {});
+    pop();
+    voiceRefresh();
+    return;
+  }
+  rootExec('pkill -f "[s]harelog.js"; rm -f /tmp/cytv-sharelog.json');
+  pop();
+}
+function doSetup(force) {
+  forceOffer = false;
+  banner('Setting up\u2026 the screen blinks once while LG\u2019s system restarts', 'work');
+  var flags =
+    (setup.debloat ? '--debloat' : '--no-debloat') + ' ' + (setup.inputKey ? '--input-key' : '--no-input-key') + (force ? ' --force' : '');
+  rootExec(
+    'rm -f /media/developer/cytv-setup.log*; nohup sh ' +
+      SVC +
+      '/bootstrap.sh install ' +
+      flags +
+      ' > /media/developer/cytv-setup.log 2>&1 &'
+  ).then(function (m) {
+    var o = {};
+    try {
+      o = JSON.parse(m);
+    } catch (e) {}
+    if (o.returnValue === false) {
+      banner(
+        'Could not start the setup: ' + (o.errorText || 'no answer from the Homebrew Channel service (is it installed and up to date?)'),
+        'err'
+      );
+      return;
+    }
+    waitUp(0);
+  });
+}
+function logTail(cb) {
+  rootExec('tail -n 3 /media/developer/cytv-setup.log 2>/dev/null').then(function (m) {
+    var o = {};
+    try {
+      o = JSON.parse(m);
+    } catch (e) {}
+    cb(
+      String(o.stdoutString || '')
+        .replace(/\[cleanyourtv\] /g, '')
+        .trim()
+    );
+  });
+}
+function waitUp(n) {
+  api('/api/manager/status').then(
+    function (s0) {
+      offline = false;
+      banner('');
+      load();
+      if (!(s0.keys && s0.keys.learned) && s0.options && s0.options.inputKey)
+        setTimeout(function () {
+          api('/api/manager/status').then(function (s) {
+            st = s;
+            openKeys('input');
+          });
+        }, 1500);
+    },
+    function () {
+      logTail(function (t) {
+        if (/ERROR|rolled back/.test(t)) {
+          forceOffer = /looks different/.test(t);
+          build();
+          draw();
+          banner(
+            'Setup stopped: ' +
+              t
+                .split('\n')
+                .pop()
+                .replace(/^ERROR: /, ''),
+            'err'
+          );
+          return;
+        }
+        if (n > 90) {
+          banner('The service did not start. Log: /media/developer/cytv-setup.log on the TV. ' + t.split('\n').pop(), 'err');
+          return;
+        }
+        if (t) banner('Setting up\u2026 ' + t.split('\n').pop(), 'work');
+        setTimeout(function () {
+          waitUp(n + 1);
+        }, 2000);
+      });
+    }
+  );
+}
+document.addEventListener('keydown', function (e) {
+  var k = e.keyCode;
+  if (k === 38) next(-1);
+  else if (k === 40) next(1);
+  else if (k === 13) act();
+  else if (k === 461 || k === 27 || k === 8 || k === 10009) {
+    if (view === 'share') closeShare();
+    else if (view === 'keys') closeKeys();
+    else if (view !== 'main') pop();
+    else {
+      try {
+        window.close();
+      } catch (x) {}
+    }
+  }
+  e.preventDefault();
+});
+document.addEventListener('click', function (e) {
+  if (e.target.closest && e.target.closest('#shareclose')) {
+    closeShare();
+    return;
+  }
+  var r = e.target.closest && e.target.closest('.row');
+  if (r) {
+    idx = +r.getAttribute('data-i');
+    draw();
+    act();
+  }
+});
+document.addEventListener('mousemove', function (e) {
+  var r = e.target.closest && e.target.closest('.row');
+  if (r && +r.getAttribute('data-i') !== idx) {
+    idx = +r.getAttribute('data-i');
+    draw();
+  }
+});
+document.addEventListener('wheel', function (e) {
+  if (e.deltaY > 0) next(1);
+  else if (e.deltaY < 0) next(-1);
+}); /* the Magic Remote wheel */
+document.addEventListener('webOSRelaunch', function () {
+  view = 'main';
+  idx = 0;
+  idxStack = [];
+  listY = 0;
+  load();
+});
+banner('Reading status…', 'work');
+load();
+</script></body></html>

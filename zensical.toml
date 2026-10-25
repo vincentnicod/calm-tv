@@ -1,0 +1,93 @@
+# Documentation site (https://zensical.org). Build locally: pip install zensical && zensical serve
+[project]
+site_name = "CleanYourTV for LG webOS"
+site_description = "A fast home screen for rooted LG webOS TVs, with Live TV from your own playlist, an Inputs list, picture notifications, optional voice and an optional debloat."
+site_author = "CleanYourTV contributors"
+site_url = "https://vincentnicod.github.io/calm-tv/"
+repo_url = "https://github.com/vincentnicod/calm-tv"
+repo_name = "vincentnicod/calm-tv"
+edit_uri = "edit/main/docs/"
+copyright = "MIT licence. Not affiliated with LG Electronics."
+docs_dir = "docs"
+site_dir = "site"
+extra_css = ["stylesheets/extra.css"]
+
+nav = [
+  { "Home" = "index.md" },
+  { "Installing" = "install.md" },
+  { "Tested TVs" = "tested-tvs.md" },
+  { "Updating and uninstalling" = "managing.md" },
+  { "Using it" = [
+    { "The launcher" = "launcher.md" },
+    { "Themes" = "themes.md" },
+    { "Live TV" = "live-tv.md" },
+    { "The Input key" = "input-key.md" },
+    { "Picture notifications" = "notifications.md" },
+    { "Voice (optional)" = "voice.md" },
+    { "Debloat" = "debloat.md" },
+    { "The manager app" = "manager.md" },
+  ] },
+  { "Reference" = [
+    { "Security" = "security.md" },
+    { "What it changes on the TV" = "tv-changes.md" },
+    { "Service API" = "api.md" },
+    { "Troubleshooting" = "troubleshooting.md" },
+    { "With an AI assistant" = "ai.md" },
+  ] },
+  { "Development" = [
+    { "Contributing" = "development/index.md" },
+    { "Testing and CI" = "development/testing.md" },
+    { "Internals" = "development/internals.md" },
+  ] },
+  { "Credits and licences" = "credits.md" },
+]
+
+[project.theme]
+language = "en"
+features = [
+  "content.action.edit",
+  "content.code.copy",
+  "content.tabs.link",
+  "navigation.footer",
+  "navigation.indexes",
+  "navigation.instant",
+  "navigation.path",
+  "navigation.sections",
+  "navigation.top",
+  "navigation.tracking",
+  "search.highlight",
+  "toc.follow",
+]
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme)"
+toggle.icon = "lucide/sun-moon"
+toggle.name = "Switch to light mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to system preference"
+
+[project.markdown_extensions]
+admonition = {}
+def_list = {}
+toc.permalink = true
+pymdownx.betterem = {}
+pymdownx.details = {}
+pymdownx.highlight.anchor_linenums = true
+pymdownx.highlight.line_spans = "__span"
+pymdownx.highlight.pygments_lang_class = true
+pymdownx.inlinehilite = {}
+pymdownx.keys = {}
+pymdownx.smartsymbols = {}
+pymdownx.superfences = {}
+pymdownx.tabbed.alternate_style = true
+pymdownx.tabbed.combine_header_slug = true

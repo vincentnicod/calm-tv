@@ -1,0 +1,37 @@
+name: Bug report
+description: Something does not work on your TV
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. The report from **Share log** (manager app) or `sh tools/diagnose.sh <tv-ip>` makes most problems much easier to find.
+        Read it before you paste it: addresses and secrets are masked, but masking is best effort.
+  - type: input
+    id: tv
+    attributes:
+      label: TV model and webOS version
+      placeholder: OLED55CX9LA, webOS 5.5
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: CleanYourTV version (manager app, or the first lines of the report)
+      placeholder: service 1.5.13, launcher 1.4.13
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+      description: What you did, how often it happens, anything that changed before it started.
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: Share log or diagnose.sh report
+      render: shell
+  - type: textarea
+    id: ai
+    attributes:
+      label: Findings of an AI assistant (optional)
+      description: If you used an AI tool to look into it, paste what it found and what you tried. See "Working on problems with an AI assistant" in the documentation.

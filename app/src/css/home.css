@@ -1,0 +1,1242 @@
+/* Typefaces shipped next to the page (SIL Open Font License, app/font-*-OFL.txt); themes choose them with type.font and type.display.
+   A browser only downloads the ones the page uses. */
+@font-face {
+  font-family: "Calm Manrope";
+  src: url("font-manrope.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Calm Geist";
+  src: url("font-geist.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Calm Instrument Sans";
+  src: url("font-instrument-sans.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Calm Instrument Serif";
+  src: url("font-instrument-serif.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Calm Instrument Serif";
+  src: url("font-instrument-serif-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: "Calm Hanken Grotesk";
+  src: url("font-hanken.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Calm Sora";
+  src: url("font-sora.woff2") format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+}
+/* Built for a weak TV GPU: only transform and opacity ever animate; no blur, masks or filters. Everything a theme changes (manager > Theme) is a
+   variable here; the service works the values out (helper/theme.js) and the defaults below are the original look. */
+:root {
+  --ink: #f5f6f8;
+  --ink2: rgba(245, 246, 248, 0.62);
+  --night: #07080b;
+  --night-rgb: 7, 8, 11;
+  --panel: #14161b;
+  --panel2: #1a1c22;
+  --acc: #f5f6f8;
+  --acc-ink: #0b0c10;
+  --focus: #f5f6f8;
+  --font: "LG Smart UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --fs: 1;
+  --spd: 1;
+  --glow-op: 1;
+  --wall: none;
+  --pill-bg: rgba(255, 255, 255, 0.09);
+  --pill-ring: rgba(255, 255, 255, 0.1);
+  --pill-r: 32px;
+  --pill-h: 64px;
+  --bar-gap: 16px;
+  --menu-bg: rgba(5, 6, 9, 0.97);
+  --row-r: 30px;
+  --clock-l: 96px;
+  --clock-r: auto;
+  --clock-t: 54px;
+  --clock-b: auto;
+  --clock-tx: none;
+  --clock-ai: flex-start;
+  --clock-s: 1;
+  --date-s: 1;
+  --clock-d: flex;
+  --date-d: block;
+  --bar-l: auto;
+  --bar-r: 96px;
+  --bar-t: 54px;
+  --bar-b: auto;
+  --bar-tx: none;
+  --bar-d: flex;
+  --name-d: block;
+  --name-x: 96px;
+  --name-y: 150px;
+  --name-a: left;
+  --name-s: 1;
+  --view-top: 300px;
+  --dock-l: 96px;
+  --dock-r: auto;
+  --dock-t: 60px;
+  --dock-b: auto;
+  --dock-tx: none;
+  --dock-w: 408px;
+  --dock-h: 230px;
+  --dock-gap: 32px;
+  --dock-rad: 36px;
+  --dock-panel: 0;
+  --dock-pad: 0px;
+  --dock-lift: -10px;
+  --dock-fs: 1.05;
+  --cols: 10;
+  --tile-w: 151px;
+  --tile-h: 151px;
+  --gap-x: 24px;
+  --gap-y: 26px;
+  --tile-r: 34px;
+  --grid-l: 96px;
+  --grid-w: 1728px;
+  --grid-t: 350px;
+  --grid-fs: 1.12;
+  --ov-dim: 0.95;
+  --gloss: 0;
+  --tile-border: 0;
+  --ring-w: 4px;
+  --ring-off: 4px;
+  --dock-dim: 1;
+  --clock-w: 600;
+  --clock-ls: -0.02em;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+html,
+body {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: var(--night);
+  color: var(--ink);
+  font-family: var(--font);
+}
+body {
+  background-image: var(--wall);
+  background-size: 1920px 1080px;
+}
+::selection {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.glow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 720px;
+  opacity: 0;
+  transition: opacity calc(0.35s * var(--spd)) linear;
+  will-change: opacity;
+  background: radial-gradient(ellipse 1400px 640px at 26% -6%, rgba(var(--c), 0.45), transparent 70%);
+}
+.glow.on {
+  opacity: var(--glow-op);
+}
+
+#top {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  z-index: 5;
+  pointer-events: none;
+}
+#clock {
+  position: absolute;
+  left: var(--clock-l);
+  right: var(--clock-r);
+  top: var(--clock-t);
+  bottom: var(--clock-b);
+  transform: var(--clock-tx);
+  display: var(--clock-d);
+  align-items: center;
+  height: 76px;
+}
+#time {
+  font-family: var(--font-d, var(--font));
+  font-size: calc(56px * var(--fs) * var(--clock-s));
+  font-weight: var(--clock-w);
+  letter-spacing: var(--clock-ls);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+#date {
+  display: var(--date-d);
+  font-size: calc(28px * var(--fs) * var(--date-s));
+  color: var(--date-ink, rgba(245, 246, 248, 0.88));
+  margin-left: 22px;
+  padding-top: 14px;
+}
+[data-clock="stack"] #clock {
+  flex-direction: column;
+  align-items: var(--clock-ai);
+  height: auto;
+}
+[data-clock="stack"] #date {
+  margin: 8px 0 0 6px;
+  padding: 0;
+}
+#bar {
+  pointer-events: auto;
+  position: absolute;
+  left: var(--bar-l);
+  right: var(--bar-r);
+  top: var(--bar-t);
+  bottom: var(--bar-b);
+  transform: var(--bar-tx);
+  display: var(--bar-d);
+  align-items: center;
+  height: calc(var(--pill-h) + 12px);
+}
+#bar > * + * {
+  margin-left: var(--bar-gap);
+}
+.pill {
+  display: flex;
+  align-items: center;
+  height: var(--pill-h);
+  padding: 0 30px 0 24px;
+  border-radius: var(--pill-r);
+  font-size: calc(26px * var(--fs));
+  font-weight: 500;
+  background: var(--pill-bg);
+  box-shadow: inset 0 0 0 1px var(--pill-ring);
+  transition: transform calc(0.12s * var(--spd)) cubic-bezier(0.3, 1.35, 0.5, 1);
+  will-change: transform;
+}
+.pill > * + * {
+  margin-left: 14px;
+}
+.pill svg {
+  width: 30px;
+  height: 30px;
+  flex: none;
+}
+.pill span {
+  white-space: nowrap;
+}
+.pill.f {
+  background: var(--acc);
+  color: var(--acc-ink);
+  transform: scale(1.07);
+}
+[data-bar="round"] .pill {
+  width: var(--pill-h);
+  padding: 0;
+  justify-content: center;
+}
+[data-bar="flat"] .pill {
+  background: none;
+  box-shadow: none;
+}
+[data-labels="hide"] .pill span {
+  display: none;
+}
+
+#shelf {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--name-y);
+  height: 120px;
+  padding: 0 var(--name-x);
+  text-align: var(--name-a);
+  display: var(--name-d);
+  z-index: 5;
+}
+#name {
+  font-size: calc(92px * var(--fs) * var(--name-s));
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  line-height: 1.05;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* the view clips rows as they scroll up under the shelf */
+#view {
+  position: absolute;
+  left: 0;
+  top: var(--view-top);
+  width: 1920px;
+  height: calc(1080px - var(--view-top));
+  overflow: hidden;
+  z-index: 2;
+}
+#scroll {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: calc(1080px - var(--view-top));
+  transition: transform calc(0.3s * var(--spd)) ease-out;
+  will-change: transform;
+}
+#dock {
+  position: absolute;
+  left: var(--dock-l);
+  right: var(--dock-r);
+  top: var(--dock-t);
+  bottom: var(--dock-b);
+  transform: var(--dock-tx);
+  display: flex;
+  z-index: 4;
+  padding: var(--dock-pad);
+  border-radius: calc(var(--dock-rad) + var(--dock-pad));
+  background: rgba(255, 255, 255, var(--dock-panel));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, calc(var(--dock-panel) * 1.4));
+}
+#dock > * + * {
+  margin-left: var(--dock-gap);
+}
+#grid {
+  position: absolute;
+  left: var(--grid-l);
+  top: var(--grid-t);
+  width: var(--grid-w);
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  gap: var(--gap-y) var(--gap-x);
+}
+/* an overlay grid: hidden until the focus moves down into it, then dark layer + grid over the screen above the dock */
+[data-grid="overlay"] #grid {
+  z-index: 3;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity calc(0.22s * var(--spd)) linear;
+}
+[data-grid="overlay"].grid-open #grid {
+  opacity: 1;
+  pointer-events: auto;
+}
+[data-grid="overlay"] #scroll::before,
+[data-grid="push"] #scroll::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -1600px;
+  width: 1920px;
+  height: 4400px;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  background: rgba(var(--night-rgb), var(--ov-dim));
+  transition: opacity calc(0.22s * var(--spd)) linear;
+}
+[data-grid="overlay"].grid-open #scroll::before,
+[data-grid="push"].grid-open #scroll::before {
+  opacity: 1;
+}
+/* push: the grid sits under the dock; focusing it scrolls the dock up and fades the grid in */
+[data-grid="push"] #grid {
+  z-index: 3;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity calc(0.25s * var(--spd)) linear;
+}
+[data-grid="push"].grid-open #grid {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* every row of tiles centred, also a last row that is not full */
+[data-galign="center"] #grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+[data-galign="center"] #grid .tile {
+  width: var(--tile-w);
+}
+.tile::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--gloss);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 46%, rgba(0, 0, 0, 0.24));
+}
+
+.tile {
+  --c: 74, 84, 112;
+  --b: 20, 22, 27;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+  background: rgb(var(--b));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, var(--tile-border));
+  transition: transform calc(0.12s * var(--spd)) cubic-bezier(0.3, 1.35, 0.5, 1);
+}
+.snap .tile,
+.snap .pill {
+  transition: none;
+} /* held arrow key: follow the focus without animating each step */
+/* the picture's own box: it crops a picture that fills the tile, so the tile itself (and its focus ring and name) is never cut off */
+.tile .face {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tile.fill .face {
+  overflow: hidden;
+}
+.tile.fill img {
+  object-fit: fill;
+}
+.tile.press {
+  transform: scale(0.96) !important;
+  transition-duration: calc(0.06s * var(--spd));
+}
+.tile.launching {
+  opacity: 0.82;
+}
+.tile img {
+  object-fit: contain;
+}
+.tile svg {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.9;
+}
+.tile .t {
+  font-size: calc(26px * var(--fs));
+  font-weight: 600;
+  padding: 12px;
+  text-align: center;
+  line-height: 1.15;
+  opacity: 0.9;
+}
+/* The focus ring is a pseudo-element with its own radius: Chromium before 94 draws an outline as a rectangle, not around rounded corners. */
+.tile.f {
+  z-index: 3;
+  box-shadow: 0 24px 36px rgba(0, 0, 0, 0.6);
+}
+.tile.f::before {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  left: calc(-1 * (var(--ring-off) + var(--ring-w)));
+  top: calc(-1 * (var(--ring-off) + var(--ring-w)));
+  right: calc(-1 * (var(--ring-off) + var(--ring-w)));
+  bottom: calc(-1 * (var(--ring-off) + var(--ring-w)));
+  border: var(--ring-w) solid var(--focus);
+  border-radius: calc(var(--tile-r) + var(--ring-off) + var(--ring-w));
+}
+#dock .tile.f::before {
+  border-radius: calc(var(--dock-rad) + var(--ring-off) + var(--ring-w));
+}
+#dock .tile {
+  width: var(--dock-w);
+  height: var(--dock-h);
+  border-radius: var(--dock-rad);
+}
+#dock .tile img {
+  height: 56%;
+  max-width: 46%;
+}
+#dock .tile svg {
+  width: 96px;
+  height: 96px;
+}
+#dock .tile.f {
+  transform: translateY(var(--dock-lift)) scale(var(--dock-fs));
+}
+#grid .tile {
+  height: var(--tile-h);
+  border-radius: var(--tile-r);
+}
+#grid .tile img {
+  width: 64%;
+  height: 64%;
+}
+#grid .tile svg {
+  width: 64px;
+  height: 64px;
+}
+#grid .tile.f {
+  transform: scale(var(--grid-fs));
+}
+#grid .tile.sys {
+  flex-direction: column;
+}
+#grid .tile.sys > * + * {
+  margin-top: 8px;
+}
+.slab {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink2);
+}
+#grid .tile.sys {
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+#toast {
+  position: absolute;
+  bottom: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  padding: 18px 38px;
+  border-radius: 34px;
+  font-size: 28px;
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  opacity: 0;
+  pointer-events: none;
+}
+#toast.on {
+  opacity: 1;
+}
+
+/* ---------- names under the tiles, drawn icons, the HDMI card, "All apps" (calm.js) ---------- */
+.tile .cap {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  top: 100%;
+  margin-top: 18px;
+  font-size: calc(28px * var(--fs));
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--ink2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+#dock .tile.f .cap {
+  color: var(--ink);
+}
+/* a theme that shows the large name at the top needs no names under the dock */
+[data-shelf="show"] #dock .tile .cap {
+  display: none;
+}
+/* in the grid the name shows under the focused tile only, and only when the theme has no large name at the top */
+#grid .tile .cap {
+  left: -40px;
+  right: -40px;
+  margin-top: 12px;
+  font-size: calc(22px * var(--fs));
+  text-align: center;
+  color: var(--ink);
+  opacity: 0;
+}
+[data-shelf="hide"] #grid .tile.f .cap {
+  opacity: 1;
+}
+.tile svg.glyph {
+  color: #fff;
+  stroke: none;
+  opacity: 1;
+  overflow: visible;
+}
+#dock .tile svg.glyph {
+  width: 116px;
+  height: 116px;
+}
+#grid .tile svg.glyph {
+  width: 76px;
+  height: 76px;
+}
+.tile svg.glyph text {
+  font-family: var(--font);
+  letter-spacing: 0.04em;
+}
+.gl-youtube {
+  background-image: linear-gradient(160deg, #ff2a4f, #e8002b);
+}
+.gl-iptv {
+  background-image: linear-gradient(140deg, #4b6cff, #8a4dff 60%, #b84dff);
+}
+.gl-tv {
+  background-image: linear-gradient(140deg, #2b95ff, #0a5be0);
+}
+.gl-hdmi {
+  background-image: linear-gradient(160deg, #3b404d, #1c1f26);
+}
+.tile.gl-hdmi {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+}
+.tile.gl-hdmi.f {
+  box-shadow: 0 24px 36px rgba(0, 0, 0, 0.6);
+}
+.gl-film {
+  background-image: linear-gradient(150deg, #ef3b57, #a3173a);
+}
+.gl-music {
+  background-image: linear-gradient(150deg, #27cf78, #0d8a5a);
+}
+.gl-sport {
+  background-image: linear-gradient(150deg, #ffa224, #f0571b);
+}
+/* the HDMI card's port, with a dot that is green while the device is on */
+.chip {
+  position: absolute;
+  left: 22px;
+  top: 20px;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 16px 0 14px;
+  border-radius: 20px;
+  font-size: 22px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(245, 246, 248, 0.86);
+  pointer-events: none;
+}
+.chip i {
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+  margin-right: 10px;
+  background: rgba(245, 246, 248, 0.35);
+}
+.chip.on i {
+  background: #3ddc84;
+}
+#grid .chip {
+  display: none;
+}
+/* a round button's name, under it while it has the focus */
+.pill {
+  position: relative;
+}
+[data-labels="hide"] .pill::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  margin-top: 14px;
+  transform: translateX(-50%);
+  font-size: calc(22px * var(--fs));
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--ink);
+  opacity: 0;
+  pointer-events: none;
+}
+[data-labels="hide"] .pill.f::after {
+  opacity: 1;
+}
+/* "All apps" under a dock at the top, while the grid waits below (push) */
+#more {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 54px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: calc(22px * var(--fs));
+  font-weight: 500;
+  color: var(--ink2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity calc(0.2s * var(--spd)) linear;
+}
+#more svg {
+  width: 30px;
+  height: 30px;
+  margin-top: 2px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+[data-grid="push"][data-dock="top"].has-grid:not(.grid-open) #more {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ---------- the dock as cards (theme dock.style "card"): a dark card tinted with the app's colour, the icon small in the top corner,
+   the name inside. The cards without the focus step back (dock.dim). ---------- */
+[data-dockstyle="card"] #dock .tile {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 60%), var(--panel);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+  opacity: var(--dock-dim);
+  transition:
+    transform calc(0.16s * var(--spd)) cubic-bezier(0.25, 1, 0.4, 1),
+    opacity calc(0.2s * var(--spd)) linear;
+}
+[data-dockstyle="card"] #dock .tile.f {
+  opacity: 1;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+}
+.tile .tint {
+  display: none;
+}
+[data-dockstyle="card"] #dock .tile .tint {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(150deg, rgba(var(--c), 0.42) 0%, rgba(var(--c), 0.14) 50%, rgba(var(--c), 0.04) 100%);
+  transition: opacity calc(0.25s * var(--spd)) linear;
+}
+[data-dockstyle="card"] #dock .tile.f .tint {
+  opacity: 1;
+}
+[data-dockstyle="card"] #dock .tile .face {
+  left: 30px;
+  top: 30px;
+  right: auto;
+  bottom: auto;
+  width: 76px;
+  height: 76px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgb(var(--b));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 8px 18px rgba(0, 0, 0, 0.35);
+}
+[data-dockstyle="card"] #dock .tile .face img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
+}
+[data-dockstyle="card"] #dock .tile svg.glyph {
+  width: 46px;
+  height: 46px;
+}
+[data-dockstyle="card"] #dock .tile .face .t {
+  font-size: 18px;
+  padding: 6px;
+}
+[data-dockstyle="card"] #dock .tile .cap {
+  top: auto;
+  bottom: 28px;
+  left: 32px;
+  right: 32px;
+  margin: 0;
+  font-size: calc(32px * var(--fs));
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+[data-dockstyle="card"] #dock .chip {
+  left: auto;
+  right: 30px;
+  top: 30px;
+  height: 30px;
+  padding: 0;
+  background: none;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ink2);
+}
+
+/* ---------- docks of logos (calm.js makes them from the icons): `logo` with no tile, `glass` on frosted glass, `paper` on a card.
+   A logo is white on a light ink and dark on a dark ink; in a tile filled with the accent (dock.focus "fill") it takes the accent's ink. */
+.tile .mono,
+.tile .mono .mw,
+.tile .mono .mk {
+  display: none;
+}
+[data-dockstyle="logo"] #dock .tile,
+[data-dockstyle="glass"] #dock .tile,
+[data-dockstyle="paper"] #dock .tile {
+  color: var(--ink);
+}
+[data-dockstyle="logo"] #dock .tile {
+  background: none;
+  box-shadow: none;
+}
+[data-dockstyle="glass"] #dock .tile {
+  background-color: rgba(255, 255, 255, 0.05);
+  background-image: linear-gradient(rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.04)), var(--glass, none);
+  background-size:
+    auto,
+    1920px 1080px;
+  background-repeat: no-repeat;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+[data-dockstyle="paper"] #dock .tile {
+  background: var(--panel);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 10px 30px rgba(60, 50, 40, 0.12);
+}
+[data-dockstyle="logo"] #dock .tile:not(.gl) .face,
+[data-dockstyle="glass"] #dock .tile:not(.gl) .face,
+[data-dockstyle="paper"] #dock .tile:not(.gl) .face,
+[data-dockstyle="logo"] #dock .chip,
+[data-dockstyle="glass"] #dock .chip,
+[data-dockstyle="paper"] #dock .chip {
+  display: none;
+}
+[data-dockstyle="logo"] #dock .tile svg.glyph,
+[data-dockstyle="glass"] #dock .tile svg.glyph,
+[data-dockstyle="paper"] #dock .tile svg.glyph {
+  width: 50px;
+  height: 50px;
+  color: inherit;
+}
+[data-dockstyle="paper"] #dock .tile svg.glyph {
+  width: 64px;
+  height: 64px;
+}
+[data-dockstyle="logo"] #dock .tile .mono,
+[data-dockstyle="glass"] #dock .tile .mono,
+[data-dockstyle="paper"] #dock .tile .mono {
+  display: flex;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0 26px;
+  pointer-events: none;
+}
+[data-dockstyle="logo"] #dock .mono img,
+[data-dockstyle="glass"] #dock .mono img,
+[data-dockstyle="paper"] #dock .mono img {
+  max-width: 100%;
+  max-height: 40px;
+}
+[data-dockstyle="paper"] #dock .mono img {
+  max-height: 52px;
+}
+[data-dockstyle="logo"] #dock .mono .mt,
+[data-dockstyle="glass"] #dock .mono .mt,
+[data-dockstyle="paper"] #dock .mono .mt {
+  font-size: calc(27px * var(--fs));
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+[data-inkmode="light"] #dock .tile:not(.f) .mono .mw,
+[data-inkmode="dark"] #dock .tile:not(.f) .mono .mk,
+[data-dockfocus="fill"][data-accmode="light"] #dock .tile.f .mono .mw,
+[data-dockfocus="fill"][data-accmode="dark"] #dock .tile.f .mono .mk,
+[data-dockfocus="lift"][data-inkmode="light"] #dock .tile.f .mono .mw,
+[data-dockfocus="lift"][data-inkmode="dark"] #dock .tile.f .mono .mk,
+[data-dockfocus="ring"][data-inkmode="light"] #dock .tile.f .mono .mw,
+[data-dockfocus="ring"][data-inkmode="dark"] #dock .tile.f .mono .mk {
+  display: block;
+}
+/* the focused logo's name, under it (logo and glass); a paper card keeps every name under it */
+[data-dockstyle="logo"] #dock .tile .cap,
+[data-dockstyle="glass"] #dock .tile .cap {
+  display: block;
+  left: -60px;
+  right: -60px;
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: calc(22px * var(--fs));
+  font-weight: 500;
+  color: var(--ink);
+  opacity: 0;
+}
+[data-dockstyle="logo"] #dock .tile.f .cap,
+[data-dockstyle="glass"] #dock .tile.f .cap {
+  opacity: 1;
+}
+[data-dockstyle="paper"] #dock .tile .cap {
+  margin-top: 20px;
+  font-size: calc(24px * var(--fs));
+}
+
+/* ---------- focus: "fill" fills the tile with the accent; "lift" brightens glass; both instead of a ring ---------- */
+[data-dockfocus="fill"] #dock .tile,
+[data-dockfocus="lift"] #dock .tile {
+  transition: transform calc(0.14s * var(--spd)) cubic-bezier(0.25, 1, 0.4, 1);
+}
+[data-dockfocus="fill"] #dock .tile.f::before,
+[data-dockfocus="lift"] #dock .tile.f::before {
+  display: none;
+}
+[data-dockfocus="fill"] #dock .tile.f {
+  background: var(--acc);
+  color: var(--acc-ink);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
+}
+[data-dockfocus="lift"] #dock .tile.f {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 34px 70px rgba(0, 0, 0, 0.45);
+}
+[data-dockfocus="lift"] #dock .tile .tint {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.16);
+  opacity: 0;
+  transition: opacity calc(0.18s * var(--spd)) linear;
+}
+[data-dockfocus="lift"] #dock .tile.f .tint {
+  opacity: 1;
+}
+
+/* ---------- a dock of words (dock.style "word"): the names in the display typeface, no icons; the focused one in italic over a hairline,
+   the number of its key above each ---------- */
+[data-dockstyle="word"] #dock {
+  align-items: baseline;
+  counter-reset: dk;
+}
+[data-dockstyle="word"] #dock .tile {
+  display: block;
+  width: auto;
+  height: auto;
+  background: none;
+  box-shadow: none;
+}
+[data-dockstyle="word"] #dock .tile.f {
+  transform: none;
+  box-shadow: none;
+}
+[data-dockstyle="word"] #dock .tile .face,
+[data-dockstyle="word"] #dock .tile .mono,
+[data-dockstyle="word"] #dock .chip,
+[data-dockstyle="word"] #dock .tint {
+  display: none;
+}
+[data-dockstyle="word"] #dock .tile .cap {
+  display: block;
+  position: static;
+  margin: 0;
+  font-family: var(--font-d, var(--font));
+  font-size: calc(64px * var(--fs));
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  opacity: 0.32;
+  white-space: nowrap;
+  max-width: 760px; /* a very long name ends in an ellipsis instead of pushing the row off the screen */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 8px;
+}
+[data-dockstyle="word"] #dock .tile.f .cap {
+  opacity: 1;
+  font-style: italic;
+}
+[data-dockstyle="word"] #dock .tile.f::before {
+  left: 0;
+  right: 0;
+  top: auto;
+  bottom: -24px;
+  height: 1px;
+  border: 0;
+  border-radius: 0;
+  background: var(--ink);
+  opacity: 0.55;
+}
+[data-dockstyle="word"] #dock .tile::after {
+  counter-increment: dk;
+  content: counter(dk);
+  left: 2px;
+  top: -30px;
+  right: auto;
+  bottom: auto;
+  background: none;
+  opacity: 0.35;
+  font: 500 15px var(--font);
+  letter-spacing: 0.14em;
+  color: var(--ink);
+}
+[data-dockstyle="word"] #dock .tile.f::after {
+  opacity: 0.75;
+}
+
+/* ---------- top buttons as words (bar.style "text", or "caps" in small spaced capitals), the focused one in a pill ---------- */
+[data-bar="text"] .pill,
+[data-bar="caps"] .pill {
+  padding: 0 24px;
+}
+[data-bar="text"] .pill:not(.f),
+[data-bar="caps"] .pill:not(.f) {
+  background: none;
+  box-shadow: none;
+  color: var(--ink2);
+}
+[data-bar="text"] .pill svg,
+[data-bar="caps"] .pill svg {
+  display: none;
+}
+[data-bar="caps"] .pill {
+  font-size: calc(16px * var(--fs));
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+[data-bar="caps"] #more {
+  font-size: calc(15px * var(--fs));
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+[data-datecase="caps"] #date {
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+}
+
+/* ---------- a clock at the bottom steps aside while the app grid is open ---------- */
+#clock {
+  transition: opacity calc(0.2s * var(--spd)) linear;
+}
+[data-clockpos="bottom"].grid-open #clock {
+  opacity: 0;
+}
+
+/* ---------- night mode (22:00 to 6:00) and the idle screen (calm.js): a veil over Home, only opacity changes ---------- */
+#veil {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  z-index: 20;
+  pointer-events: none;
+  background: #140c02;
+  opacity: 0;
+  transition: opacity 1.2s linear;
+}
+.night #veil {
+  opacity: 0.24;
+}
+.idle #veil {
+  background: #000;
+  opacity: 0.42;
+  transition-duration: 2.5s;
+}
+#view,
+#bar,
+#shelf {
+  transition: opacity 0.9s linear;
+}
+#top {
+  transition: transform 4s ease-in-out;
+}
+body.idle #view,
+body.idle #bar,
+body.idle #shelf,
+body.idle #more,
+body.idle .glow {
+  opacity: 0 !important;
+}
+
+/* ---------- the Remote buttons screen (calm.js, RB) ---------- */
+#rb {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  padding: 0 170px;
+  background: rgb(var(--night-rgb));
+}
+#rb .rb-l {
+  width: 760px;
+}
+#rb .rb-r {
+  margin-left: auto;
+  width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#rb .rb-remote {
+  height: 740px;
+  width: auto;
+}
+#rb .rb-hot {
+  stroke: var(--acc);
+  opacity: 0.85;
+}
+#rb.teach .rb-hot {
+  animation: rbpulse 1.4s ease-in-out infinite;
+}
+@keyframes rbpulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+#rb .rb-note {
+  margin-top: 28px;
+  max-width: 440px;
+  text-align: center;
+  font-size: calc(21px * var(--fs));
+  line-height: 1.4;
+  color: var(--ink2);
+}
+#rb .rb-eyebrow {
+  font-size: calc(17px * var(--fs));
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink2);
+}
+#rb h2 {
+  margin: 14px 0 16px;
+  font-size: calc(56px * var(--fs));
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+}
+#rb .rb-p {
+  max-width: 660px;
+  margin-bottom: 34px;
+  font-size: calc(26px * var(--fs));
+  line-height: 1.4;
+  color: var(--ink2);
+}
+#rb .rb-p.rb-small {
+  margin-top: -18px;
+  font-size: calc(21px * var(--fs));
+}
+#rb .rb-list > * + * {
+  margin-top: 14px;
+}
+#rb .rb-card {
+  display: flex;
+  align-items: center;
+  height: 104px;
+  padding: 0 28px;
+  border-radius: 24px;
+  background: var(--panel2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+#rb .rb-card.f {
+  background: var(--acc);
+  color: var(--acc-ink);
+}
+#rb .rb-badge {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-right: 24px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #2c3038;
+  color: #fff;
+}
+#rb .rb-badge img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+#rb .rb-badge svg {
+  width: 40px;
+  height: 40px;
+}
+#rb .rb-badge.plus {
+  background: none;
+  box-shadow: inset 0 0 0 2px currentColor;
+  color: inherit;
+  opacity: 0.8;
+}
+#rb .rb-badge.plus svg {
+  width: 30px;
+  height: 30px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+#rb .rb-badge.big {
+  width: 128px;
+  height: 128px;
+  margin: 0 0 34px;
+  border-radius: 34px;
+}
+#rb .rb-badge.big svg {
+  width: 80px;
+  height: 80px;
+}
+#rb.done .rb-badge.big {
+  box-shadow: 0 0 0 6px #3ddc84;
+}
+#rb .rb-tx {
+  min-width: 0;
+}
+#rb .rb-name {
+  font-size: calc(30px * var(--fs));
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#rb .rb-sub {
+  margin-top: 2px;
+  font-size: calc(20px * var(--fs));
+  opacity: 0.65;
+}

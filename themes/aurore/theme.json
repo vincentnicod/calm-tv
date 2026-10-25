@@ -1,0 +1,74 @@
+{
+ "name": "Aurore",
+ "author": "CleanYourTV",
+ "description": "A soft aurora that takes on the focused app's colour, a very thin clock in the centre and glass pills with white logos.",
+ "colors": {
+  "night": "#07070d",
+  "panel": "#171826",
+  "ink": "#ffffff",
+  "accent": "#f6f5fa"
+ },
+ "surface": {
+  "menuAlpha": 0.9
+ },
+ "type": {
+  "font": "sora"
+ },
+ "clock": {
+  "layout": "stack",
+  "align": "center",
+  "x": 0,
+  "y": 240,
+  "scale": 4.1,
+  "dateScale": 0.8,
+  "weight": 100,
+  "tracking": -0.05,
+  "dateCase": "caps"
+ },
+ "bar": {
+  "style": "round",
+  "align": "right",
+  "x": 96,
+  "y": 56,
+  "size": 56,
+  "gap": 14
+ },
+ "shelf": {
+  "show": false
+ },
+ "dock": {
+  "anchor": "bottom",
+  "align": "center",
+  "x": 0,
+  "y": 120,
+  "count": 5,
+  "w": 236,
+  "h": 100,
+  "gap": 22,
+  "radius": 50,
+  "lift": 0,
+  "focusScale": 1.06,
+  "style": "glass",
+  "focus": "fill"
+ },
+ "grid": {
+  "mode": "push",
+  "dockUp": 560,
+  "clipTop": 0,
+  "overlayDim": 0.5,
+  "cols": 10,
+  "tileH": 140,
+  "gapX": 26,
+  "gapY": 60,
+  "radius": 28,
+  "focusScale": 1.1
+ },
+ "tile": {
+  "ringWidth": 3,
+  "ringOffset": 5
+ },
+ "effects": {
+  "glow": 0.55,
+  "scene": "aurore"
+ }
+}

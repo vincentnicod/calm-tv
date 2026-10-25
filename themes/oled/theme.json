@@ -1,0 +1,3 @@
+{ "name": "OLED black", "author": "CleanYourTV", "description": "Pure black, no ambient glow: unlit pixels stay off.",
+  "colors": { "night": "#000000", "panel": "#0a0a0a", "ink": "#ffffff", "accent": "#ffffff" },
+  "effects": { "glow": 0 } }

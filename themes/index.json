@@ -1,0 +1,110 @@
+{
+ "v": 1,
+ "themes": [
+  {
+   "id": "classic",
+   "name": "Paysage",
+   "author": "CleanYourTV",
+   "description": "A lake at dusk, a thin clock on the water and one line of white logos; all apps one press down.",
+   "preview": "classic/preview.jpg"
+  },
+  {
+   "id": "aurore",
+   "name": "Aurore",
+   "author": "CleanYourTV",
+   "description": "A soft aurora that takes on the focused app's colour, a very thin clock in the centre and glass pills with white logos.",
+   "preview": "aurore/preview.jpg"
+  },
+  {
+   "id": "bloom",
+   "name": "Bloom",
+   "author": "CleanYourTV",
+   "description": "A flower wallpaper with the dock in a glass panel at the bottom. Down moves the dock up and the apps appear below it, centred.",
+   "preview": "bloom/preview.jpg"
+  },
+  {
+   "id": "calm",
+   "name": "Calm",
+   "author": "CleanYourTV",
+   "description": "Four dark cards with the app's name inside and the focused one in the light; round buttons and the clock; all apps one press down.",
+   "preview": "calm/preview.jpg"
+  },
+  {
+   "id": "compact",
+   "name": "Compact",
+   "author": "CleanYourTV",
+   "description": "Twelve columns of smaller tiles: more apps on screen.",
+   "preview": "compact/preview.jpg"
+  },
+  {
+   "id": "editorial",
+   "name": "Éditorial",
+   "author": "CleanYourTV",
+   "description": "Warm slate, a large serif clock and your apps set as words, with no icons; the focused name in italic over a hairline.",
+   "preview": "editorial/preview.jpg"
+  },
+  {
+   "id": "horizon",
+   "name": "Horizon",
+   "author": "CleanYourTV",
+   "description": "A row of seven square apps along the bottom of a dusk landscape, the clock on the left and the buttons on the right at the top. Down moves the row up and shows all apps below it.",
+   "preview": "horizon/preview.jpg"
+  },
+  {
+   "id": "large",
+   "name": "Large print",
+   "author": "CleanYourTV",
+   "description": "Eight columns of big tiles and bigger text, easier to read from the sofa.",
+   "preview": "large/preview.jpg"
+  },
+  {
+   "id": "lin",
+   "name": "Lin",
+   "author": "CleanYourTV",
+   "description": "Warm linen, black type and paper-white cards with logos in ink; the focused card turns black. Bright in a dark room.",
+   "preview": "lin/preview.jpg"
+  },
+  {
+   "id": "midnight",
+   "name": "Midnight",
+   "author": "CleanYourTV",
+   "description": "Deep blue with a soft wallpaper and a blue focus.",
+   "preview": "midnight/preview.jpg"
+  },
+  {
+   "id": "oled",
+   "name": "OLED black",
+   "author": "CleanYourTV",
+   "description": "Pure black, no ambient glow: unlit pixels stay off.",
+   "preview": "oled/preview.jpg"
+  },
+  {
+   "id": "original",
+   "name": "Original",
+   "author": "CleanYourTV",
+   "description": "The original CleanYourTV look: the large name of the focused app, four wide dock tiles and ten columns under them.",
+   "preview": "original/preview.jpg"
+  },
+  {
+   "id": "still",
+   "name": "Still",
+   "author": "CleanYourTV",
+   "description": "No animation and a quiet glow, for anyone who prefers a calm screen.",
+   "preview": "still/preview.jpg"
+  },
+  {
+   "id": "verre",
+   "name": "Verre",
+   "author": "CleanYourTV",
+   "description": "Alpine peaks at blue hour and a row of frosted-glass tiles with white logos; the focused one grows and brightens.",
+   "preview": "verre/preview.jpg"
+  },
+  {
+   "id": "warm",
+   "name": "Warm",
+   "author": "CleanYourTV",
+   "description": "Brown and amber with the glow in the accent colour.",
+   "preview": "warm/preview.jpg"
+  }
+ ]
+}

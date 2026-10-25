@@ -1,0 +1,74 @@
+{
+ "name": "Lin",
+ "author": "CleanYourTV",
+ "description": "Warm linen, black type and paper-white cards with logos in ink; the focused card turns black. Bright in a dark room.",
+ "colors": {
+  "night": "#ece7df",
+  "panel": "#fbfaf7",
+  "ink": "#17171a",
+  "accent": "#17171a",
+  "pill": "#17171a"
+ },
+ "surface": {
+  "pillAlpha": 0,
+  "pillRing": 0,
+  "menuAlpha": 0.96,
+  "rowRadius": 18
+ },
+ "type": {
+  "font": "hanken"
+ },
+ "clock": {
+  "layout": "stack",
+  "align": "left",
+  "x": 96,
+  "y": 84,
+  "scale": 2.15,
+  "dateScale": 0.93,
+  "weight": 300,
+  "tracking": -0.045
+ },
+ "bar": {
+  "style": "text",
+  "align": "right",
+  "x": 96,
+  "y": 92,
+  "size": 52,
+  "gap": 8
+ },
+ "shelf": {
+  "show": false
+ },
+ "dock": {
+  "y": 560,
+  "count": 4,
+  "w": 402,
+  "h": 240,
+  "gap": 32,
+  "radius": 22,
+  "lift": 0,
+  "focusScale": 1,
+  "style": "paper",
+  "focus": "fill"
+ },
+ "grid": {
+  "mode": "push",
+  "dockUp": 290,
+  "y": 930,
+  "overlayDim": 0,
+  "cols": 10,
+  "tileH": 140,
+  "gapX": 26,
+  "gapY": 60,
+  "radius": 24,
+  "focusScale": 1.1
+ },
+ "tile": {
+  "ringWidth": 3,
+  "ringOffset": 5
+ },
+ "effects": {
+  "glow": 0,
+  "scene": "lin"
+ }
+}

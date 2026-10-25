@@ -1,0 +1,78 @@
+{
+ "name": "Paysage",
+ "author": "CleanYourTV",
+ "description": "A lake at dusk, a thin clock on the water and one line of white logos; all apps one press down.",
+ "colors": {
+  "night": "#0b0d14",
+  "panel": "#1b1e28",
+  "ink": "#ffffff",
+  "accent": "#f4f4f6"
+ },
+ "surface": {
+  "pillRadius": 28,
+  "menuAlpha": 0.9
+ },
+ "type": {
+  "font": "manrope"
+ },
+ "clock": {
+  "layout": "stack",
+  "anchor": "bottom",
+  "align": "left",
+  "x": 110,
+  "y": 196,
+  "scale": 2.5,
+  "dateScale": 0.95,
+  "weight": 200,
+  "tracking": -0.06
+ },
+ "bar": {
+  "style": "text",
+  "labels": "show",
+  "anchor": "top",
+  "align": "right",
+  "x": 96,
+  "y": 58,
+  "size": 52,
+  "gap": 10
+ },
+ "shelf": {
+  "show": false
+ },
+ "dock": {
+  "anchor": "bottom",
+  "align": "left",
+  "x": 96,
+  "y": 76,
+  "count": 5,
+  "w": 204,
+  "h": 84,
+  "gap": 14,
+  "radius": 42,
+  "lift": 0,
+  "focusScale": 1.04,
+  "style": "logo",
+  "focus": "fill"
+ },
+ "grid": {
+  "mode": "push",
+  "dockUp": 300,
+  "clipTop": 0,
+  "overlayDim": 0.6,
+  "cols": 10,
+  "tileH": 140,
+  "gapX": 26,
+  "gapY": 60,
+  "radius": 28,
+  "focusScale": 1.1
+ },
+ "tile": {
+  "ringWidth": 3,
+  "ringOffset": 5
+ },
+ "effects": {
+  "glow": 0,
+  "scene": "lac",
+  "timeOfDay": true
+ }
+}

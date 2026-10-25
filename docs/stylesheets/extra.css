@@ -1,0 +1,8 @@
+/* Screenshots: as wide as the page allows, never wider than themselves, with a soft corner */
+.md-typeset img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+/* a table used as an image gallery */
+.md-typeset table:not([class]) td img { display: block; margin: 0 auto; }

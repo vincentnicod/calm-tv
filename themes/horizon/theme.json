@@ -1,0 +1,69 @@
+{
+ "name": "Horizon",
+ "author": "CleanYourTV",
+ "description": "A row of seven square apps along the bottom of a dusk landscape, the clock on the left and the buttons on the right at the top. Down moves the row up and shows all apps below it.",
+ "colors": {
+  "night": "#0d0b16",
+  "panel": "#1f1a2c",
+  "ink": "#ffffff",
+  "accent": "#ffffff"
+ },
+ "surface": {
+  "pillAlpha": 0.16,
+  "pillRing": 0.2
+ },
+ "clock": {
+  "layout": "inline",
+  "align": "left",
+  "x": 96,
+  "y": 54,
+  "scale": 0.9,
+  "dateScale": 0.85
+ },
+ "bar": {
+  "style": "pill",
+  "anchor": "top",
+  "align": "right",
+  "x": 96,
+  "y": 54,
+  "size": 58,
+  "gap": 14
+ },
+ "shelf": {
+  "show": false
+ },
+ "dock": {
+  "anchor": "bottom",
+  "align": "left",
+  "x": 96,
+  "y": 76,
+  "count": 7,
+  "w": 150,
+  "h": 150,
+  "gap": 22,
+  "radius": 32,
+  "lift": 6,
+  "focusScale": 1.08
+ },
+ "grid": {
+  "mode": "push",
+  "dockUp": 180,
+  "clipTop": 160,
+  "cols": 10,
+  "tileH": 150,
+  "gapX": 22,
+  "gapY": 22,
+  "radius": 32,
+  "align": "left"
+ },
+ "tile": {
+  "border": 0.08,
+  "ringWidth": 3,
+  "ringOffset": 4
+ },
+ "effects": {
+  "glow": 0,
+  "wallpaper": "horizon.jpg",
+  "wallpaperDim": 0.05
+ }
+}

@@ -1,0 +1,5 @@
+#!/bin/sh
+# Boot hook: stop LG telemetry/ad daemons ~60 s after boot. Disable: touch /media/developer/cleanyourtv/DISABLE-DEBLOAT
+[ -e /media/developer/cleanyourtv/DISABLE-DEBLOAT ] && exit 0
+[ -e /media/developer/cleanyourtv/DISABLE ] && exit 0   # LG's own Home breaks without the services this blocks
+(sleep 60; grep -q ' /usr/palm/applications/com.webos.app.home ' /proc/mounts && sh /media/developer/cleanyourtv/debloat-stop.sh) </dev/null >/dev/null 2>&1 &

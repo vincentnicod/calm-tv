@@ -1,0 +1,191 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Inputs</title>
+<style>
+*{box-sizing:border-box;margin:0}
+:root{--ink:#f5f6f8;--ink2:rgba(245,246,248,.62);--font:"LG Smart UI","Helvetica Neue",Helvetica,Arial,sans-serif}
+html,body{width:1920px;height:1080px;overflow:hidden;background:transparent;color:var(--ink);font-family:var(--font)}
+#dim{position:absolute;left:0;top:0;width:1920px;height:1080px;background:rgba(5,6,9,.78);opacity:0;transition:opacity .12s linear}
+#wrap{position:absolute;left:96px;right:96px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;opacity:0;transition:opacity .12s linear}
+.on #dim,.on #wrap{opacity:1}
+.cap{font-size:30px;font-weight:600;color:var(--ink2);margin-bottom:20px;letter-spacing:.01em}
+.row{display:flex}
+.row>*+*{margin-left:32px}
+#wrap>*+*{margin-top:72px}
+#inputs>*+*{margin-left:24px}
+.tile{position:relative;flex:1 1 0;min-width:0;height:180px;border-radius:28px;overflow:hidden;background:rgba(30,33,40,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);transform:scale(.96);transition:transform .15s ease-out}
+/* an app: its icon in a small badge (in the icon's own colour) and its name, as on Home */
+.tile .bd{width:84px;height:84px;flex:none;border-radius:22px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#2c3038;box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
+.tile img{width:100%;height:100%;object-fit:contain}
+.tile .nm{margin-top:14px;max-width:88%;font-size:26px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile:not(.f){opacity:.8}
+.tile.f{transform:scale(1.06);box-shadow:0 0 0 4px var(--ink),0 26px 44px rgba(0,0,0,.5)}
+.chip{position:relative;flex:1 1 auto;min-width:max(200px,fit-content);max-width:340px;height:180px;padding:0 32px;border-radius:32px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(38,41,50,.96);color:var(--ink);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+  transform:scale(.96);transition:transform .15s ease-out}
+.chip>*+*{margin-top:8px}
+.chip svg{width:48px;height:48px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+/* the width of the card is its own: the text lines shrink inside it and end in an ellipsis, never painted over the neighbours (issue 19) */
+.chip .tx{display:flex;flex-direction:column;align-items:center;width:100%;min-width:0;max-width:100%}
+.chip .tx>*+*{margin-top:2px}
+.chip .lb{font-size:36px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.chip .st{font-size:25px;font-weight:500;opacity:.7;text-align:center;line-height:1.2;max-width:100%;min-height:2.4em;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.chip.dim{opacity:.5}
+.chip.act::after{content:"";position:absolute;right:26px;top:24px;width:16px;height:16px;border-radius:8px;background:#3ddc84}
+.chip.f{opacity:1;background:#f5f6f8;color:#0b0c10;transform:scale(1.06);box-shadow:0 26px 44px rgba(0,0,0,.5)}
+#inputs{justify-content:center}
+/* drawn icons, as in the launcher (app/src/js/calm.js; a test keeps the drawings equal) */
+.tile svg.gl{width:50px;height:50px;overflow:visible;color:#fff}
+.tile svg.gl text{font-family:var(--font);letter-spacing:.04em}
+.tile .bd.gl-youtube{background:linear-gradient(160deg,#ff2a4f,#e8002b)}
+.tile .bd.gl-iptv{background:linear-gradient(140deg,#4b6cff,#8a4dff 60%,#b84dff)}
+.tile .bd.gl-tv{background:linear-gradient(140deg,#2b95ff,#0a5be0)}
+.tile .bd.gl-hdmi{background:linear-gradient(160deg,#3b404d,#1c1f26)}
+.tile .bd.gl-film{background:linear-gradient(150deg,#ef3b57,#a3173a)}
+.tile .bd.gl-music{background:linear-gradient(150deg,#27cf78,#0d8a5a)}
+.tile .bd.gl-sport{background:linear-gradient(150deg,#ffa224,#f0571b)}
+#msg{margin-top:28px;text-align:center;font-size:28px;font-weight:500;color:var(--ink);opacity:.85}
+#msg:empty{display:none}
+</style></head><body>
+<div id="dim"></div>
+<div id="wrap">
+  <div id="appsBox"><div class="cap" id="capA"></div><div class="row" id="apps"></div></div>
+  <div><div class="cap" id="capI"></div><div class="row" id="inputs"></div><div id="msg"></div></div>
+</div>
+<script>
+/* Inputs picker shown over whatever is playing, opened by the Input key (see the inputhook bind): the dock apps above,
+   the inputs (HDMI ports, Live TV) below. The app stays running: starting a web app takes ~8 s before it gets the
+   remote, so the service starts it once ({"prewarm":true}) and it hides itself; every later launch only fires
+   webOSRelaunch. For an instant open the page is built while hidden, the icons are kept as data in localStorage and
+   opening only toggles a class and refreshes in the background. */
+var API='http://127.0.0.1:8765', KEY='cytv.picker.v3';
+var apps=[], inputs=[], row=1, col=[0,0], moved=false, shown=false, shownAt=0, built='';
+var cache={apps:[],inputs:[],icons:{},colors:{}};
+var ICON={
+  hdmi:'<svg viewBox="0 0 24 24"><path d="M4 8h16v7l-3 3H7l-3-3z"/><path d="M9 11v3M12 11v3M15 11v3"/></svg>',
+  tv:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M8 21h8M12 18v3"/></svg>'};
+var TX={
+  nl:{Apps:'Apps',Inputs:'Ingangen',Connected:'Verbonden',Live:'Live TV',LiveSub:'Je afspeellijst',Nothing:'Niets aangesloten',nohelper:'Kan de ingangen niet lezen. Live TV werkt nog.'},
+  de:{Apps:'Apps',Inputs:'Eing\u00E4nge',Connected:'Verbunden',Live:'Live-TV',LiveSub:'Deine Playlist',Nothing:'Nichts angeschlossen',nohelper:'Eing\u00E4nge nicht lesbar. Live-TV funktioniert weiter.'},
+  fr:{Apps:'Apps',Inputs:'Entr\u00E9es',Connected:'Connect\u00E9',Live:'TV en direct',LiveSub:'Votre playlist',Nothing:'Rien de connect\u00E9',nohelper:'Impossible de lire les entr\u00E9es. La TV en direct fonctionne encore.'},
+  es:{Apps:'Apps',Inputs:'Entradas',Connected:'Conectado',Live:'TV en directo',LiveSub:'Tu lista',Nothing:'Nada conectado',nohelper:'No se pueden leer las entradas. La TV en directo sigue funcionando.'}};
+var GL={"youtube":"<path fill-rule=\"evenodd\" fill=\"currentColor\" d=\"M16 14h32a11 11 0 0 1 11 11v14a11 11 0 0 1-11 11H16A11 11 0 0 1 5 39V25a11 11 0 0 1 11-11zM27 23.5v17l14.5-8.5z\"/>","iptv":"<circle cx=\"32\" cy=\"32\" r=\"5.5\" fill=\"currentColor\"/><path d=\"M21.5 21.5a15 15 0 0 0 0 21M42.5 21.5a15 15 0 0 1 0 21M14 14a25.5 25.5 0 0 0 0 36M50 14a25.5 25.5 0 0 1 0 36\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3.6\" stroke-linecap=\"round\"/>","tv":"<rect x=\"6\" y=\"11\" width=\"52\" height=\"35\" rx=\"7\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3.2\"/><path d=\"M22 54h20\" stroke=\"currentColor\" stroke-width=\"3.2\" stroke-linecap=\"round\"/><path d=\"M28 22v13l10.5-6.5z\" fill=\"currentColor\"/>","hdmi":"<path d=\"M7 21h50v13l-8 10H15L7 34z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3.2\" stroke-linejoin=\"round\"/><path d=\"M18 30h28\" stroke=\"currentColor\" stroke-width=\"3.6\" stroke-dasharray=\"3 4\" fill=\"none\"/>","film":"<rect x=\"8\" y=\"25\" width=\"48\" height=\"29\" rx=\"5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3.2\"/><path d=\"M7.5 22.5l45-11.5 2.2 8-45 11.5z\" fill=\"currentColor\"/><path d=\"M27 33v13l10.5-6.5z\" fill=\"currentColor\"/>","music":"<path d=\"M26 46V16l24-5v29\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3.2\" stroke-linejoin=\"round\"/><circle cx=\"20\" cy=\"46\" r=\"6.5\" fill=\"currentColor\"/><circle cx=\"44\" cy=\"40\" r=\"6.5\" fill=\"currentColor\"/>","sport":"<circle cx=\"32\" cy=\"32\" r=\"22\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3.2\"/><path d=\"M32 22l9.5 6.9-3.6 11.1H26.1l-3.6-11.1z\" fill=\"currentColor\"/>"};
+var EN={Apps:'Apps',Inputs:'Inputs',Connected:'Connected',Live:'Live TV',LiveSub:'Your playlist',Nothing:'Nothing connected',nohelper:'Can\u2019t read the inputs. Live TV still works.'};
+var LANG=((window.webOSSystem&&webOSSystem.locale)||navigator.language||'en').slice(0,2);
+function t(k){return (TX[LANG]&&TX[LANG][k])||EN[k]||k}
+function $(i){return document.getElementById(i)}
+function call(uri,p){try{var b=new PalmServiceBridge();b.onservicecallback=function(){};b.call(uri,JSON.stringify(p));return true}catch(e){return false}}
+function log(m){try{var x=new XMLHttpRequest();x.open('GET',API+'/api/log?m='+encodeURIComponent('picker '+m));x.send()}catch(e){}}
+function launch(id,params){
+  log('launch '+id+' '+JSON.stringify(params||{}));
+  var x=new XMLHttpRequest();x.open('POST',API+'/api/launch');x.timeout=4000;
+  x.onload=function(){log('launch reply '+x.responseText.slice(0,120))};
+  x.onerror=x.ontimeout=function(){log('helper did not answer; trying the system');call('luna://com.webos.applicationManager/launch',{id:id,params:params||{}})};
+  x.send(JSON.stringify({id:id,params:params||{}}))}
+/* Started on demand by the Input key ({"ondemand":true}): nothing runs hidden in the background. Dismissing closes the app (platformBack,
+   window.close, and the service asks the app manager as well); a hidden overlay can keep the remote on some TVs. Closes by itself when idle. */
+var ondemand=false,idleT=0;
+function closeSoon(){log('close');try{if(window.webOS&&webOS.platformBack)webOS.platformBack()}catch(e){}try{window.close()}catch(e){}}
+function idle(){clearTimeout(idleT);if(ondemand&&shown)idleT=setTimeout(function(){if(shown)hide()},10000)}
+function hide(){log('hide');shown=false;clearTimeout(idleT);document.body.classList.remove('on');try{webOSSystem.hide()}catch(e){}if(ondemand)closeSoon()}
+function cur(){return row===0?apps:inputs}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(cache))}catch(e){}}
+
+/* a tile's background is the colour along its icon's edge, as in the launcher */
+function edge(img){try{var c=document.createElement('canvas');c.width=c.height=16;var g=c.getContext('2d');g.drawImage(img,0,0,16,16);
+  var d=g.getImageData(0,0,16,16).data,r=0,gg=0,b=0,n=0;
+  for(var i=0;i<16;i++)for(var j=0;j<16;j++){if(i&&j&&i<15&&j<15)continue;var k=(i*16+j)*4;if(d[k+3]<200)continue;r+=d[k];gg+=d[k+1];b+=d[k+2];n++}
+  return n>8?'rgb('+Math.round(r/n)+','+Math.round(gg/n)+','+Math.round(b/n)+')':null}catch(e){return null}}
+function keep(img,id){   // remember the icon and its colour so the next open needs no network
+  try{var c=document.createElement('canvas'),w=Math.min(256,img.naturalWidth||256),h=Math.min(256,img.naturalHeight||256);c.width=w;c.height=h;
+    c.getContext('2d').drawImage(img,0,0,w,h);cache.icons[id]=c.toDataURL('image/png')}catch(e){}
+  var col=edge(img);if(col){cache.colors[id]=col;img.parentNode.style.background=col}
+  persist()}
+
+/* build the rows once per change of data; moving the focus only changes classes */
+function render(){
+  $('capA').textContent=t('Apps');$('capI').textContent=t('Inputs');
+  var h='';apps.forEach(function(a,i){h+='<div class="tile" data-r="0" data-i="'+i+'">'+(GL[a.g]?'<i class="bd gl-'+a.g+'"><svg class="gl" viewBox="0 0 64 64">'+GL[a.g]+'</svg></i>':
+    '<i class="bd"'+(cache.colors[a.id]?' style="background:'+cache.colors[a.id]+'"':'')+'><img alt=""></i>')+'<span class="nm"></span></div>'});
+  $('apps').innerHTML=h;
+  var tl=$('apps').children;
+  apps.forEach(function(a,i){tl[i].querySelector('.nm').textContent=a.name||a.title||''});
+  apps.forEach(function(a,i){var im=tl[i].querySelector('img'),data=cache.icons[a.id];if(!im)return;im.crossOrigin='anonymous';
+    if(data)im.src=data;
+    else{im.onload=function(){keep(im,a.id)};im.src=API+'/icon/'+encodeURIComponent(a.id)}});
+  h='';inputs.forEach(function(r,i){h+='<div class="chip'+(r.dim?' dim':'')+(r.active?' act':'')+'" data-r="1" data-i="'+i+'">'+ICON[r.icon]+'<div class="tx"><span class="lb"></span><span class="st"></span></div></div>'});
+  $('inputs').innerHTML=h;
+  var el=$('inputs').children;inputs.forEach(function(r,i){el[i].querySelector('.lb').textContent=r.label;el[i].querySelector('.st').textContent=r.sub||''});
+  $('appsBox').style.display=apps.length?'':'none'}
+function paint(){
+  var a=$('apps').children,c=$('inputs').children,i;
+  for(i=0;i<a.length;i++)a[i].className='tile'+(row===0&&col[0]===i?' f':'');
+  for(i=0;i<c.length;i++)c[i].className='chip'+(inputs[i].dim?' dim':'')+(inputs[i].active?' act':'')+(row===1&&col[1]===i?' f':'')}
+function choose(){log('choose row '+row+' col '+col[row]);var r=cur()[col[row]];if(!r)return;if(row===0)launch(r.id);else launch(r.id,r.params);setTimeout(hide,200)}
+
+var liveOn=true;   /* Live TV is optional: the manager switches it off */
+function buildInputs(devs){
+  var r=(devs||[]).filter(function(v){return v.appId}).map(function(v){
+    var port='HDMI '+v.port,named=v.label&&v.label!==port;
+    // second line: what is connected (the device's own name), or that nothing is
+    var what=!v.hdmiPlugIn?t('Nothing'):(named?v.label:t('Connected'));
+    return {id:v.appId,icon:'hdmi',label:port,sub:what,dim:!v.hdmiPlugIn,active:!!v.activate}});
+  if(liveOn)r.push({id:'com.webos.app.home',params:{live:true},icon:'tv',label:t('Live'),sub:t('LiveSub')});
+  return r}
+function setData(d,fresh){
+  apps=d.apps;inputs=d.inputs;
+  var sig=JSON.stringify([apps,inputs]);
+  if(sig!==built){built=sig;render()}
+  if(fresh){row=1;col=[0,0];for(var i=0;i<inputs.length;i++)if(inputs[i].active){col[1]=i;break}}
+  col[0]=Math.min(col[0],Math.max(0,apps.length-1));col[1]=Math.min(col[1],inputs.length-1);
+  if(row===0&&!apps.length)row=1;
+  paint()}
+function get(path,cb,fail){var x=new XMLHttpRequest();x.open('GET',API+path);x.timeout=4000;
+  x.onload=function(){try{cb(JSON.parse(x.responseText))}catch(e){fail&&fail()}};x.onerror=x.ontimeout=function(){fail&&fail()};x.send()}
+function refresh(){
+  var got={apps:null,inputs:null};
+  function done(){if(!got.apps||!got.inputs)return;cache.apps=got.apps;cache.inputs=got.inputs;persist();$('msg').textContent='';setData(cache,false)}
+  get('/api/apps',function(x){liveOn=!(x.config&&x.config.options&&x.config.options.liveTv===false);var by={};(x.apps||[]).forEach(function(a){by[a.id]=a});
+    var looks=(x.config&&x.config.tiles)||{};   // a drawn icon chosen in the launcher (Icon and name)
+    got.apps=((x.config&&x.config.dock)||[]).filter(function(id){return by[id]}).map(function(id){var lk=looks[id]||{},g=lk.icon;return {id:id,title:by[id].title,name:typeof lk.label==='string'&&lk.label?lk.label:by[id].title,g:GL[g]?g:''}});done()},function(){});
+  get('/api/inputs',function(x){got.inputs=buildInputs(x.devices);done()},function(){if(shown&&inputs.length<=1)$('msg').textContent=t('nohelper')})}
+function load(){   // the last known layout, ready before the first open
+  try{var c=JSON.parse(localStorage.getItem(KEY)||'null');if(c&&c.inputs&&c.inputs.length){cache=c;cache.icons=cache.icons||{};cache.colors=cache.colors||{}}}catch(e){}
+  setData(cache.inputs.length?cache:{apps:[],inputs:buildInputs([])},true)}
+function show(){
+  shown=true;moved=false;shownAt=Date.now();log('show');idle();
+  setData({apps:apps,inputs:inputs},true);   // focus back on the active input
+  document.body.classList.add('on');
+  requestAnimationFrame(function(){log('painted')});
+  refresh()}
+function params(){var p={};try{p=JSON.parse(webOSSystem.launchParams||'{}')}catch(e){}return p||{}}
+function move(dr,dc){
+  moved=true;
+  if(dr){var nr=row+dr;if(nr<0||nr>1||!(nr===0?apps:inputs).length)return;
+    var from=cur(),to=nr===0?apps:inputs;col[nr]=Math.min(to.length-1,Math.round(col[row]*(to.length-1)/Math.max(1,from.length-1)));row=nr}
+  if(dc){var n=cur().length;col[row]=(col[row]+dc+n)%n}
+  paint()}
+document.addEventListener('keydown',function(e){
+  if(!shown)return;
+  idle();
+  var k=e.keyCode;
+  if(k===37)move(0,-1);else if(k===39)move(0,1);else if(k===38)move(-1,0);else if(k===40)move(1,0);
+  else if(k===13)choose();
+  else if(k===461||k===27||k===8||k===10009)hide();
+  e.preventDefault()});
+document.addEventListener('click',function(e){if(!shown)return;idle();var r=e.target.closest&&e.target.closest('[data-r]');if(r){row=+r.getAttribute('data-r');col[row]=+r.getAttribute('data-i');paint();choose()}else hide()});
+document.addEventListener('mousemove',function(e){var r=e.target.closest&&e.target.closest('[data-r]');if(!r)return;var a=+r.getAttribute('data-r'),i=+r.getAttribute('data-i');if(a!==row||i!==col[row]){moved=true;row=a;col[row]=i;paint()}});
+document.addEventListener('webOSRelaunch',function(){
+  log('relaunch shown='+shown);
+  if(params().prewarm)return;
+  idle();
+  if(shown){if(Date.now()-shownAt>700)hide()}   // Input pressed again closes it
+  else show()});
+ondemand=!!params().ondemand;
+load();
+if(params().prewarm){
+  refresh();   // built and filled while hidden
+  var done=false,go=function(){if(done)return;done=true;setTimeout(hide,150)};
+  window.addEventListener('focus',go);setTimeout(go,12000);
+}else show();
+</script></body></html>

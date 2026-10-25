@@ -1,0 +1,39 @@
+#!/bin/sh
+# Replace LG's Home with the CleanYourTV launcher (RAM-only; reboot without this script restores stock).
+# Use LG's Home instead: the switch in the manager app (creates /media/developer/cleanyourtv/DISABLE and restarts the TV).
+export PATH=/usr/bin:/usr/sbin:/bin:/sbin:$PATH
+L=/media/developer/cleanyourtv
+H=/usr/palm/applications/com.webos.app.home
+pgrep -f cleanyourtv/helper.js >/dev/null || (nohup node $L/helper.js >/tmp/cleanyourtv-helper.log 2>&1 </dev/null &)
+[ -e $L/DISABLE ] && exit 0   # LG's Home is selected: only the service runs (manager, Input key picker)
+sh $L/stage-home.sh
+if grep -q " $H " /proc/mounts; then
+  # already replaced (an update): the served files were refreshed in place; reload Home unless asked not to ($1 = keep)
+  [ "$1" = keep ] && exit 0
+  sh $L/reload-home.sh
+  exit 0
+fi
+mount --bind $L/home-overlay $H && { (sleep 3; pkill -9 -f /usr/palm/applications/airplay/LunaExecutable) </dev/null >/dev/null 2>&1 & systemctl restart sam; }
+# After the sam restart nothing is in the foreground (black screen). Once sam is back, start Home again
+# unless the user already went somewhere else (e.g. an HDMI input).
+(
+  for i in $(seq 1 60); do systemctl is-active sam >/dev/null && break; sleep 2; done
+  sleep 8
+  fg=$(luna-send -n 1 -w 5000 -f luna://com.webos.applicationManager/getForegroundAppInfo '{}' </dev/null | grep '"appId"')
+  case "$fg" in
+    *'"appId": ""'*|*com.webos.app.home*|"")
+      pkill -f "[a]pp-id=com.webos.app.home"; sleep 2
+      luna-send -n 1 -w 10000 -f luna://com.webos.applicationManager/launch '{"id":"com.webos.app.home"}' </dev/null ;;
+  esac
+) </dev/null >/dev/null 2>&1 &
+# Watchdog: if the helper stays unreachable for 60 s, fall back to stock Home until next reboot.
+(
+  bad=0
+  while grep -q " $H " /proc/mounts; do
+    sleep 10
+    if curl -s -m 3 -o /dev/null http://127.0.0.1:8765/api/foreground; then bad=0; else
+      pgrep -f cleanyourtv/helper.js >/dev/null || (nohup node $L/helper.js >/tmp/cleanyourtv-helper.log 2>&1 </dev/null &)
+      bad=$((bad+1)); [ $bad -ge 6 ] && { sh $L/undo-home.sh temp; break; }
+    fi
+  done
+) </dev/null >/dev/null 2>&1 &

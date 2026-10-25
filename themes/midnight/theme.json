@@ -1,0 +1,3 @@
+{ "name": "Midnight", "author": "CleanYourTV", "description": "Deep blue with a soft wallpaper and a blue focus.",
+  "colors": { "night": "#060a18", "panel": "#101830", "ink": "#eaf0ff", "accent": "#7aa2ff" },
+  "effects": { "glow": 0.8, "wallpaper": "midnight.jpg", "wallpaperDim": 0.25 } }

@@ -1,0 +1,6 @@
+.impeccable/
+dist/
+site/
+.venv/
+node_modules/
+.lint-pages/

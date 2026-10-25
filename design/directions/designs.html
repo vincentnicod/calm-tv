@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Calm design proposals</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600&family=Manrope:wght@200;300;400;500;600&family=Hanken+Grotesk:wght@300;400;500;600&family=Sora:wght@100;200;300;400;500&family=Bebas+Neue&display=block">
+<style>
+*{box-sizing:border-box;margin:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#000;-webkit-font-smoothing:antialiased}
+#bg{position:absolute;left:0;top:0;width:1920px;height:1080px}
+#ui{position:absolute;left:0;top:0;width:1920px;height:1080px}
+svg.logo{display:block;overflow:visible}
+.glass{background-size:1920px 1080px;background-repeat:no-repeat}
+</style></head><body>
+<canvas id="bg" width="1920" height="1080"></canvas>
+<div id="ui"></div>
+<script>
+/* ---------- data: your TV ---------- */
+var APPS=[
+  {k:'hdmi',name:'Décodeur',meta:'HDMI 1 · UPC',c:[120,140,170]},
+  {k:'sunrise',name:'Sunrise TV',meta:'TV en direct',c:[229,0,79]},
+  {k:'youtube',name:'YouTube',meta:'Sans publicité',c:[255,0,51]},
+  {k:'iptv',name:'IPTV',meta:'STZ Player',c:[118,92,255]},
+  {k:'netflix',name:'Netflix',meta:'',c:[229,9,20]}
+];
+var Q={};(location.search.slice(1)+'&'+location.hash.slice(1)).split('&').forEach(function(p){var a=p.split('=');Q[a[0]]=a[1]});
+var D=+Q.d||1,F=+(Q.f||0);
+
+/* ---------- monochrome marks (as the TV would make them from each app's icon) ---------- */
+function logo(k,h){
+  var M={
+    hdmi:['0 0 120 60','<path d="M8 12h104v22l-16 18H24L8 34z" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/><path d="M32 30h56" stroke="currentColor" stroke-width="7" stroke-dasharray="6 7"/>'],
+    sunrise:['0 0 220 60','<text x="110" y="45" text-anchor="middle" font-family="Manrope" font-weight="600" font-size="50" letter-spacing="-1" fill="currentColor">sunrise</text>'],
+    youtube:['0 0 270 60','<path fill-rule="evenodd" fill="currentColor" d="M14 6h40a14 14 0 0 1 14 14v20a14 14 0 0 1-14 14H14A14 14 0 0 1 0 40V20A14 14 0 0 1 14 6zM27 19v22l19-11z"/><text x="80" y="46" font-family="Geist" font-weight="600" font-size="44" letter-spacing="-1.5" fill="currentColor">YouTube</text>'],
+    iptv:['0 0 170 60','<circle cx="30" cy="30" r="6" fill="currentColor"/><path d="M17 17a18 18 0 0 0 0 26M43 17a18 18 0 0 1 0 26M8 8a31 31 0 0 0 0 44M52 8a31 31 0 0 1 0 44" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><text x="76" y="45" font-family="Geist" font-weight="600" font-size="42" letter-spacing="1" fill="currentColor">IPTV</text>'],
+    netflix:['0 0 200 60','<text x="100" y="52" text-anchor="middle" font-family="Bebas Neue" font-size="66" letter-spacing="2" fill="currentColor">NETFLIX</text>']
+  }[k];
+  return '<svg class="logo" viewBox="'+M[0]+'" style="height:'+h+'px">'+M[1]+'</svg>';
+}
+
+/* ---------- procedural backgrounds ---------- */
+var cv=document.getElementById('bg'),g=cv.getContext('2d'),W=1920,H=1080;
+function rnd(s){return function(){s=(s*16807)%2147483647;return (s-1)/2147483646}}
+function lerp(a,b,t){return a+(b-a)*t}
+function mix(a,b,t){return 'rgb('+[0,1,2].map(function(i){return Math.round(lerp(a[i],b[i],t))}).join(',')+')'}
+function grain(amount,seed){var r=rnd(seed||7),id=g.getImageData(0,0,W,H),d=id.data;for(var i=0;i<d.length;i+=4){var n=(r()-.5)*amount;d[i]+=n;d[i+1]+=n;d[i+2]+=n}g.putImageData(id,0,0)}
+function vgrad(stops){var gr=g.createLinearGradient(0,0,0,H);stops.forEach(function(s){gr.addColorStop(s[0],s[1])});g.fillStyle=gr;g.fillRect(0,0,W,H)}
+function glow(x,y,r,col,a){var gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,'rgba('+col+','+a+')');gr.addColorStop(1,'rgba('+col+',0)');g.fillStyle=gr;g.fillRect(0,0,W,H)}
+function vnoise(seed){var r=rnd(seed),v=[];for(var i=0;i<512;i++)v.push(r());return function(x){var i=Math.floor(x),f=x-i,u=f*f*(3-2*f);return lerp(v[i&511],v[(i+1)&511],u)}}
+function peaks(base,amp,col,seed,scale,sharp,lit){var n=vnoise(seed);g.beginPath();g.moveTo(0,H);
+  for(var x=0;x<=W;x+=2){var t=x/scale,y=0,a=1,fq=1,norm=0;for(var o=0;o<6;o++){var v=1-Math.abs(2*n(t*fq+o*31.7)-1);y+=a*Math.pow(v,sharp);norm+=a;a*=.5;fq*=2.1}
+    g.lineTo(x,base-amp*(y/norm))}
+  g.lineTo(W,H);g.closePath();g.fillStyle=col;g.fill();
+  if(lit){g.save();g.clip();var ag=g.createLinearGradient(0,base-amp,0,base-amp*.2);ag.addColorStop(0,'rgba(255,186,166,'+lit+')');ag.addColorStop(1,'rgba(255,186,166,0)');g.fillStyle=ag;g.fillRect(0,0,W,H);g.restore()}}
+function ridge(base,amp,col,seed,rough){var r=rnd(seed),ph=[r()*9,r()*9,r()*9,r()*9];g.beginPath();g.moveTo(0,H);
+  for(var x=0;x<=W;x+=4){var y=base-amp*(0.55*Math.sin(x/410+ph[0])+0.3*Math.sin(x/170+ph[1])+0.15*Math.sin(x/61+ph[2])*rough+0.08*Math.sin(x/23+ph[3])*rough);g.lineTo(x,y)}
+  g.lineTo(W,H);g.closePath();g.fillStyle=col;g.fill()}
+var BG={
+  brume:function(){ /* alpine peaks in mist, blue hour */
+    vgrad([[0,'#060c18'],[.38,'#16253d'],[.6,'#4b5873'],[.74,'#a08f9c'],[.82,'#c2a6a3'],[1,'#c2a6a3']]);
+    glow(1250,780,820,'255,206,180',.32);
+    var far=[150,138,160],near=[5,8,15];
+    [[700,300,7,560,2.4],[770,210,11,420,2.1],[850,170,19,330,1.8],[940,140,23,260,1.6],[1040,120,31,210,1.4]].forEach(function(l,i){
+      peaks(l[0],l[1],mix(far,near,Math.pow(i/4,.55)),l[2],l[3],l[4],i===0?.6:i===1?.22:0);
+      var hz=g.createLinearGradient(0,l[0]-90,0,l[0]+40);hz.addColorStop(0,'rgba(190,175,190,0)');hz.addColorStop(1,'rgba(190,175,190,'+(0.30-i*0.06)+')');g.fillStyle=hz;g.fillRect(0,l[0]-90,W,130)});
+    var v=g.createRadialGradient(W/2,H*.45,500,W/2,H*.45,1250);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.4)');g.fillStyle=v;g.fillRect(0,0,W,H);
+    grain(9,3)},
+  lac:function(){ /* dusk lake */
+    vgrad([[0,'#141b2b'],[.35,'#3a3550'],[.55,'#b57a6a'],[.615,'#f0b98c'],[.62,'#2b2a35'],[1,'#07090d']]);
+    glow(1200,668,520,'255,190,140',.55);
+    ridge(668,26,'#1a1b24',5,.6);
+    g.save();g.translate(1200,672);g.scale(1,.22);var rf=g.createRadialGradient(0,0,0,0,0,700);rf.addColorStop(0,'rgba(255,196,150,.42)');rf.addColorStop(.5,'rgba(230,150,120,.12)');rf.addColorStop(1,'rgba(230,150,120,0)');g.fillStyle=rf;g.fillRect(-1300,0,2600,2000);g.restore();
+    var wt=g.createLinearGradient(0,672,0,H);wt.addColorStop(0,'rgba(120,90,100,.25)');wt.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=wt;g.fillRect(0,672,W,H-672);
+    var v=g.createRadialGradient(W/2,H/2,500,W/2,H/2,1200);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.45)');g.fillStyle=v;g.fillRect(0,0,W,H);
+    grain(9,5)},
+  aurore:function(c){ /* soft mesh, tinted by the focused app */
+    g.fillStyle='#07070d';g.fillRect(0,0,W,H);g.globalCompositeOperation='lighter';
+    glow(300,180,900,'40,70,160',.55);glow(1600,260,800,'110,40,120',.45);glow(1100,1000,900,'20,110,120',.35);
+    glow(900,500,700,c.join(','),.22);
+    g.globalCompositeOperation='source-over';
+    var v=g.createLinearGradient(0,0,0,H);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.35)');g.fillStyle=v;g.fillRect(0,0,W,H);
+    grain(12,9)},
+  ardoise:function(){ /* warm slate */
+    g.fillStyle='#0c0b0a';g.fillRect(0,0,W,H);glow(1650,-80,1200,'200,150,100',.12);glow(200,1100,900,'60,70,90',.10);
+    grain(14,11)},
+  lin:function(){ /* warm linen */
+    g.fillStyle='#ece7df';g.fillRect(0,0,W,H);glow(400,0,1300,'255,252,246',.7);glow(1700,1100,900,'200,190,175',.25);
+    var r=rnd(13);g.globalAlpha=.035;for(var i=0;i<2400;i++){g.fillStyle=r()<.5?'#000':'#fff';g.fillRect(r()*W,r()*H,r()*140,1)}g.globalAlpha=1;
+    grain(7,13)}
+};
+/* a blurred copy for glass panels (on the TV: a second, pre-blurred wallpaper image; no live blur) */
+function blurred(px){var c2=document.createElement('canvas');c2.width=W;c2.height=H;var x=c2.getContext('2d');x.filter='blur('+px+'px)';x.drawImage(cv,-60,-60,W+120,H+120);return c2.toDataURL('image/jpeg',.9)}
+function glassify(url){[].forEach.call(document.querySelectorAll('.glass'),function(el){var b=el.getBoundingClientRect();el.style.backgroundImage=el.style.backgroundImage? el.style.backgroundImage+',url('+url+')':'url('+url+')';el.style.backgroundPosition=(el.dataset.tint?'0 0,':'')+(-b.left)+'px '+(-b.top)+'px'})}
+
+var ui=document.getElementById('ui');
+function h(s){ui.innerHTML=s}
+
+/* ---------- 1. Verre: Apple TV, glass over a mountain landscape ---------- */
+function d1(){
+  BG.brume();
+  var tiles=APPS.map(function(a,i){var f=i===F;
+    return '<div style="position:relative;width:296px;height:176px;margin-left:'+(i?36:0)+'px;transform:'+(f?'translateY(-10px) scale(1.1)':'none')+';transition:none">'+
+      '<div class="glass" data-tint="1" style="position:absolute;inset:0;border-radius:30px;background-image:linear-gradient(rgba(255,255,255,'+(f?.30:.12)+'),rgba(255,255,255,'+(f?.20:.05)+'));box-shadow:inset 0 1px 0 rgba(255,255,255,'+(f?.55:.28)+'),inset 0 0 0 1px rgba(255,255,255,.10)'+(f?',0 34px 70px rgba(0,0,0,.45)':'')+'"></div>'+
+      '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff">'+logo(a.k,a.k==='hdmi'?46:40)+'</div>'+
+      (f?'<div style="position:absolute;left:0;right:0;top:196px;text-align:center;font:500 26px Geist;color:#fff;letter-spacing:-.01em;text-shadow:0 2px 12px rgba(0,0,0,.4)">'+a.name+'</div>':'')+
+    '</div>'}).join('');
+  h('<div style="position:absolute;right:96px;top:60px;font:400 34px Geist;color:rgba(255,255,255,.92);letter-spacing:-.01em">21:47</div>'+
+    '<div style="position:absolute;left:0;right:0;top:760px;display:flex;justify-content:center">'+tiles+'</div>'+
+    '<div style="position:absolute;left:0;right:0;bottom:44px;display:flex;justify-content:center"><svg width="34" height="20" viewBox="0 0 34 20"><path d="M6 6l11 9 11-9" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>');
+  glassify(blurred(46));
+}
+
+/* ---------- 2. Éditorial: no icons, the names set in a serif, warm slate ---------- */
+function d2(){
+  BG.ardoise();
+  var row=APPS.map(function(a,i){var f=i===F;
+    return '<div style="margin-left:'+(i?64:0)+'px;position:relative">'+
+      '<div style="font:400 '+(f?84:64)+'px/1 \'Instrument Serif\';letter-spacing:-.01em;color:'+(f?'#f4efe8':'rgba(244,239,232,.30)')+';white-space:nowrap">'+(f?'<i>'+a.name+'</i>':a.name)+'</div>'+
+      '<div style="position:absolute;left:2px;top:-30px;font:500 15px \'Instrument Sans\';letter-spacing:.14em;color:rgba(244,239,232,'+(f?.7:.25)+')">'+(i+1)+'</div>'+
+      (f?'<div style="position:absolute;left:0;right:0;top:100%;margin-top:22px;height:1px;background:rgba(244,239,232,.55)"></div><div style="position:absolute;left:0;top:100%;margin-top:40px;white-space:nowrap;font:500 17px \'Instrument Sans\';letter-spacing:.16em;text-transform:uppercase;color:rgba(244,239,232,.6)">'+(a.meta||'Ouvrir')+'</div>':'')+
+    '</div>'}).join('');
+  h('<div style="position:absolute;left:120px;top:96px;font:500 17px \'Instrument Sans\';letter-spacing:.22em;text-transform:uppercase;color:rgba(244,239,232,.55)">Dimanche 25 octobre</div>'+
+    '<div style="position:absolute;left:112px;top:128px;font:400 230px/1 \'Instrument Serif\';letter-spacing:-.03em;color:#f4efe8">21<span style="opacity:.55">:</span>47</div>'+
+    '<div style="position:absolute;left:120px;right:120px;top:120px;text-align:right;font:500 15px \'Instrument Sans\';letter-spacing:.2em;text-transform:uppercase;color:rgba(244,239,232,.4)">Entrées &nbsp;·&nbsp; Réglages</div>'+
+    '<div style="position:absolute;left:120px;top:800px;display:flex;align-items:baseline">'+row+'</div>'+
+    '<div style="position:absolute;left:120px;bottom:66px;font:500 15px \'Instrument Sans\';letter-spacing:.2em;text-transform:uppercase;color:rgba(244,239,232,.35)">Toutes les apps &nbsp;↓</div>');
+}
+
+/* ---------- 3. Paysage: a dusk lake, the clock and a line of white marks ---------- */
+function d3(){
+  BG.lac();
+  var row=APPS.map(function(a,i){var f=i===F;
+    return '<div style="margin-left:'+(i?20:0)+'px;height:84px;padding:0 34px;border-radius:42px;display:flex;align-items:center;'+(f?'background:rgba(255,255,255,.94);color:#14161c;box-shadow:0 18px 40px rgba(0,0,0,.35)':'color:rgba(255,255,255,.88)')+'">'+logo(a.k,a.k==='hdmi'?34:28)+'</div>'}).join('');
+  var a=APPS[F];
+  h('<div style="position:absolute;left:110px;bottom:250px;font:200 150px/1 Manrope;letter-spacing:-.04em;color:#fff">21:47</div>'+
+    '<div style="position:absolute;left:118px;bottom:212px;font:400 26px Manrope;color:rgba(255,255,255,.75)">dimanche 25 octobre</div>'+
+    '<div style="position:absolute;right:110px;top:70px;display:flex"><span style="font:500 20px Manrope;color:rgba(255,255,255,.7);letter-spacing:.04em">Entrées</span><span style="margin-left:40px;font:500 20px Manrope;color:rgba(255,255,255,.7);letter-spacing:.04em">Réglages</span></div>'+
+    '<div style="position:absolute;left:96px;bottom:84px;display:flex;align-items:center">'+row+'</div>'+
+    '<div style="position:absolute;right:110px;bottom:108px;text-align:right"><div style="font:600 30px Manrope;color:#fff;letter-spacing:-.01em">'+a.name+'</div><div style="margin-top:4px;font:400 20px Manrope;color:rgba(255,255,255,.65)">'+(a.meta||'')+'</div></div>');
+}
+
+/* ---------- 4. Lin: a light room, paper cards, black marks ---------- */
+function d4(){
+  BG.lin();
+  var ink='#17171a';
+  var cards=APPS.slice(0,4).map(function(a,i){var f=i===F;
+    return '<div style="margin-left:'+(i?32:0)+'px;width:402px">'+
+      '<div style="height:240px;border-radius:22px;display:flex;align-items:center;justify-content:center;background:'+(f?ink:'#fbfaf7')+';color:'+(f?'#fbfaf7':ink)+';box-shadow:'+(f?'0 30px 60px rgba(40,30,20,.28)':'0 1px 0 rgba(255,255,255,.8) inset,0 10px 30px rgba(60,50,40,.10)')+';transform:'+(f?'translateY(-8px)':'none')+'">'+logo(a.k,a.k==='hdmi'?50:42)+'</div>'+
+      '<div style="margin-top:22px;display:flex;justify-content:space-between;font:500 24px \'Hanken Grotesk\';color:'+(f?ink:'rgba(23,23,26,.55)')+'"><span>'+a.name+'</span><span style="font-weight:400;color:rgba(23,23,26,.4)">'+(i+1)+'</span></div>'+
+    '</div>'}).join('');
+  h('<div style="position:absolute;left:96px;top:84px;font:300 120px/1 \'Hanken Grotesk\';letter-spacing:-.045em;color:'+ink+'">21:47</div>'+
+    '<div style="position:absolute;left:102px;top:214px;font:400 26px \'Hanken Grotesk\';color:rgba(23,23,26,.55)">Dimanche 25 octobre</div>'+
+    '<div style="position:absolute;right:96px;top:96px;display:flex;font:500 21px \'Hanken Grotesk\';color:rgba(23,23,26,.6)"><span>Entrées</span><span style="margin-left:36px">Réglages</span><span style="margin-left:36px">Personnaliser</span></div>'+
+    '<div style="position:absolute;left:96px;top:560px;display:flex">'+cards+'</div>'+
+    '<div style="position:absolute;left:96px;right:96px;bottom:70px;height:1px;background:rgba(23,23,26,.12)"></div>'+
+    '<div style="position:absolute;left:96px;bottom:30px;font:500 19px \'Hanken Grotesk\';color:rgba(23,23,26,.45)">Toutes les apps</div>');
+}
+
+/* ---------- 5. Aurore: a soft aurora that takes the focused app's colour, the time in the middle, glass pills ---------- */
+function d5(){
+  BG.aurore(APPS[F].c);
+  var pills=APPS.map(function(a,i){var f=i===F;
+    return '<div '+(f?'':'class="glass" data-tint="1"')+' style="margin-left:'+(i?22:0)+'px;width:236px;height:100px;border-radius:50px;display:flex;align-items:center;justify-content:center;'+(f?'background:#f6f5fa;color:#101018;box-shadow:0 26px 60px rgba(0,0,0,.45);transform:scale(1.06)':'background-image:linear-gradient(rgba(255,255,255,.09),rgba(255,255,255,.05));color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 0 0 1px rgba(255,255,255,.08)')+'">'+logo(a.k,a.k==='hdmi'?32:26)+'</div>'}).join('');
+  h('<div style="position:absolute;left:0;right:0;top:250px;text-align:center;font:100 230px/1 Sora;letter-spacing:-.05em;color:#fff">21:47</div>'+
+    '<div style="position:absolute;left:0;right:0;top:500px;text-align:center;font:400 22px Sora;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.6)">Dimanche 25 octobre</div>'+
+    '<div style="position:absolute;left:0;right:0;bottom:120px;display:flex;justify-content:center;align-items:center">'+pills+'</div>'+
+    '<div style="position:absolute;left:0;right:0;bottom:62px;text-align:center;font:400 20px Sora;color:rgba(255,255,255,.7)">'+APPS[F].name+(APPS[F].meta?' <span style="opacity:.55">·  '+APPS[F].meta+'</span>':'')+'</div>');
+  glassify(blurred(30));
+}
+
+document.fonts.ready.then(function(){[d1,d2,d3,d4,d5][D-1]();document.title='ready'});
+</script></body></html>

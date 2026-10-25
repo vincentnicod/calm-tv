@@ -1,0 +1,95 @@
+var kFlow = 'input',
+  kText = '',
+  kRows = [],
+  kTimer = 0,
+  upd = null,
+  checkedOffline = false,
+  forceOffer = false,
+  API = 'http://127.0.0.1:8765',
+  SVC = '/media/developer/apps/usr/palm/services/com.cleanyourtv.manager.service';
+var napi = null,
+  lv = null,
+  th = null,
+  vo = null,
+  mdl = [],
+  agl = [],
+  tst = null,
+  shareMode = 'log',
+  pairBase = 0,
+  idxStack = [],
+  setupIdx = 0,
+  updIdx = 0,
+  st = null,
+  rows = [],
+  idx = 0,
+  view = 'main',
+  pending = null,
+  pollT = 0,
+  setup = { debloat: true, inputKey: true },
+  offline = false,
+  busyMsg = '';
+function $(i) {
+  return document.getElementById(i);
+}
+function api(p, body, ms) {
+  return new Promise(function (res, rej) {
+    var x = new XMLHttpRequest();
+    x.open(body ? 'POST' : 'GET', API + p);
+    x.timeout = ms || 30000;
+    x.onload = function () {
+      try {
+        res(JSON.parse(x.responseText));
+      } catch (e) {
+        rej(e);
+      }
+    };
+    x.onerror = x.ontimeout = function () {
+      rej(new Error('no answer'));
+    };
+    x.send(body ? JSON.stringify(body) : null);
+  });
+}
+function rootExec(cmd) {
+  return new Promise(function (res) {
+    try {
+      var b = new PalmServiceBridge();
+      b.onservicecallback = function (m) {
+        res(m);
+      };
+      b.call('luna://org.webosbrew.hbchannel.service/exec', JSON.stringify({ command: cmd }));
+    } catch (e) {
+      res(JSON.stringify({ returnValue: false, errorText: String(e) }));
+    }
+  });
+}
+function launch(id, params) {
+  try {
+    var b = new PalmServiceBridge();
+    b.onservicecallback = function () {};
+    b.call('luna://com.webos.applicationManager/launch', JSON.stringify({ id: id, params: params || {} }));
+  } catch (e) {}
+}
+function onoff(v) {
+  return v ? 'On' : 'Off';
+}
+function banner(text, cls) {
+  var b = $('banner');
+  b.textContent = text || '';
+  b.className = cls || '';
+  b.style.display = text ? '' : 'none';
+}
+
+function push(v) {
+  idxStack.push([view, idx]);
+  view = v;
+  idx = 0;
+  build();
+  draw();
+} // into a screen; pop returns to the row we left
+function pop() {
+  var p = idxStack.pop() || ['main', 0];
+  view = p[0];
+  idx = p[1];
+  build();
+  draw();
+}

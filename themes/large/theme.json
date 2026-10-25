@@ -1,0 +1,5 @@
+{ "name": "Large print", "author": "CleanYourTV", "description": "Eight columns of big tiles and bigger text, easier to read from the sofa.",
+  "colors": { "accent": "#f2c94c" },
+  "grid": { "cols": 8, "tileH": 190, "radius": 44, "gapX": 28, "gapY": 30 },
+  "dock": { "h": 260, "radius": 48 },
+  "type": { "scale": 1.18 } }

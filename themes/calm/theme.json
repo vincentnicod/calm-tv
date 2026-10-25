@@ -1,0 +1,61 @@
+{
+ "name": "Calm",
+ "author": "CleanYourTV",
+ "description": "Four dark cards with the app's name inside and the focused one in the light; round buttons and the clock; all apps one press down.",
+ "colors": {
+  "night": "#08090b",
+  "panel": "#15171c",
+  "ink": "#f2f3f5",
+  "accent": "#f2f3f5"
+ },
+ "surface": {
+  "pillAlpha": 0.06,
+  "pillRing": 0.14
+ },
+ "clock": {
+  "layout": "stack",
+  "y": 70,
+  "scale": 1.75,
+  "dateScale": 0.95,
+  "weight": 300
+ },
+ "bar": {
+  "style": "round",
+  "size": 56,
+  "gap": 14,
+  "y": 62
+ },
+ "shelf": {
+  "show": false
+ },
+ "dock": {
+  "y": 600,
+  "w": 408,
+  "h": 236,
+  "gap": 32,
+  "radius": 26,
+  "lift": 0,
+  "focusScale": 1.05,
+  "style": "card",
+  "dim": 0.7
+ },
+ "grid": {
+  "mode": "push",
+  "dockUp": 250,
+  "y": 930,
+  "overlayDim": 0,
+  "cols": 10,
+  "tileH": 151,
+  "gapX": 24,
+  "gapY": 60,
+  "radius": 26,
+  "focusScale": 1.1
+ },
+ "tile": {
+  "ringWidth": 3,
+  "ringOffset": 6
+ },
+ "effects": {
+  "glow": 0.4
+ }
+}

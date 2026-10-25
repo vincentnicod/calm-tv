@@ -1,0 +1,55 @@
+{
+ "name": "Bloom",
+ "author": "CleanYourTV",
+ "description": "A flower wallpaper with the dock in a glass panel at the bottom. Down moves the dock up and the apps appear below it, centred.",
+ "colors": {
+  "night": "#0b0a1c",
+  "panel": "#2a2038",
+  "ink": "#ffffff",
+  "accent": "#ffffff"
+ },
+ "surface": {
+  "pillAlpha": 0.14,
+  "pillRing": 0.22
+ },
+ "clock": {
+  "layout": "stack",
+  "scale": 1.45,
+  "dateScale": 1
+ },
+ "bar": {
+  "style": "round",
+  "size": 58
+ },
+ "dock": {
+  "anchor": "bottom",
+  "align": "center",
+  "count": 6,
+  "w": 236,
+  "h": 142,
+  "gap": 28,
+  "radius": 38,
+  "panel": 0.14
+ },
+ "grid": {
+  "mode": "push",
+  "dockUp": 230,
+  "clipTop": 210,
+  "cols": 8,
+  "tileH": 150,
+  "gapX": 26,
+  "align": "center",
+  "overlayDim": 0.55
+ },
+ "tile": {
+  "gloss": 0.6
+ },
+ "effects": {
+  "glow": 0,
+  "wallpaper": "bloom.jpg",
+  "wallpaperDim": 0.2
+ },
+ "shelf": {
+  "show": false
+ }
+}

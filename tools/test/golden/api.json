@@ -1,0 +1,1082 @@
+{
+ "version": {
+  "body": {
+   "version": "<version>"
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "apps": {
+  "body": {
+   "apps": [
+    {
+     "folder": "<tmp>/apps/netflix",
+     "icon": "icon.png",
+     "id": "netflix",
+     "title": "Netflix",
+     "type": "web"
+    },
+    {
+     "folder": "<tmp>/apps/youtube",
+     "icon": "missing.png",
+     "id": "youtube.leanback.v4",
+     "title": "YouTube",
+     "type": "web"
+    }
+   ],
+   "config": {
+    "clock": "auto",
+    "dock": [
+     "netflix",
+     "youtube.leanback.v4"
+    ],
+    "hidden": [
+     "com.webos.app.browser"
+    ],
+    "keys": {
+     "input": "241",
+     "learned": true
+    },
+    "options": {
+     "debloat": false,
+     "inputKey": false,
+     "liveTv": true
+    },
+    "sort": "usage",
+    "theme": {
+     "attrs": {
+      "accmode": "dark",
+      "bar": "text",
+      "clock": "stack",
+      "clockpos": "bottom",
+      "datecase": "normal",
+      "dock": "bottom",
+      "dockfocus": "fill",
+      "dockstyle": "logo",
+      "galign": "left",
+      "grid": "push",
+      "inkmode": "light",
+      "labels": "show",
+      "shelf": "hide"
+     },
+     "cols": 10,
+     "daily": true,
+     "dockN": 5,
+     "gapY": 60,
+     "glass": "",
+     "glowRgb": "",
+     "gt": 1064,
+     "id": "classic",
+     "name": "Paysage",
+     "nightRgb": "11,13,20",
+     "overlay": false,
+     "overlayH": 510,
+     "push": {
+      "gridTop": 1064,
+      "up": 620
+     },
+     "scene": "lac",
+     "tileH": 140,
+     "vars": {
+      "--acc": "#f4f4f6",
+      "--acc-ink": "#0b0c10",
+      "--bar-b": "auto",
+      "--bar-d": "flex",
+      "--bar-gap": "10px",
+      "--bar-l": "auto",
+      "--bar-r": "96px",
+      "--bar-t": "58px",
+      "--bar-tx": "none",
+      "--clock-ai": "flex-start",
+      "--clock-b": "196px",
+      "--clock-d": "flex",
+      "--clock-l": "110px",
+      "--clock-ls": "-0.06em",
+      "--clock-r": "auto",
+      "--clock-s": "2.5",
+      "--clock-t": "auto",
+      "--clock-tx": "none",
+      "--clock-w": "200",
+      "--cols": "10",
+      "--date-d": "block",
+      "--date-ink": "rgba(255,255,255,.78)",
+      "--date-s": "0.95",
+      "--dock-b": "auto",
+      "--dock-dim": "1",
+      "--dock-fs": "1.04",
+      "--dock-gap": "14px",
+      "--dock-h": "84px",
+      "--dock-l": "96px",
+      "--dock-lift": "0px",
+      "--dock-pad": "0px",
+      "--dock-panel": "0",
+      "--dock-r": "auto",
+      "--dock-rad": "42px",
+      "--dock-t": "920px",
+      "--dock-tx": "none",
+      "--dock-w": "204px",
+      "--focus": "#f4f4f6",
+      "--font": "\"Calm Manrope\",\"LG Smart UI\",\"Helvetica Neue\",Helvetica,Arial,sans-serif",
+      "--font-d": "\"Calm Manrope\",\"LG Smart UI\",\"Helvetica Neue\",Helvetica,Arial,sans-serif",
+      "--fs": "1",
+      "--gap-x": "26px",
+      "--gap-y": "60px",
+      "--gloss": "0",
+      "--glow-op": "0",
+      "--grid-fs": "1.1",
+      "--grid-l": "96px",
+      "--grid-t": "1064px",
+      "--grid-w": "1728px",
+      "--ink": "#ffffff",
+      "--ink2": "rgba(255,255,255,.62)",
+      "--menu-bg": "rgba(11,13,20,0.9)",
+      "--name-a": "left",
+      "--name-d": "none",
+      "--name-s": "1",
+      "--name-x": "96px",
+      "--name-y": "150px",
+      "--night": "#0b0d14",
+      "--night-rgb": "11,13,20",
+      "--ov-dim": "0.6",
+      "--panel": "#1b1e28",
+      "--panel2": "#292c35",
+      "--pill-bg": "rgba(255,255,255,0.09)",
+      "--pill-h": "52px",
+      "--pill-r": "28px",
+      "--pill-ring": "rgba(255,255,255,0.1)",
+      "--ring-off": "5px",
+      "--ring-w": "3px",
+      "--row-r": "30px",
+      "--spd": "1",
+      "--tile-border": "0",
+      "--tile-h": "140px",
+      "--tile-r": "28px",
+      "--tile-w": "149px",
+      "--view-top": "0px"
+     },
+     "viewH": 1080,
+     "wallpaper": null
+    }
+   },
+   "usage": {},
+   "version": "<version>"
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "inputs": {
+  "body": {
+   "devices": [
+    {
+     "appId": "com.webos.app.hdmi1",
+     "connected": true,
+     "id": "HDMI_1",
+     "label": "HDMI 1"
+    }
+   ],
+   "returnValue": true
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "foreground": {
+  "body": {
+   "appId": "netflix",
+   "processId": "",
+   "returnValue": true,
+   "windowId": ""
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "launch a bad id": {
+  "body": {
+   "error": "bad id"
+  },
+  "cors": "null",
+  "status": 400,
+  "type": "application/json"
+ },
+ "launch": {
+  "body": {
+   "returnValue": true
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "a web page is refused": {
+  "body": {
+   "error": "origin not allowed"
+  },
+  "cors": "",
+  "status": 403,
+  "type": "application/json"
+ },
+ "preflight from our app": {
+  "body": "",
+  "cors": "null",
+  "status": 204,
+  "type": ""
+ },
+ "webOS 6 app origin": {
+  "body": {
+   "version": "<version>"
+  },
+  "cors": "*",
+  "status": 200,
+  "type": "application/json"
+ },
+ "another app origin is refused": {
+  "body": {
+   "error": "origin not allowed"
+  },
+  "cors": "",
+  "status": 403,
+  "type": "application/json"
+ },
+ "save the launcher settings": {
+  "body": {
+   "returnValue": true
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "the launcher settings are kept, the rest too": {
+  "body": {
+   "apps": [
+    {
+     "folder": "<tmp>/apps/netflix",
+     "icon": "icon.png",
+     "id": "netflix",
+     "title": "Netflix",
+     "type": "web"
+    },
+    {
+     "folder": "<tmp>/apps/youtube",
+     "icon": "missing.png",
+     "id": "youtube.leanback.v4",
+     "title": "YouTube",
+     "type": "web"
+    }
+   ],
+   "config": {
+    "clock": "24",
+    "dock": [
+     "netflix"
+    ],
+    "hidden": [],
+    "keys": {
+     "input": "241",
+     "learned": true
+    },
+    "options": {
+     "debloat": false,
+     "inputKey": false,
+     "liveTv": true
+    },
+    "sort": "alpha",
+    "theme": {
+     "attrs": {
+      "accmode": "dark",
+      "bar": "text",
+      "clock": "stack",
+      "clockpos": "bottom",
+      "datecase": "normal",
+      "dock": "bottom",
+      "dockfocus": "fill",
+      "dockstyle": "logo",
+      "galign": "left",
+      "grid": "push",
+      "inkmode": "light",
+      "labels": "show",
+      "shelf": "hide"
+     },
+     "cols": 10,
+     "daily": true,
+     "dockN": 5,
+     "gapY": 60,
+     "glass": "",
+     "glowRgb": "",
+     "gt": 1064,
+     "id": "classic",
+     "name": "Paysage",
+     "nightRgb": "11,13,20",
+     "overlay": false,
+     "overlayH": 510,
+     "push": {
+      "gridTop": 1064,
+      "up": 620
+     },
+     "scene": "lac",
+     "tileH": 140,
+     "vars": {
+      "--acc": "#f4f4f6",
+      "--acc-ink": "#0b0c10",
+      "--bar-b": "auto",
+      "--bar-d": "flex",
+      "--bar-gap": "10px",
+      "--bar-l": "auto",
+      "--bar-r": "96px",
+      "--bar-t": "58px",
+      "--bar-tx": "none",
+      "--clock-ai": "flex-start",
+      "--clock-b": "196px",
+      "--clock-d": "flex",
+      "--clock-l": "110px",
+      "--clock-ls": "-0.06em",
+      "--clock-r": "auto",
+      "--clock-s": "2.5",
+      "--clock-t": "auto",
+      "--clock-tx": "none",
+      "--clock-w": "200",
+      "--cols": "10",
+      "--date-d": "block",
+      "--date-ink": "rgba(255,255,255,.78)",
+      "--date-s": "0.95",
+      "--dock-b": "auto",
+      "--dock-dim": "1",
+      "--dock-fs": "1.04",
+      "--dock-gap": "14px",
+      "--dock-h": "84px",
+      "--dock-l": "96px",
+      "--dock-lift": "0px",
+      "--dock-pad": "0px",
+      "--dock-panel": "0",
+      "--dock-r": "auto",
+      "--dock-rad": "42px",
+      "--dock-t": "920px",
+      "--dock-tx": "none",
+      "--dock-w": "204px",
+      "--focus": "#f4f4f6",
+      "--font": "\"Calm Manrope\",\"LG Smart UI\",\"Helvetica Neue\",Helvetica,Arial,sans-serif",
+      "--font-d": "\"Calm Manrope\",\"LG Smart UI\",\"Helvetica Neue\",Helvetica,Arial,sans-serif",
+      "--fs": "1",
+      "--gap-x": "26px",
+      "--gap-y": "60px",
+      "--gloss": "0",
+      "--glow-op": "0",
+      "--grid-fs": "1.1",
+      "--grid-l": "96px",
+      "--grid-t": "1064px",
+      "--grid-w": "1728px",
+      "--ink": "#ffffff",
+      "--ink2": "rgba(255,255,255,.62)",
+      "--menu-bg": "rgba(11,13,20,0.9)",
+      "--name-a": "left",
+      "--name-d": "none",
+      "--name-s": "1",
+      "--name-x": "96px",
+      "--name-y": "150px",
+      "--night": "#0b0d14",
+      "--night-rgb": "11,13,20",
+      "--ov-dim": "0.6",
+      "--panel": "#1b1e28",
+      "--panel2": "#292c35",
+      "--pill-bg": "rgba(255,255,255,0.09)",
+      "--pill-h": "52px",
+      "--pill-r": "28px",
+      "--pill-ring": "rgba(255,255,255,0.1)",
+      "--ring-off": "5px",
+      "--ring-w": "3px",
+      "--row-r": "30px",
+      "--spd": "1",
+      "--tile-border": "0",
+      "--tile-h": "140px",
+      "--tile-r": "28px",
+      "--tile-w": "149px",
+      "--view-top": "0px"
+     },
+     "viewH": 1080,
+     "wallpaper": null
+    }
+   },
+   "usage": {},
+   "version": "<version>"
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "save app looks and the HDMI card": {
+  "body": {
+   "returnValue": true
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "app looks and the HDMI card are kept": {
+  "body": {
+   "apps": [
+    {
+     "folder": "<tmp>/apps/netflix",
+     "icon": "icon.png",
+     "id": "netflix",
+     "title": "Netflix",
+     "type": "web"
+    },
+    {
+     "folder": "<tmp>/apps/youtube",
+     "icon": "missing.png",
+     "id": "youtube.leanback.v4",
+     "title": "YouTube",
+     "type": "web"
+    }
+   ],
+   "config": {
+    "dock": [
+     "__hdmi",
+     "netflix"
+    ],
+    "hdmi": "1",
+    "keys": {
+     "input": "241",
+     "learned": true
+    },
+    "options": {
+     "debloat": false,
+     "inputKey": false,
+     "liveTv": true
+    },
+    "theme": {
+     "attrs": {
+      "accmode": "dark",
+      "bar": "text",
+      "clock": "stack",
+      "clockpos": "bottom",
+      "datecase": "normal",
+      "dock": "bottom",
+      "dockfocus": "fill",
+      "dockstyle": "logo",
+      "galign": "left",
+      "grid": "push",
+      "inkmode": "light",
+      "labels": "show",
+      "shelf": "hide"
+     },
+     "cols": 10,
+     "daily": true,
+     "dockN": 5,
+     "gapY": 60,
+     "glass": "",
+     "glowRgb": "",
+     "gt": 1064,
+     "id": "classic",
+     "name": "Paysage",
+     "nightRgb": "11,13,20",
+     "overlay": false,
+     "overlayH": 510,
+     "push": {
+      "gridTop": 1064,
+      "up": 620
+     },
+     "scene": "lac",
+     "tileH": 140,
+     "vars": {
+      "--acc": "#f4f4f6",
+      "--acc-ink": "#0b0c10",
+      "--bar-b": "auto",
+      "--bar-d": "flex",
+      "--bar-gap": "10px",
+      "--bar-l": "auto",
+      "--bar-r": "96px",
+      "--bar-t": "58px",
+      "--bar-tx": "none",
+      "--clock-ai": "flex-start",
+      "--clock-b": "196px",
+      "--clock-d": "flex",
+      "--clock-l": "110px",
+      "--clock-ls": "-0.06em",
+      "--clock-r": "auto",
+      "--clock-s": "2.5",
+      "--clock-t": "auto",
+      "--clock-tx": "none",
+      "--clock-w": "200",
+      "--cols": "10",
+      "--date-d": "block",
+      "--date-ink": "rgba(255,255,255,.78)",
+      "--date-s": "0.95",
+      "--dock-b": "auto",
+      "--dock-dim": "1",
+      "--dock-fs": "1.04",
+      "--dock-gap": "14px",
+      "--dock-h": "84px",
+      "--dock-l": "96px",
+      "--dock-lift": "0px",
+      "--dock-pad": "0px",
+      "--dock-panel": "0",
+      "--dock-r": "auto",
+      "--dock-rad": "42px",
+      "--dock-t": "920px",
+      "--dock-tx": "none",
+      "--dock-w": "204px",
+      "--focus": "#f4f4f6",
+      "--font": "\"Calm Manrope\",\"LG Smart UI\",\"Helvetica Neue\",Helvetica,Arial,sans-serif",
+      "--font-d": "\"Calm Manrope\",\"LG Smart UI\",\"Helvetica Neue\",Helvetica,Arial,sans-serif",
+      "--fs": "1",
+      "--gap-x": "26px",
+      "--gap-y": "60px",
+      "--gloss": "0",
+      "--glow-op": "0",
+      "--grid-fs": "1.1",
+      "--grid-l": "96px",
+      "--grid-t": "1064px",
+      "--grid-w": "1728px",
+      "--ink": "#ffffff",
+      "--ink2": "rgba(255,255,255,.62)",
+      "--menu-bg": "rgba(11,13,20,0.9)",
+      "--name-a": "left",
+      "--name-d": "none",
+      "--name-s": "1",
+      "--name-x": "96px",
+      "--name-y": "150px",
+      "--night": "#0b0d14",
+      "--night-rgb": "11,13,20",
+      "--ov-dim": "0.6",
+      "--panel": "#1b1e28",
+      "--panel2": "#292c35",
+      "--pill-bg": "rgba(255,255,255,0.09)",
+      "--pill-h": "52px",
+      "--pill-r": "28px",
+      "--pill-ring": "rgba(255,255,255,0.1)",
+      "--ring-off": "5px",
+      "--ring-w": "3px",
+      "--row-r": "30px",
+      "--spd": "1",
+      "--tile-border": "0",
+      "--tile-h": "140px",
+      "--tile-r": "28px",
+      "--tile-w": "149px",
+      "--view-top": "0px"
+     },
+     "viewH": 1080,
+     "wallpaper": null
+    },
+    "tiles": {
+     "youtube.leanback.v4": {
+      "icon": "youtube",
+      "label": "YouTube"
+     }
+    }
+   },
+   "usage": {},
+   "version": "<version>"
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "manager check": {
+  "body": {
+   "channel": "",
+   "checkError": "",
+   "checkedAt": "<time>",
+   "checking": "<time>",
+   "frontend": {
+    "build": "",
+    "previous": null,
+    "updateTo": "99.1.0",
+    "version": "1.4.15"
+   },
+   "home": {
+    "enabled": true,
+    "fullhome": false,
+    "ours": false
+   },
+   "inputhook": {
+    "bound": false,
+    "hook": {
+     "attached": false,
+     "errors": [],
+     "sawKeys": false
+    },
+    "hooked": false
+   },
+   "job": {
+    "at": "<time>",
+    "message": "",
+    "state": "idle"
+   },
+   "keys": {
+    "guide": "",
+    "home": "",
+    "input": "241",
+    "inputIsDefault": false,
+    "learned": true,
+    "voice": ""
+   },
+   "notifyApi": {
+    "enabled": false,
+    "port": 8767
+   },
+   "options": {
+    "debloat": false,
+    "inputKey": false,
+    "liveTv": true
+   },
+   "picker": {
+    "mode": "overlay",
+    "released": false
+   },
+   "release": {
+    "build": "",
+    "frontend": "99.1.0",
+    "notes": "Release notes.",
+    "service": "99.1.0",
+    "test": false,
+    "version": "99.1.0"
+   },
+   "repo": "vincentnicod/calm-tv",
+   "service": {
+    "build": "",
+    "updateTo": "99.1.0",
+    "version": "<version>"
+   },
+   "voice": {
+    "enabled": false,
+    "installed": false
+   }
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "manager status": {
+  "body": {
+   "channel": "",
+   "checkError": "",
+   "checkedAt": "<time>",
+   "checking": "<time>",
+   "frontend": {
+    "build": "",
+    "previous": null,
+    "updateTo": "99.1.0",
+    "version": "1.4.15"
+   },
+   "home": {
+    "enabled": true,
+    "fullhome": false,
+    "ours": false
+   },
+   "inputhook": {
+    "bound": false,
+    "hook": {
+     "attached": false,
+     "errors": [],
+     "sawKeys": false
+    },
+    "hooked": false
+   },
+   "job": {
+    "at": "<time>",
+    "message": "",
+    "state": "idle"
+   },
+   "keys": {
+    "guide": "",
+    "home": "",
+    "input": "241",
+    "inputIsDefault": false,
+    "learned": true,
+    "voice": ""
+   },
+   "notifyApi": {
+    "enabled": false,
+    "port": 8767
+   },
+   "options": {
+    "debloat": false,
+    "inputKey": false,
+    "liveTv": true
+   },
+   "picker": {
+    "mode": "overlay",
+    "released": false
+   },
+   "release": {
+    "build": "",
+    "frontend": "99.1.0",
+    "notes": "Release notes.",
+    "service": "99.1.0",
+    "test": false,
+    "version": "99.1.0"
+   },
+   "repo": "vincentnicod/calm-tv",
+   "service": {
+    "build": "",
+    "updateTo": "99.1.0",
+    "version": "<version>"
+   },
+   "voice": {
+    "enabled": false,
+    "installed": false
+   }
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "test builds": {
+  "body": {
+   "builds": [
+    {
+     "branch": "test-branch-a",
+     "build": "abcdef1",
+     "frontend": null,
+     "published": "2026-01-02T00:00:00Z",
+     "service": null,
+     "tag": "test-branch-a"
+    }
+   ],
+   "channel": ""
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "an option": {
+  "body": {
+   "channel": "",
+   "checkError": "",
+   "checkedAt": "<time>",
+   "checking": "<time>",
+   "frontend": {
+    "build": "",
+    "previous": null,
+    "updateTo": "99.1.0",
+    "version": "1.4.15"
+   },
+   "home": {
+    "enabled": true,
+    "fullhome": false,
+    "ours": false
+   },
+   "inputhook": {
+    "bound": false,
+    "hook": {
+     "attached": false,
+     "errors": [],
+     "sawKeys": false
+    },
+    "hooked": false
+   },
+   "job": {
+    "at": "<time>",
+    "message": "",
+    "state": "idle"
+   },
+   "keys": {
+    "guide": "",
+    "home": "",
+    "input": "241",
+    "inputIsDefault": false,
+    "learned": true,
+    "voice": ""
+   },
+   "notifyApi": {
+    "enabled": false,
+    "port": 8767
+   },
+   "options": {
+    "debloat": false,
+    "inputKey": false,
+    "liveTv": false
+   },
+   "picker": {
+    "mode": "overlay",
+    "released": false
+   },
+   "release": {
+    "build": "",
+    "frontend": "99.1.0",
+    "notes": "Release notes.",
+    "service": "99.1.0",
+    "test": false,
+    "version": "99.1.0"
+   },
+   "repo": "vincentnicod/calm-tv",
+   "service": {
+    "build": "",
+    "updateTo": "99.1.0",
+    "version": "<version>"
+   },
+   "voice": {
+    "enabled": false,
+    "installed": false
+   }
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "notification api": {
+  "body": {
+   "allow": [],
+   "enabled": false,
+   "ip": "<time>",
+   "listening": false,
+   "port": 8767,
+   "token": ""
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "live status": {
+  "body": {
+   "channels": 0,
+   "configured": false,
+   "epg": 0,
+   "error": "",
+   "pairing": null,
+   "state": "idle"
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "live channels": {
+  "body": {
+   "channels": [],
+   "groups": []
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "live state": {
+  "body": {
+   "failed": {},
+   "fav": [],
+   "recent": []
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "themes": {
+  "body": {
+   "accents": [
+    {
+     "hex": "",
+     "name": "Theme default"
+    },
+    {
+     "hex": "#f5f6f8",
+     "name": "White"
+    },
+    {
+     "hex": "#4c8dff",
+     "name": "Blue"
+    },
+    {
+     "hex": "#2ec4b6",
+     "name": "Teal"
+    },
+    {
+     "hex": "#46c37b",
+     "name": "Green"
+    },
+    {
+     "hex": "#f2c94c",
+     "name": "Yellow"
+    },
+    {
+     "hex": "#ff8a3d",
+     "name": "Orange"
+    },
+    {
+     "hex": "#ff5a5f",
+     "name": "Red"
+    },
+    {
+     "hex": "#ff6fb5",
+     "name": "Pink"
+    },
+    {
+     "hex": "#a77bff",
+     "name": "Purple"
+    }
+   ],
+   "catalogue": {
+    "at": "<time>",
+    "error": "",
+    "ok": true
+   },
+   "current": {
+    "accent": "",
+    "id": "classic"
+   },
+   "previous": null,
+   "themes": [
+    {
+     "author": "CleanYourTV",
+     "description": "A lake at dusk, a thin clock on the water and one line of white logos; all apps one press down.",
+     "id": "classic",
+     "installed": true,
+     "name": "Paysage",
+     "preview": true
+    },
+    {
+     "author": "CleanYourTV",
+     "description": "Alpine peaks at blue hour and a row of frosted-glass tiles with white logos; the focused one grows and brightens.",
+     "id": "verre",
+     "installed": true,
+     "name": "Verre",
+     "preview": false
+    },
+    {
+     "author": "CleanYourTV",
+     "description": "Warm slate, a large serif clock and your apps set as words, with no icons; the focused name in italic over a hairline.",
+     "id": "editorial",
+     "installed": true,
+     "name": "Éditorial",
+     "preview": false
+    },
+    {
+     "author": "CleanYourTV",
+     "description": "Warm linen, black type and paper-white cards with logos in ink; the focused card turns black. Bright in a dark room.",
+     "id": "lin",
+     "installed": true,
+     "name": "Lin",
+     "preview": false
+    },
+    {
+     "author": "CleanYourTV",
+     "description": "A soft aurora that takes on the focused app's colour, a very thin clock in the centre and glass pills with white logos.",
+     "id": "aurore",
+     "installed": true,
+     "name": "Aurore",
+     "preview": false
+    },
+    {
+     "author": "CleanYourTV",
+     "description": "Four dark cards with the app's name inside and the focused one in the light; round buttons and the clock; all apps one press down.",
+     "id": "calm",
+     "installed": true,
+     "name": "Calm",
+     "preview": false
+    },
+    {
+     "author": "CleanYourTV",
+     "description": "The original CleanYourTV look: the large name of the focused app, four wide dock tiles and ten columns under them.",
+     "id": "original",
+     "installed": true,
+     "name": "Original",
+     "preview": false
+    },
+    {
+     "author": "CleanYourTV",
+     "description": "A flower wallpaper with the dock in a glass panel at the bottom. Down moves the dock up and the apps appear below it, centred.",
+     "id": "bloom",
+     "installed": false,
+     "name": "Bloom",
+     "preview": true
+    }
+   ]
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "voice": {
+  "body": {
+   "bytes": 0,
+   "enabled": false,
+   "engine": "Moonshine tiny (English)",
+   "ha": {
+    "agent": "",
+    "configured": false,
+    "hasToken": false,
+    "route": "ha-first",
+    "selfSigned": false,
+    "url": ""
+   },
+   "hasToken": false,
+   "installed": false,
+   "job": {
+    "at": "<time>",
+    "message": "",
+    "state": "idle"
+   },
+   "last": null,
+   "lgPaused": false,
+   "listening": false,
+   "llm": {
+    "enabled": false,
+    "hasKey": false,
+    "model": "openrouter/auto"
+   },
+   "pairedAt": 0,
+   "pairing": false,
+   "suppressLg": false,
+   "url": ""
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "icon": {
+  "body": {
+   "bytes": 8
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "image/png"
+ },
+ "icon of an app without the file": {
+  "body": "",
+  "cors": "null",
+  "status": 404,
+  "type": ""
+ },
+ "icon of an unknown app": {
+  "body": "",
+  "cors": "null",
+  "status": 404,
+  "type": ""
+ },
+ "log line": {
+  "body": {},
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "unknown route": {
+  "body": "",
+  "cors": "null",
+  "status": 404,
+  "type": ""
+ },
+ "config.json afterwards": {
+  "dock": [
+   "__hdmi",
+   "netflix"
+  ],
+  "hdmi": "1",
+  "keys": {
+   "input": "241",
+   "learned": true
+  },
+  "options": {
+   "debloat": false,
+   "inputKey": false,
+   "liveTv": false
+  },
+  "theme": {
+   "id": "classic"
+  },
+  "tiles": {
+   "youtube.leanback.v4": {
+    "icon": "youtube",
+    "label": "YouTube"
+   }
+  }
+ }
+}

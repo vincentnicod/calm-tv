@@ -1,0 +1,13 @@
+{
+  "//": "Type checks of the service from its code and JSDoc comments, without a build step (node tools/lint.js). Nothing is compiled.",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "target": "es2018",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "types": ["node"]
+  },
+  "include": ["helper/*.js"]
+}

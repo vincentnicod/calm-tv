@@ -1,0 +1,5 @@
+{ "name": "Compact", "author": "CleanYourTV", "description": "Twelve columns of smaller tiles: more apps on screen.",
+  "colors": { "accent": "#46c37b" },
+  "grid": { "cols": 12, "tileH": 122, "radius": 26, "gapX": 20, "gapY": 20 },
+  "dock": { "h": 190, "radius": 30 },
+  "type": { "scale": 0.92 } }

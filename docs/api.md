@@ -1,0 +1,39 @@
+# Service API
+
+The service runs as root on `127.0.0.1:8765` and answers JSON. It is what the launcher, the manager and the other apps use, and
+you can call it from a shell on the TV (for example over SSH).
+
+!!! note "Who may call it"
+    Requests from web pages with an `http(s)` origin are refused, so a page opened in the TV's browser cannot drive the service.
+    Local apps and scripts (no `Origin` header) are accepted.
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/apps` | Installed apps, config, usage, version |
+| `POST /api/launch` `{id, params}` | Launch an app |
+| `GET /api/inputs` | HDMI inputs and their state |
+| `GET /api/running`, `POST /api/running/close` `{id}` or `{all: true}` | The running apps the launcher can close, and closing them (only listed apps; never Home or CleanYourTV's own apps) |
+| `POST /api/notify` | Picture notification (on the network: `POST :8767/notify` with the token) |
+| `GET /api/voice/status`, `POST /api/voice/install`, `/uninstall`, `/set`, `/listen`, `/ask`, `/forget`, `/ha-test`, `/ha-agents` | Optional voice function and AI chat |
+| `GET /api/theme/list`, `POST /api/theme/set`, `/revert` | Themes for the home screen; see [Themes](themes.md) |
+| `GET /api/live/status`, `/api/live/channels`, `/api/live/epg` | Live TV data |
+| `POST /api/live/settings`, `/api/live/refresh`, `/api/live/reset` | Live TV setup |
+| `GET /api/manager/status` | Versions, updates, options, hook state |
+| `GET /api/version` | The service's version |
+| `GET /api/tv` | What the service found out about this TV and the decisions that follow from it (Input key mode, notification window, tested firmware) |
+| `GET /api/service` | The service's version, its Node.js version and which parts are running (a part that failed to load is listed with the reason) |
+
+## Examples
+
+```sh
+# launch an app
+curl -X POST localhost:8765/api/launch -d '{"id":"com.palm.app.settings"}'
+
+# show a picture notification without a token (from the TV itself)
+curl -X POST localhost:8765/api/notify -d '{"title":"Hello","text":"From a shell","seconds":8}'
+
+# the service version and updates
+curl -s localhost:8765/api/manager/status
+```
+
+See the pages for [Live TV](live-tv.md), [Picture notifications](notifications.md) and [Voice](voice.md) for their bodies.

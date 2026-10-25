@@ -1,0 +1,57 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Notification</title>
+<style>
+html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:transparent;font-family:"LG Smart UI","Helvetica Neue",Helvetica,Arial,sans-serif;color:#f5f6f8}
+#card{box-sizing:border-box;position:absolute;display:flex;flex-direction:column;width:640px;padding:28px;border-radius:44px;background:rgba(12,13,17,.95);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 30px 60px rgba(0,0,0,.55);opacity:0;transform:translateY(-24px);transition:opacity .35s ease-out,transform .35s ease-out}
+#card>*+*{margin-top:20px}
+#card.on{opacity:1;transform:none}
+#img{display:none;box-sizing:border-box;width:100%;max-height:400px;object-fit:contain;border-radius:28px;background:#1c1e24}
+#title{font-size:38px;font-weight:700;letter-spacing:-.01em;line-height:1.15}
+#text{font-size:28px;line-height:1.3;color:rgba(245,246,248,.78);white-space:pre-wrap}
+#title:empty,#text:empty,#q:empty{display:none}
+/* the voice function: one wide card that changes in place (listening, thinking, answer); only transform and opacity animate */
+#card.v{width:900px}
+#q{font-size:28px;line-height:1.3;color:rgba(245,246,248,.55)}
+#card.v #text{font-size:34px;line-height:1.35;color:#f5f6f8}
+#bars,#dots{display:none;height:44px;align-items:center}
+#bars>*+*,#dots>*+*{margin-left:10px}
+.k-listening #bars,.k-thinking #dots{display:flex}
+#bars i{display:block;width:12px;height:44px;border-radius:6px;background:#f5f6f8;transform:scaleY(.25);animation:bar 1s ease-in-out infinite}
+#bars i:nth-child(2){animation-delay:.15s}#bars i:nth-child(3){animation-delay:.3s}#bars i:nth-child(4){animation-delay:.45s}#bars i:nth-child(5){animation-delay:.6s}
+#dots i{display:block;width:16px;height:16px;border-radius:8px;background:#f5f6f8;opacity:.3;animation:dot 1.2s ease-in-out infinite}
+#dots i:nth-child(2){animation-delay:.2s}#dots i:nth-child(3){animation-delay:.4s}
+@keyframes bar{50%{transform:scaleY(1)}}
+@keyframes dot{50%{opacity:1}}
+</style></head><body>
+<div id="card"><div id="bars"><i></i><i></i><i></i><i></i><i></i></div><div id="dots"><i></i><i></i><i></i></div><img id="img" alt=""><div id="title"></div><div id="q"></div><div id="text"></div></div>
+<script>
+var card=document.getElementById('card'),img=document.getElementById('img'),timer=0;
+/* never take the remote or the pointer: an empty input region and key mask. Newer webOS wants an array; webOS 5 throws for that and
+   wants a JSON string. The array goes first, the string only when that fails, so a TV that takes the array never sees the string. */
+function setBoth(name,value){try{webOSSystem[name](value)}catch(e){try{webOSSystem[name](JSON.stringify(value))}catch(e2){}}}
+setBoth('setInputRegion',[{x:0,y:0,width:0,height:0}]);
+setBoth('setKeyMask',[]);
+/* safety net: if the region was not honoured and a key reaches this window anyway, close the card at once instead of holding the remote for the whole duration */
+document.addEventListener('keydown',function(){clearTimeout(timer);card.classList.remove('on');setTimeout(function(){try{window.close()}catch(e){}},300)},true);
+function place(pos,wide){
+  var m=64,s=card.style,w=wide?900:640;s.left=s.right=s.top=s.bottom='auto';
+  if(/left/.test(pos))s.left=m+'px';else if(/center/.test(pos))s.left=(1920-w)/2+'px';else s.right=m+'px';
+  if(/bottom/.test(pos))s.bottom=m+'px';else if(/middle/.test(pos))s.top='300px';else s.top=m+'px'}
+function reveal(){requestAnimationFrame(function(){requestAnimationFrame(function(){card.classList.add('on')})})}   // only after the first full layout, so nothing jumps
+function show(){
+  var p={};try{p=JSON.parse(webOSSystem.launchParams||'{}')}catch(e){}
+  var inplace=!!p.kind&&card.classList.contains('on')&&card.className.indexOf('k-')>=0;   // a voice card that is already showing is updated without fading out
+  if(!inplace)card.classList.remove('on');
+  card.className=(card.classList.contains('on')?'on ':'')+(p.kind?'v k-'+p.kind:'');
+  document.getElementById('title').textContent=p.title||'';document.getElementById('q').textContent=p.question||'';document.getElementById('text').textContent=p.text||'';
+  place(p.position||'top-right',!!p.kind);
+  clearTimeout(timer);
+  timer=setTimeout(function(){card.classList.remove('on');setTimeout(function(){try{window.close()}catch(e){}},500)},Math.max(2,Math.min(120,p.seconds||8))*1000+500);
+  if(!p.image){img.style.display='none';img.removeAttribute('src');reveal();return}
+  // load the picture first, then show the finished card in one go
+  var im=new Image(),done=false,go=function(ok){if(done)return;done=true;if(ok){img.src=p.image;img.style.display='block'}else{img.style.display='none'}reveal()};
+  im.onload=function(){go(true)};im.onerror=function(){go(false)};setTimeout(function(){go(false)},3000);im.src=p.image}
+document.addEventListener('webOSRelaunch',show);
+show();
+</script></body></html>

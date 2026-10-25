@@ -1,0 +1,493 @@
+// Themes for the launcher's home screen. A theme is a folder in the themes/ folder of the GitHub repository (theme.json, a screenshot and
+// optionally a wallpaper). Nothing is shipped with the service: the TV reads themes/index.json from GitHub, shows the list with the
+// screenshots and downloads a theme (and its wallpaper) when it is chosen; downloaded themes stay on the TV. Calm (id classic) is built in. A theme sets
+// values from the table SCHEMA below: colours, surfaces, text, and the position and size of every part of the screen (clock, buttons, app
+// name, dock, grid), plus effects and a wallpaper. There is no CSS or script in a theme. Every value is checked against SCHEMA and clamped,
+// a value that is missing or invalid keeps the value of the theme it extends (or the default, the original look), and unknown keys are
+// ignored, so a theme can change how Home looks but nothing else. A new setting is one row in SCHEMA plus the CSS that reads its variable;
+// docs/themes.md is generated from SCHEMA (tools/theme-docs.js).
+// API (loopback only): GET /api/theme/list, POST /api/theme/set {id, accent}, POST /api/theme/revert, GET /api/theme/preview/<id>,
+// GET /api/theme/wallpaper/<id>/<file>.
+const fs = require('fs'),
+  path = require('path');
+const nc = require('./netcompat'),
+  fetch = require('./fetch');
+const {
+  ACCENTS,
+  DEFAULTS,
+  DEFAULT_ID,
+  FILE,
+  HEX,
+  ID,
+  MAX_INDEX,
+  MAX_PREVIEW,
+  MAX_THEME,
+  MAX_WALLPAPER,
+  PREVIEW_PATH,
+  SCHEMA,
+  dir,
+  getPath,
+  hex,
+  imageOk,
+  imageType,
+  normalize,
+  resolve,
+  sniff,
+} = require('./themeschema');
+
+// The built-in styles, which need no download and switch at once (Customise > Style on Home, or Theme in the manager). 'classic' is the
+// one a TV that never chose gets: Paysage. Each has the same values in themes/<id>/theme.json (a test keeps them equal), for the catalogue.
+const PAYSAGE = {
+  name: 'Paysage',
+  author: 'CleanYourTV',
+  description: 'A lake at dusk, a thin clock on the water and one line of white logos; all apps one press down.',
+  colors: { night: '#0b0d14', panel: '#1b1e28', ink: '#ffffff', accent: '#f4f4f6' },
+  surface: { pillRadius: 28, menuAlpha: 0.9 },
+  type: { font: 'manrope' },
+  clock: { layout: 'stack', anchor: 'bottom', align: 'left', x: 110, y: 196, scale: 2.5, dateScale: 0.95, weight: 200, tracking: -0.06 },
+  bar: { style: 'text', labels: 'show', anchor: 'top', align: 'right', x: 96, y: 58, size: 52, gap: 10 },
+  shelf: { show: false },
+  dock: {
+    anchor: 'bottom',
+    align: 'left',
+    x: 96,
+    y: 76,
+    count: 5,
+    w: 204,
+    h: 84,
+    gap: 14,
+    radius: 42,
+    lift: 0,
+    focusScale: 1.04,
+    style: 'logo',
+    focus: 'fill',
+  },
+  grid: { mode: 'push', dockUp: 300, clipTop: 0, overlayDim: 0.6, cols: 10, tileH: 140, gapX: 26, gapY: 60, radius: 28, focusScale: 1.1 },
+  tile: { ringWidth: 3, ringOffset: 5 },
+  effects: { glow: 0, scene: 'lac', timeOfDay: true },
+};
+const CALM = {
+  name: 'Calm',
+  author: 'CleanYourTV',
+  description:
+    "Four dark cards with the app's name inside and the focused one in the light; round buttons and the clock; all apps one press down.",
+  colors: { night: '#08090b', panel: '#15171c', ink: '#f2f3f5', accent: '#f2f3f5' },
+  surface: { pillAlpha: 0.06, pillRing: 0.14 },
+  clock: { layout: 'stack', y: 70, scale: 1.75, dateScale: 0.95, weight: 300 },
+  bar: { style: 'round', size: 56, gap: 14, y: 62 },
+  shelf: { show: false },
+  dock: { y: 600, w: 408, h: 236, gap: 32, radius: 26, lift: 0, focusScale: 1.05, style: 'card', dim: 0.7 },
+  grid: { mode: 'push', dockUp: 250, y: 930, overlayDim: 0, cols: 10, tileH: 151, gapX: 24, gapY: 60, radius: 26, focusScale: 1.1 },
+  tile: { ringWidth: 3, ringOffset: 6 },
+  effects: { glow: 0.4 },
+};
+const VERRE = {
+  name: 'Verre',
+  author: 'CleanYourTV',
+  description: 'Alpine peaks at blue hour and a row of frosted-glass tiles with white logos; the focused one grows and brightens.',
+  colors: { night: '#0a1222', panel: '#1a2233', ink: '#ffffff', accent: '#ffffff' },
+  surface: { pillAlpha: 0.12, pillRing: 0.22, menuAlpha: 0.9 },
+  type: { font: 'geist' },
+  clock: { align: 'right', x: 96, y: 56, scale: 0.62, date: false, weight: 400, tracking: -0.01 },
+  bar: { style: 'round', align: 'left', x: 96, y: 52, size: 56, gap: 14 },
+  shelf: { show: false },
+  dock: {
+    anchor: 'bottom',
+    align: 'center',
+    x: 0,
+    y: 150,
+    count: 5,
+    w: 296,
+    h: 176,
+    gap: 36,
+    radius: 30,
+    lift: 10,
+    focusScale: 1.1,
+    style: 'glass',
+    focus: 'lift',
+  },
+  grid: { mode: 'push', dockUp: 260, clipTop: 0, overlayDim: 0.55, cols: 10, tileH: 140, gapX: 26, gapY: 60, radius: 28, focusScale: 1.1 },
+  tile: { ringWidth: 3, ringOffset: 5 },
+  effects: { glow: 0, scene: 'brume', timeOfDay: true },
+};
+const EDITORIAL = {
+  name: '\u00c9ditorial',
+  author: 'CleanYourTV',
+  description: 'Warm slate, a large serif clock and your apps set as words, with no icons; the focused name in italic over a hairline.',
+  colors: { night: '#0c0b0a', panel: '#1c1a17', ink: '#f4efe8', accent: '#f4efe8' },
+  surface: { menuAlpha: 0.94, rowRadius: 14 },
+  type: { font: 'instrument', display: 'instrument-serif' },
+  clock: { layout: 'stack', align: 'left', x: 112, y: 96, scale: 4.1, dateScale: 0.62, weight: 400, tracking: -0.03, dateCase: 'caps' },
+  bar: { style: 'caps', align: 'right', x: 110, y: 92, size: 44, gap: 6 },
+  shelf: { show: false },
+  dock: { anchor: 'top', align: 'left', x: 120, y: 800, count: 4, h: 90, gap: 60, lift: 0, focusScale: 1, style: 'word' },
+  grid: { mode: 'push', dockUp: 560, y: 960, overlayDim: 0, cols: 10, tileH: 140, gapX: 26, gapY: 60, radius: 24, focusScale: 1.1 },
+  effects: { glow: 0, scene: 'ardoise' },
+};
+const LIN = {
+  name: 'Lin',
+  author: 'CleanYourTV',
+  description: 'Warm linen, black type and paper-white cards with logos in ink; the focused card turns black. Bright in a dark room.',
+  colors: { night: '#ece7df', panel: '#fbfaf7', ink: '#17171a', accent: '#17171a', pill: '#17171a' },
+  surface: { pillAlpha: 0, pillRing: 0, menuAlpha: 0.96, rowRadius: 18 },
+  type: { font: 'hanken' },
+  clock: { layout: 'stack', align: 'left', x: 96, y: 84, scale: 2.15, dateScale: 0.93, weight: 300, tracking: -0.045 },
+  bar: { style: 'text', align: 'right', x: 96, y: 92, size: 52, gap: 8 },
+  shelf: { show: false },
+  dock: { y: 560, count: 4, w: 402, h: 240, gap: 32, radius: 22, lift: 0, focusScale: 1, style: 'paper', focus: 'fill' },
+  grid: { mode: 'push', dockUp: 290, y: 930, overlayDim: 0, cols: 10, tileH: 140, gapX: 26, gapY: 60, radius: 24, focusScale: 1.1 },
+  tile: { ringWidth: 3, ringOffset: 5 },
+  effects: { glow: 0, scene: 'lin' },
+};
+const AURORE = {
+  name: 'Aurore',
+  author: 'CleanYourTV',
+  description: "A soft aurora that takes on the focused app's colour, a very thin clock in the centre and glass pills with white logos.",
+  colors: { night: '#07070d', panel: '#171826', ink: '#ffffff', accent: '#f6f5fa' },
+  surface: { menuAlpha: 0.9 },
+  type: { font: 'sora' },
+  clock: { layout: 'stack', align: 'center', x: 0, y: 240, scale: 4.1, dateScale: 0.8, weight: 100, tracking: -0.05, dateCase: 'caps' },
+  bar: { style: 'round', align: 'right', x: 96, y: 56, size: 56, gap: 14 },
+  shelf: { show: false },
+  dock: {
+    anchor: 'bottom',
+    align: 'center',
+    x: 0,
+    y: 120,
+    count: 5,
+    w: 236,
+    h: 100,
+    gap: 22,
+    radius: 50,
+    lift: 0,
+    focusScale: 1.06,
+    style: 'glass',
+    focus: 'fill',
+  },
+  grid: { mode: 'push', dockUp: 560, clipTop: 0, overlayDim: 0.5, cols: 10, tileH: 140, gapX: 26, gapY: 60, radius: 28, focusScale: 1.1 },
+  tile: { ringWidth: 3, ringOffset: 5 },
+  effects: { glow: 0.55, scene: 'aurore' },
+};
+const ORIGINAL = {
+  name: 'Original',
+  author: 'CleanYourTV',
+  description: 'The original CleanYourTV look: the large name of the focused app, four wide dock tiles and ten columns under them.',
+};
+const BUILTINS = { [DEFAULT_ID]: PAYSAGE, verre: VERRE, editorial: EDITORIAL, lin: LIN, aurore: AURORE, calm: CALM, original: ORIGINAL };
+const builtin = id => Object.prototype.hasOwnProperty.call(BUILTINS, id);
+let cache = null;
+// the themes on the TV: the built-in styles and every downloaded folder
+function load() {
+  if (cache) return cache;
+  const raws = {};
+  let names = [];
+  try {
+    names = fs.readdirSync(dir());
+  } catch (_) {}
+  for (const f of names.sort()) {
+    if (!ID.test(f) || builtin(f)) continue;
+    try {
+      raws[f] = JSON.parse(fs.readFileSync(path.join(dir(), f, 'theme.json'), 'utf8'));
+    } catch (_) {}
+  }
+  const out = {};
+  for (const id of Object.keys(BUILTINS)) out[id] = normalize(BUILTINS[id], id);
+  const build = (id, stack) => {
+    // "extends": another theme's values are the starting point
+    if (out[id]) return out[id];
+    const raw = raws[id];
+    if (!raw || stack.indexOf(id) >= 0 || stack.length > 4) return null;
+    const baseId = typeof raw.extends === 'string' && ID.test(raw.extends) ? raw.extends : '',
+      base = baseId ? build(baseId, stack.concat(id)) : null;
+    if (baseId && !base) return null; // its base is missing: not usable
+    return (out[id] = normalize(raw, id, base ? base.v : null));
+  };
+  for (const id of Object.keys(raws)) build(id, []);
+  for (const id of Object.keys(out)) if (!out[id]) delete out[id];
+  return (cache = out);
+}
+
+// ---- reading from GitHub ----
+// the themes folder of the repository (main branch); https only, except the address a test sets
+function baseUrl(slug, ref) {
+  return process.env.CYTV_THEMES_URL || 'https://raw.githubusercontent.com/' + slug + '/' + (ref || 'main') + '/themes';
+}
+// a file from GitHub, at most `max` bytes and `ms` milliseconds
+function fetchBuf(url, max, ms) {
+  return fetch
+    .read(url, {
+      headers: { 'User-Agent': 'cleanyourtv-themes' },
+      maxBytes: max,
+      totalMs: ms || 15000,
+      idleMs: 10000,
+      redirects: 3,
+      allowHttp: () => !!process.env.CYTV_THEMES_URL,
+      statusText: st => (st === 404 ? 'not found on GitHub' : 'GitHub answered ' + st),
+    })
+    .then(r => r.body);
+}
+const writeAtomic = (f, data) => {
+  fs.writeFileSync(f + '.tmp', data);
+  fs.renameSync(f + '.tmp', f);
+};
+const mkdirs = d => {
+  try {
+    nc.mkdirp(d);
+  } catch (_) {}
+};
+const rmrf = d => {
+  try {
+    for (const f of fs.readdirSync(d)) {
+      const p = path.join(d, f);
+      if (fs.statSync(p).isDirectory()) rmrf(p);
+      else fs.unlinkSync(p);
+    }
+    fs.rmdirSync(d);
+  } catch (_) {}
+};
+
+function create(ctx) {
+  // the repository and branch the themes come from: this project's main branch, unless D/source names another (to try a theme)
+  const slug = () => (ctx.slug && ctx.slug()) || require('./updates').repo();
+  const ref = () => {
+    if (ctx.ref) return ctx.ref();
+    let x = '';
+    try {
+      x = fs.readFileSync(require('./paths').SOURCE, 'utf8').trim().split(/\s+/)[1];
+    } catch (_) {}
+    return /^[\w.\/-]{1,60}$/.test(x || '') ? x : 'main';
+  };
+  const conf = () => ctx.config.get();
+  const base = () => baseUrl(slug(), ref());
+  const cur = () => {
+    const c = conf().theme || {};
+    const all = load();
+    return {
+      id: all[c.id] ? c.id : DEFAULT_ID,
+      accent: hex(c.accent) || '',
+      prev: c.prev && all[c.prev.id] ? { id: c.prev.id, accent: hex(c.prev.accent) || '' } : null,
+    };
+  };
+  const resolved = () => {
+    const c = cur();
+    return resolve(load()[c.id], c.accent);
+  };
+  const save = o =>
+    ctx.config.update('theme', c => {
+      c.theme = o;
+    });
+
+  // the catalogue: themes/index.json from GitHub, kept in memory for ten minutes
+  let cat = { at: 0, themes: [], error: '' },
+    catP = null;
+  function refreshCatalogue(force) {
+    if (!force && cat.at && Date.now() - cat.at < 600000) return Promise.resolve(cat);
+    if (catP) return catP;
+    catP = fetchBuf(base() + '/index.json', MAX_INDEX, 12000)
+      .then(b => {
+        const j = JSON.parse(b.toString('utf8')),
+          out = [];
+        for (const t of Array.isArray(j.themes) ? j.themes.slice(0, 200) : []) {
+          if (!t || !ID.test(String(t.id || ''))) continue;
+          const pm = PREVIEW_PATH.exec(String(t.preview || ''));
+          out.push({
+            id: t.id,
+            name: String(t.name || t.id).slice(0, 40),
+            author: String(t.author || '').slice(0, 60),
+            description: String(t.description || '').slice(0, 160),
+            preview: pm && pm[1] === t.id ? t.preview : '',
+          });
+        }
+        cat = { at: Date.now(), themes: out, error: '' };
+      })
+      .catch(e => {
+        cat = { at: cat.at, themes: cat.themes, error: String(e.message || e) };
+      })
+      .then(() => {
+        catP = null;
+        return cat;
+      });
+    return catP;
+  }
+
+  // download a theme (and the theme it extends, and its wallpaper) into themes/<id>/; nothing is kept when a file is invalid
+  async function install(id, depth) {
+    if (!ID.test(id) || builtin(id)) throw new Error('unknown theme');
+    if ((depth || 0) > 3) throw new Error('the theme extends too many themes');
+    const raw = JSON.parse((await fetchBuf(base() + '/' + id + '/theme.json', MAX_THEME, 12000)).toString('utf8'));
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('not a theme file');
+    if (typeof raw.extends === 'string' && ID.test(raw.extends) && !builtin(raw.extends) && !load()[raw.extends]) {
+      try {
+        await install(raw.extends, (depth || 0) + 1);
+      } catch (e) {
+        throw new Error('the theme it extends (' + raw.extends + ') could not be downloaded: ' + e.message);
+      }
+    }
+    const w = getPath(raw, 'effects.wallpaper');
+    let wall = null;
+    if (typeof w === 'string' && w !== '') {
+      if (!FILE.test(w)) throw new Error('the wallpaper name is not valid');
+      wall = await fetchBuf(base() + '/' + id + '/' + w, MAX_WALLPAPER, 25000);
+      if (!imageOk(wall, w, MAX_WALLPAPER)) throw new Error('the wallpaper is not an image of that type');
+    }
+    const d = path.join(dir(), id),
+      had = fs.existsSync(path.join(d, 'theme.json'));
+    mkdirs(d);
+    if (wall) writeAtomic(path.join(d, w), wall);
+    writeAtomic(path.join(d, 'theme.json'), JSON.stringify(raw));
+    cache = null;
+    if (!load()[id]) {
+      if (!had) rmrf(d);
+      cache = null;
+      throw new Error('the theme file is not usable');
+    }
+  }
+
+  // screenshots: fetched once from GitHub and kept in themes/.previews for a day
+  async function preview(id) {
+    if (!ID.test(id)) return null;
+    const pd = path.join(dir(), '.previews'),
+      f = path.join(pd, id + '.img');
+    let st = null;
+    try {
+      st = fs.statSync(f);
+    } catch (_) {}
+    if (st && Date.now() - st.mtimeMs < 86400000) return fs.readFileSync(f);
+    try {
+      const e = (await refreshCatalogue(false)).themes.find(t => t.id === id);
+      if (!e || !e.preview) throw new Error('no screenshot');
+      const b = await fetchBuf(base() + '/' + e.preview, MAX_PREVIEW, 15000);
+      if (!sniff(b)) throw new Error('the screenshot is not an image');
+      mkdirs(pd);
+      writeAtomic(f, b);
+      return b;
+    } catch (_) {
+      return st ? fs.readFileSync(f) : null;
+    }
+  }
+
+  async function list() {
+    await refreshCatalogue(false);
+    const c = cur(),
+      all = load(),
+      seen = {},
+      themes = [];
+    const add = (id, info) => {
+      if (seen[id]) return;
+      seen[id] = 1;
+      const l = all[id];
+      themes.push({
+        id,
+        name: l ? l.name : info.name,
+        author: l ? l.author : info.author,
+        description: l ? l.description : info.description,
+        installed: !!l,
+        preview: !!info.preview,
+      });
+    };
+    // the built-in styles first, in their order
+    for (const id of Object.keys(BUILTINS)) {
+      const cc = cat.themes.find(t => t.id === id);
+      add(id, cc || { name: all[id].name, author: all[id].author, description: all[id].description, preview: '' });
+    }
+    for (const t of cat.themes) add(t.id, t);
+    for (const id of Object.keys(all))
+      add(id, { name: all[id].name, author: all[id].author, description: all[id].description, preview: '' });
+    return {
+      current: { id: c.id, accent: c.accent },
+      previous: c.prev,
+      accents: ACCENTS.map(x => ({ name: x[0], hex: x[1] })),
+      themes,
+      catalogue: { ok: !cat.error, error: cat.error, at: cat.at },
+    };
+  }
+
+  async function handle(req, res, u, body) {
+    const json = (o, code) => {
+      res.writeHead(code || 200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify(o));
+    };
+    const act = u.replace('/api/theme/', '');
+    if (act === 'list') return json(await list());
+    let m = /^preview\/([a-z0-9-]{1,30})$/.exec(act);
+    if (m) {
+      const b = await preview(m[1]);
+      if (!b) {
+        res.writeHead(404);
+        return res.end();
+      }
+      res.writeHead(200, { 'content-type': imageType('x.' + sniff(b)), 'cache-control': 'max-age=600' });
+      return res.end(b);
+    }
+    m = /^wallpaper\/([a-z0-9-]{1,30})\/([\w-]{1,40}\.(?:jpg|png|webp))$/.exec(act);
+    if (m) {
+      const t = load()[m[1]];
+      if (!t || t.v['effects.wallpaper'] !== m[2]) {
+        res.writeHead(404);
+        return res.end();
+      }
+      try {
+        const b = fs.readFileSync(path.join(dir(), m[1], m[2]));
+        res.writeHead(200, { 'content-type': imageType(m[2]), 'cache-control': 'max-age=3600' });
+        return res.end(b);
+      } catch (_) {
+        res.writeHead(404);
+        return res.end();
+      }
+    }
+    if (req.method !== 'POST') {
+      res.writeHead(404);
+      return res.end();
+    }
+    const b = await body(req),
+      c = cur();
+    if (act === 'set') {
+      const id = b.id === undefined ? c.id : String(b.id);
+      if (!ID.test(id)) return json({ error: 'unknown theme' }, 400);
+      if (b.id !== undefined && !builtin(id)) {
+        // the latest version of the theme from GitHub; a downloaded copy is used when GitHub cannot be reached
+        try {
+          await install(id);
+        } catch (e) {
+          if (!load()[id]) {
+            const unk = e.message === 'unknown theme' || e.message === 'not found on GitHub';
+            return json({ error: unk ? 'unknown theme' : 'could not download the theme: ' + e.message }, unk ? 400 : 502);
+          }
+        }
+      }
+      const all = load();
+      if (!all[id]) return json({ error: 'unknown theme' }, 400);
+      let accent = c.accent;
+      if (b.accent !== undefined) {
+        if (b.accent !== '' && !HEX.test(String(b.accent))) return json({ error: 'the accent must be a colour like #4c8dff' }, 400);
+        accent = String(b.accent).toLowerCase();
+      } else if (id !== c.id) accent = ''; // a new theme brings its own accent
+      if (id !== c.id || accent !== c.accent) save({ id, accent, prev: { id: c.id, accent: c.accent } });
+      if (b.quick === true) return json({ current: { id, accent } }); // the launcher's Style menu: no catalogue, which can take seconds
+      return json(await list());
+    }
+    if (act === 'revert') {
+      if (!c.prev) return json({ error: 'nothing to go back to' }, 400);
+      save({ id: c.prev.id, accent: c.prev.accent, prev: { id: c.id, accent: c.accent } });
+      return json(await list());
+    }
+    res.writeHead(404);
+    res.end();
+  }
+
+  // earlier versions shipped the themes with the service: remove those files; fetch the chosen theme when it is not on the TV
+  try {
+    for (const f of fs.readdirSync(dir())) if (/^[a-z0-9-]+\.json$/.test(f)) fs.unlinkSync(path.join(dir(), f));
+    rmrf(path.join(dir(), 'wallpapers'));
+  } catch (_) {}
+  const startup = () => {
+    const c = conf().theme || {};
+    if (c.id && c.id !== DEFAULT_ID && ID.test(c.id) && !load()[c.id]) install(c.id).catch(() => {});
+  };
+  if (!ctx.noStartup) {
+    const t = setTimeout(startup, 8000);
+    if (t.unref) t.unref();
+  }
+  return { name: 'theme', prefix: '/api/theme/', handle, resolved, list, install, refreshCatalogue, preview };
+}
+module.exports = { create, normalize, SCHEMA, DEFAULTS, imageOk, ID, resolve, BUILTINS };

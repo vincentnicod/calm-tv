@@ -1,0 +1,26 @@
+<!doctype html>
+<!-- Built by tools/build-pages.js from manager/src: edit the files there, not this one. -->
+<html><head><meta charset="utf-8"><title>CleanYourTV</title>
+<meta name="viewport" content="width=1920">
+<style>
+@include css/manager.css
+</style><script src="qrcode.js"></script></head><body>
+<div id="head"><h1>CleanYourTV</h1><p id="sub"></p><img id="pv" alt=""><div id="info"></div></div>
+<div id="panel"><div id="banner"></div><div id="listwrap"><div id="list"></div></div></div>
+<div id="share"><h2>Share the log</h2>
+  <ol><li>Phone on the <b>same Wi-Fi</b> as the TV.</li><li>Scan the code with the camera.</li><li>Tap <b>Copy</b> on the page and paste it into your message.</li></ol>
+  <div id="sharemsg"></div><div id="shareurl"></div><div id="shareclose">Close</div>
+  <div id="qrbox"><canvas id="qr"></canvas></div></div>
+<script>
+@include js/core.js
+@include js/menu.js
+@include js/help.js
+@include js/list.js
+@include js/screens.js
+@include js/status.js
+@include js/offline.js
+@include js/keys.js
+@include js/share.js
+@include js/setup.js
+@include js/input.js
+</script></body></html>

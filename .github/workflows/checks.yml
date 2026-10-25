@@ -1,0 +1,37 @@
+# The same checks as a test build (tools/check.sh: the tests under Node 8.12.0 and the current Node, the built pages), for pull requests.
+# Pushes, main included, are checked by test-build.yml.
+name: Checks
+on:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache Node 8 and the old Chromium builds
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/cleanyourtv
+          key: cytv-engines-${{ runner.os }}-node8.12.0-chromium555668-706915
+      - name: Libraries the old Chromium builds need
+        run: |
+          sudo apt-get update -qq
+          for p in libnss3 libatk1.0-0t64 libatk-bridge2.0-0t64 libcups2t64 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2t64 libpangocairo-1.0-0 libgtk-3-0t64 libxss1 libxtst6 fonts-liberation; do sudo apt-get install -y -qq $p >/dev/null 2>&1 || echo "not installed: $p"; done
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Development tools (type checks, lint, formatting)
+        run: npm ci --no-audit --no-fund
+      - name: Checks
+        run: CYTV_SHOTS=$RUNNER_TEMP/shots sh tools/check.sh --chromium
+      - name: Screenshots of the pages in Chromium 68 and 79
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: old-chromium-screenshots
+          path: ${{ runner.temp }}/shots
+          if-no-files-found: ignore
+      - name: The package builds
+        run: python3 ipk/build.py

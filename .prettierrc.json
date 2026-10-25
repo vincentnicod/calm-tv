@@ -1,0 +1,9 @@
+{
+  "printWidth": 140,
+  "singleQuote": true,
+  "trailingComma": "es5",
+  "arrowParens": "avoid",
+  "endOfLine": "lf",
+  "quoteProps": "preserve",
+  "overrides": [{ "files": "*.css", "options": { "singleQuote": false } }]
+}
