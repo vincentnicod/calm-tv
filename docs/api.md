@@ -12,6 +12,7 @@ you can call it from a shell on the TV (for example over SSH).
 | `GET /api/apps` | Installed apps, config, usage, version |
 | `POST /api/launch` `{id, params}` | Launch an app |
 | `GET /api/inputs` | HDMI inputs and their state |
+| `GET /api/quick`, `POST /api/quick` `{picture\|sound\|sleep: value}`, `{sleep: "more"}`, `{screen: "off"}`, `{open: "quick"}` | Quick settings: LG's picture mode, sound mode and sleep timer with the values the TV offers (and when a timer set here ends); setting one, 20 more minutes, screen off, and showing the panel over the screen ([Launcher](launcher.md#quick-settings)) |
 | `GET /api/running`, `POST /api/running/close` `{id}` or `{all: true}` | The running apps the launcher can close, and closing them (only listed apps; never Home or CleanYourTV's own apps) |
 | `POST /api/notify` | Picture notification (on the network: `POST :8767/notify` with the token) |
 | `GET /api/voice/status`, `POST /api/voice/install`, `/uninstall`, `/set`, `/listen`, `/ask`, `/forget`, `/ha-test`, `/ha-agents` | Optional voice function and AI chat |

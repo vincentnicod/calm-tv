@@ -37,7 +37,8 @@ use.
 
 It uses the bundled [inputhook](credits.md#inputhook) library, which injects a small hook into LG's input process so that a remote
 button can run a command. The Input button's code is **241** by default. The command opens the picker app
-(`com.cleanyourtv.picker`) over whatever is on screen.
+(`com.cleanyourtv.picker`) over whatever is on screen. The same app shows [Quick settings](launcher.md#quick-settings) and the sleep
+timer's warning; each launch names its panel.
 
 The hook goes into `lginput2`, LG's input service, where the remote's keys arrive on webOS 5 and newer. Other processes
 (`micomservice` and a few more) are only used on firmware without `lginput2`: hooked into `micomservice`, the hook replaced a

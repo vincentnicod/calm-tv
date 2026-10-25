@@ -52,11 +52,40 @@ const dev = (port, label, on, act) => ({
   activate: !!act,
 });
 // what the stand-in answers; each check changes it
-const S = { config: {}, inputs: [], launched: [], saved: [], version: '1.7.0', locale: 'en-GB', remap: {}, learning: null, remapCalls: [] };
+const S = { config: {}, inputs: [], launched: [], saved: [], version: '1.8.0', locale: 'en-GB', remap: {}, learning: null, remapCalls: [], quickCalls: [], quickOk: true, panel: '', realQuick: false, tv: {}, tvCalls: [], refuse: false };
 const page = () =>
   fs
     .readFileSync(path.join(ROOT, 'app', 'index.html'), 'utf8')
     .replace('<script>', '<script>window.webOSSystem={launchParams:"{}",locale:' + JSON.stringify(S.locale) + '};', 1);
+// the Input key's picker app, which also shows Quick settings and the sleep timer's warning: opened with the launch params of S.panel
+const pickerPage = () =>
+  fs
+    .readFileSync(path.join(ROOT, 'picker', 'app', 'index.html'), 'utf8')
+    .replace(
+      '<script>',
+      '<script>window.__hidden=0;window.webOSSystem={launchParams:' +
+        JSON.stringify(JSON.stringify(S.panel ? { panel: S.panel } : {})) +
+        ',locale:"en-GB",hide:function(){window.__hidden++},platformBack:function(){}};',
+      1
+    );
+// with S.realQuick the service's own Quick settings module answers, over a stand-in for LG's settings (S.tv, what an LG C4 offers)
+const offer = (vis, hid) => vis.map(value => ({ visible: true, active: true, value })).concat(hid.map(value => ({ visible: false, active: true, value })));
+const OFFER = {
+  pictureMode: offer(['personalized', 'vivid', 'normal', 'eco', 'cinema', 'sports', 'game', 'filmMaker'], ['hdrCinema', 'hdrStandard']),
+  soundMode: offer(['aiSoundPlus', 'aiSound', 'standard', 'movie', 'news', 'sports', 'music', 'game'], []),
+  sleepTimer: offer(['off', '10', '20', '30', '60', '90', '120', '180', '240'], []),
+};
+const quick = require(path.join(ROOT, 'helper', 'quick.js')).create({
+  luna: async (uri, p) => {
+    S.tvCalls.push(uri.split('/').pop() + (p.settings ? ' ' + JSON.stringify(p.settings) : ''));
+    if (/getSystemSettingDesc/.test(uri)) return { returnValue: true, results: [{ values: { arrayExt: OFFER[p.keys[0]] } }] };
+    if (/getSystemSettings/.test(uri)) return { returnValue: true, settings: { [p.keys[0]]: S.tv[p.keys[0]] } };
+    if (/setSystemSettings/.test(uri)) return S.refuse ? { returnValue: false, errorText: 'refused' } : (Object.assign(S.tv, p.settings), { returnValue: true });
+    return { returnValue: true, state: 'Active', running: [] };
+  },
+  inputhook: { hookInfo: () => ({ attached: false }) },
+  feature: () => null,
+});
 const body = req =>
   new Promise(res => {
     let b = '';
@@ -99,6 +128,9 @@ const srv = http.createServer(async (q, r) => {
     return j({ buttons: Object.keys(S.remap).map(c => ({ code: c, app: S.remap[c] })), learning: S.learning, attached: true });
   }
   if (u === '/api/launch') return S.launched.push((await body(q)).id), j({ returnValue: true });
+  if (u === '/api/quick' && S.realQuick) return quick.handle(q, r, u, body);
+  if (u === '/api/quick') return S.quickCalls.push(await body(q)), j(S.quickOk ? { ok: true } : { error: 'not installed' });
+  if (u === '/picker.html') return r.writeHead(200, { 'content-type': 'text/html' }), r.end(pickerPage());
   if (u === '/api/config') {
     const b = await body(q);
     S.saved.push(b);
@@ -429,6 +461,22 @@ try {
   ok((await focusId()) === '__hdmi', 'moving left reaches the HDMI card');
   S.config = {};
 
+  // ---- Quick settings: a button at the top of Home, between Inputs and Settings; the service opens the panel over the screen ----
+  await js('RB.close(); closeMenus(); 0');
+  await fresh();
+  const barTexts = () => js("[].map.call($('bar').children, function (e) { return e.textContent; }).join('|')");
+  ok(/^Inputs\|Quick settings\|Settings/.test(await barTexts()), 'Quick settings sits at the top of Home, between Inputs and Settings');
+  S.quickCalls = [];
+  const pressQuick = () => js("act([].filter.call($('bar').children, function (e) { return e.textContent === 'Quick settings'; })[0]); 0");
+  await pressQuick();
+  await sleep(400);
+  ok(JSON.stringify(S.quickCalls) === '[{"open":"quick"}]' && !(await toastText()), 'OK on it asks the service to show the panel');
+  S.quickOk = false;
+  await pressQuick();
+  await sleep(400);
+  ok((await toastText()) === 'Quick settings are not available', 'when the service cannot show it, Home says so');
+  S.quickOk = true;
+
   // ---- French, and an older service ----
   S.locale = 'fr-CH';
   S.version = '1.6.4';
@@ -437,7 +485,7 @@ try {
   ok(/older than this launcher needs/.test(await toastText()), 'an older service is reported');
   ok((await caps()).split('|')[2] === 'YouTube', 'with an older service the automatic looks still apply');
   S.locale = 'en-GB';
-  S.version = '1.7.0';
+  S.version = '1.8.0';
 
   // ---- the grid opens one press down ----
   await fresh();
@@ -523,10 +571,11 @@ try {
   await key(OK, 400);
   ok(
     (await menuTitle()) === 'Which app should it open?' &&
-      (await js('stack[stack.length - 1].items.slice(0, 5).map(function (i) { return i.label; }).join()')) ===
-        'Sunrise TV,YouTube,IPTV,Netflix,Apple TV',
-    'the choices start with the dock apps, then the HDMI inputs by their device'
+      (await js('stack[stack.length - 1].items.slice(0, 6).map(function (i) { return i.label; }).join()')) ===
+        'Quick settings,Sunrise TV,YouTube,IPTV,Netflix,Apple TV',
+    'the choices start with Quick settings and the dock apps, then the HDMI inputs by their device'
   );
+  await key(DOWN, 200);
   await key(OK, 600);
   ok(
     JSON.stringify(S.remapCalls[S.remapCalls.length - 1]) === '{"learn":"ch.sunrise.tv"}' &&
@@ -551,10 +600,18 @@ try {
   await key(DOWN, 200);
   await key(DOWN, 200);
   await key(DOWN, 200);
+  await key(DOWN, 200);
   await key(OK, 900);
   ok(
     S.remap['435'] === 'com.webos.app.hdmi1' && /Apple TV · HDMI 1/.test(await rbCards()),
     'OK on the button: it can open an HDMI input instead'
+  );
+  await key(OK, 400);
+  await key(OK, 400);
+  await key(OK, 900);
+  ok(
+    S.remap['435'] === '__quick' && /^Quick settingsButton 1/.test(await rbCards()),
+    'or the Quick settings panel, named so on its card'
   );
   await key(OK, 400);
   await key(DOWN, 200);
@@ -623,6 +680,85 @@ try {
       /scene-lac-nuit\.jpg/.test(await wallAt(23)),
     'Paysage: dawn, day, dusk and night lakes through the day'
   );
+
+  // ---- Quick settings over the screen: the picker app's panel, with the service's own module behind it ----
+  S.realQuick = true;
+  S.tv = { pictureMode: 'filmMaker', soundMode: 'aiSoundPlus', sleepTimer: 'off' };
+  const BACK = 461;
+  const openPicker = async (panel, wait = 1200) => {
+    S.panel = panel;
+    S.tvCalls = [];
+    await send('Page.navigate', { url: 'http://127.0.0.1:8765/picker.html' });
+    await sleep(wait);
+  };
+  const rows = () => js("[].map.call(document.querySelectorAll('#qs .qr'), function (e) { return e.innerText.replace(/\\n/g, ' ') + (e.classList.contains('f') ? '*' : ''); }).join('|')");
+  const sets = () => S.tvCalls.filter(c => /^setSystemSettings/.test(c)).map(c => c.slice(18));
+  await openPicker('quick');
+  ok(
+    (await js('document.body.className')) === 'on v-quick' &&
+      (await rows()) === 'Picture Filmmaker*|Sound AI Sound Pro|Sleep timer Off|Screen · the sound plays on Turn off',
+    "Quick settings: the TV's picture and sound modes, the sleep timer and the screen, read from the TV"
+  );
+  await key(RIGHT, 1100);
+  ok(S.tv.pictureMode === 'personalized' && /^Picture Personalised\*/.test(await rows()), 'Right: the next picture mode (round from the last), set on the TV');
+  await key(DOWN, 100);
+  await key(RIGHT, 80);
+  await key(RIGHT, 80);
+  await key(RIGHT, 1100);
+  ok(
+    S.tv.soundMode === 'movie' && sets().filter(c => /soundMode/.test(c)).length === 1,
+    'quick presses show each mode but only the one it rests on is sent'
+  );
+  await key(DOWN, 100);
+  await key(LEFT, 300);
+  ok(/Sleep timer Off\*/.test(await rows()) && !sets().some(c => /sleepTimer/.test(c)), 'the sleep timer stops at Off');
+  await key(RIGHT, 80);
+  await key(RIGHT, 1200);
+  ok(S.tv.sleepTimer === '20' && /Sleep timer · off at \d+:\d\d 20 min\*/.test(await rows()), 'two steps: 20 minutes, and when the TV will turn off');
+  await key(RIGHT, 80);
+  await key(BACK, 900);
+  ok(
+    S.tv.sleepTimer === '30' && (await js('document.body.className')) === '' && (await js('window.__hidden')) > 0,
+    'Back closes the panel, and a change still waiting is sent all the same'
+  );
+  await openPicker('quick');
+  S.refuse = true;
+  await key(RIGHT, 1200);
+  ok(
+    /did not take it/.test(await js("document.querySelector('#qs .qf').textContent")) && /^Picture Personalised\*/.test(await rows()),
+    'a change the TV refuses is said, and the panel shows the mode the TV kept'
+  );
+  S.refuse = false;
+  await js("webOSSystem.launchParams = JSON.stringify({ panel: 'inputs' }); document.dispatchEvent(new Event('webOSRelaunch')); 0");
+  await sleep(300);
+  ok((await js('document.body.className')) === 'on v-inputs', 'the Input key over the panel shows the Inputs');
+  await js("webOSSystem.launchParams = JSON.stringify({ panel: 'quick' }); document.dispatchEvent(new Event('webOSRelaunch')); 0");
+  await sleep(900);
+  await js("webOSSystem.launchParams = JSON.stringify({ panel: 'quick' }); document.dispatchEvent(new Event('webOSRelaunch')); 0");
+  await sleep(300);
+  ok((await js('document.body.className')) === '', 'its own button pressed again closes it');
+  await openPicker('quick');
+  await key(DOWN, 80);
+  await key(DOWN, 80);
+  await key(DOWN, 80);
+  await key(OK, 600);
+  ok(S.tvCalls.includes('turnOffScreen') && (await js('document.body.className')) === '', 'Turn off: the screen goes off and the panel closes');
+  // the warning a minute before the sleep timer ends (the timer was changed elsewhere, so the page counts the minute itself)
+  S.tv.sleepTimer = '10';
+  await openPicker('sleep');
+  ok(
+    (await js("document.getElementById('sw').innerText.replace(/\\n/g, ' ')")).indexOf('The TV turns off soon') === 0 &&
+      /in (59|60) s/.test(await js("$('swIn').textContent")),
+    'the sleep warning: the TV turns off in a minute'
+  );
+  await key(OK, 900);
+  ok(S.tv.sleepTimer === '20' && (await js('document.body.className')) === '', '20 more minutes: the timer starts again, the warning goes');
+  await openPicker('sleep');
+  await key(RIGHT, 100);
+  S.tvCalls = [];
+  await key(OK, 500);
+  ok(!sets().length && (await js('document.body.className')) === '', 'or it is left to turn the TV off');
+  S.realQuick = false;
 
   ok(!errors.length, 'no script errors' + (errors.length ? ':\n  ' + errors.join('\n  ') : ''));
   ws.close();

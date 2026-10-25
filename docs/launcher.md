@@ -82,14 +82,41 @@ shows the same icons.
 button to Sunrise TV, or another one straight to the set-top box. It works from anywhere, not only on Home. The screen shows the taught
 buttons as cards beside a drawing of the remote.
 
-1. **Teach a button...**, then choose what it should open: the dock's apps come first, then the HDMI inputs by their device, then every
-   app.
+1. **Teach a button...**, then choose what it should open: [Quick settings](#quick-settings) comes first, then the dock's apps, the HDMI
+   inputs by their device and every app.
 2. Press the button: the remote's app buttons pulse on the drawing while it waits. The first time, the button still does what LG made it
    do (Netflix opens): come back to Home, it is saved and the screen says so. From then on it opens your choice.
 
 OK on a taught button changes its app or gives it back to LG; Back leaves the screen. Up to twelve buttons; teaching another button to the same app moves it.
 The arrows, OK, Back, volume, mute, power and the buttons CleanYourTV already uses (Input, and the voice and Guide keys when set) are
 never taken. It needs the input hook in LG's input service, like the Input key; without it the menu says so.
+
+## Quick settings
+
+**Quick settings**, at the top of Home between Inputs and Settings, opens a panel on the right of the screen. Give it a remote button
+(Customise > **Remote buttons** > **Quick settings**) and it opens over whatever is playing, like the Inputs list on the Input key.
+
+![Quick settings](screenshots/quick-settings.jpg)
+
+| Row | What it does |
+|---|---|
+| **Picture** | LG's picture modes for what is on screen: during HDR or Dolby Vision, their own modes (the heading then says HDR or Dolby Vision). |
+| **Sound** | LG's sound modes: AI Sound Pro, Standard, Cinema, Clear voice, Sports, Music, Game. |
+| **Sleep timer** | LG's own sleep timer, 10 minutes to 4 hours. The heading says when the TV turns off. |
+| **Screen** | Turns the screen off while the sound plays on. The next button turns it on again; volume and mute leave it off. |
+
+Left and right change a row, OK too; the panel shows the change at once and sends it to the TV when the arrows rest. Back closes the
+panel (a change on its way is still sent), and it closes itself after 20 seconds. These are LG's own settings, the same as in LG's menus,
+and the panel offers only the values the TV lists for them; if the TV refuses one, the panel says so and shows what the TV kept.
+
+**The sleep timer's warning.** A minute before a timer set here ends, a card at the bottom of the screen offers **20 more minutes**.
+Otherwise the TV turns itself off as it would with LG's menu, and with SIMPLINK on the set-top box goes off with it. The timer is
+LG's, so it runs even if the service stops; a timer set in LG's own menu gets no card.
+
+![The sleep timer's warning](screenshots/sleep-warning.jpg)
+
+Sound output (speakers, soundbar, headphones) is not in the panel: the TV does not say which outputs are connected, and choosing one
+that is not would leave the TV silent.
 
 ## Idle screen, night mode, weather
 
@@ -108,7 +135,7 @@ Back on the home screen lists the apps that are open, as LG's Home does with its
 
 It lists the apps the launcher knows, including the ones you hid from the grid; Home itself, CleanYourTV's own apps and the TV's
 system apps are never in it. The list is read when it opens and closes when you leave Home. Suggested and first built by
-[Steefzar](https://github.com/vincentnicod/calm-tv/issues/16).
+Steefzar for the original CleanYourTV.
 
 ![Running apps](screenshots/running.jpg)
 
@@ -119,9 +146,9 @@ system apps are never in it. The list is read when it opens and closes when you 
 **Customise** holds:
 
 - the **style** (Paysage, Verre, Éditorial, Lin, Aurore, Calm, Original),
-- the **remote buttons** given to apps,
+- the **remote buttons** given to apps or to Quick settings,
 - the **idle screen**, **night mode** and the **weather**,
-- the **top buttons** (add Inputs, Settings, Live TV or any app, or remove one),
+- the **top buttons** (add Inputs, Quick settings, Settings, Live TV or any app, or remove one),
 - **hidden apps** (show them again),
 - the **app order** (most used first, or A to Z),
 - the **clock** format (automatic, 12 or 24 hour),
@@ -168,7 +195,7 @@ Settings are stored on the TV in `/media/developer/cleanyourtv/config.json`:
 | `tiles` | How apps look: `{"<app id>": {"label": "IPTV", "icon": "iptv"}}`. Icons: `youtube`, `iptv`, `tv`, `film`, `music`, `sport`, or `""` for the app's own. |
 | `hdmi` | The HDMI card: `auto` or a port, `"1"` to `"8"`. |
 | `idle`, `night`, `weather` | The idle screen (`3`, `10` or `off`), night mode (`on` or `off`), the weather's city (`lausanne`, ...) or `off`. |
-| `remap` | Remote buttons given to apps: `{"<button code>": "<app id>"}` (an input is `com.webos.app.hdmi1`). Set in Customise > Remote buttons. |
+| `remap` | Remote buttons given to apps: `{"<button code>": "<app id>"}` (an input is `com.webos.app.hdmi1`, Quick settings is `__quick`). Set in Customise > Remote buttons. |
 
 See [`config.example.json`](https://github.com/vincentnicod/calm-tv/blob/main/config.example.json). Change settings in
 the launcher; the file is read and written by the service.

@@ -89,18 +89,22 @@ const theme = require(path.join(ROOT, 'helper', 'theme.js')).create({
   config: require(path.join(ROOT, 'helper', 'config.js')).memory({}),
   noStartup: true,
 });
-// in front of the page's own script: report script errors on <html data-errors>, and the TV's webOSSystem with no launch parameters
-const PROBE =
+// in front of the page's own script: report script errors on <html data-errors>, and the TV's webOSSystem with the page's launch parameters
+const PROBE = params =>
   '<script>window.onerror=function(m,s,l){var h=document.documentElement;h.setAttribute("data-errors",(h.getAttribute("data-errors")||"")+m+" (line "+l+"); ")};' +
-  'window.webOSSystem={launchParams:"{}",locale:"en-GB",hide:function(){},activate:function(){},platformBack:function(){},setInputRegion:function(){},setKeyMask:function(){}};</script>';
-const page = f => fs.readFileSync(path.join(ROOT, f), 'utf8').replace('<script>', PROBE + '<script>');
-// [name, file, what it draws, how many at least, milliseconds of page time to wait]
+  'window.webOSSystem={launchParams:' +
+  JSON.stringify(JSON.stringify(params || {})) +
+  ',locale:"en-GB",hide:function(){},activate:function(){},platformBack:function(){},setInputRegion:function(){},setKeyMask:function(){}};</script>';
+const page = (f, params) => fs.readFileSync(path.join(ROOT, f), 'utf8').replace('<script>', PROBE(params) + '<script>');
+// [name, file, what it draws, how many at least, milliseconds of page time to wait, launch parameters]
 const PAGES = [
   ['launcher', 'app/index.html', /class="tile[ "]/g, 8, 8000],
   // no saved dock: the favourites found by name (YouTube AdFree, an IPTV player) and the HDMI card with its port, drawn as glyphs
   ['launcher-favourites', 'app/index.html', /class="(?:tile gl gl-|chip on)/g, 4, 8000],
   ['manager', 'manager/app/index.html', /class="row[ "]/g, 5, 8000],
   ['picker', 'picker/app/index.html', /class="chip[ "]/g, 2, 3000],
+  // the same app as Quick settings: four rows filled from the service
+  ['picker-quick', 'picker/app/index.html', /class="qr[ "]/g, 4, 3000, { panel: 'quick' }],
 ];
 // apps the Calm favourites find by their names
 const FAVOURITES = [
@@ -117,7 +121,7 @@ function serve() {
     if (q.method === 'OPTIONS') return r.writeHead(204), r.end();
     const json = o => (r.writeHead(200, { 'content-type': 'application/json' }), r.end(JSON.stringify(o)));
     const p = PAGES.filter(x => '/' + x[0] + '.html' === u)[0];
-    if (p) return r.writeHead(200, { 'content-type': 'text/html' }), r.end(page(p[1]));
+    if (p) return r.writeHead(200, { 'content-type': 'text/html' }), r.end(page(p[1], p[5]));
     if (u === '/qrcode.js')
       return (
         r.writeHead(200, { 'content-type': 'text/javascript' }),
@@ -148,6 +152,12 @@ function serve() {
         ],
       });
     if (u === '/api/manager/status') return json(golden['manager status'].body);
+    if (u === '/api/quick')
+      return json({
+        picture: { value: 'cinema', values: ['vivid', 'normal', 'cinema', 'filmMaker'] },
+        sound: { value: 'aiSoundPlus', values: ['aiSoundPlus', 'standard', 'movie'] },
+        sleep: { value: '30', values: ['off', '10', '20', '30', '60'], endsAt: Date.now() + 1800000 },
+      });
     if (u === '/api/log') {
       marks.push(decodeURIComponent(q.url.split('m=')[1] || ''));
       return json({});

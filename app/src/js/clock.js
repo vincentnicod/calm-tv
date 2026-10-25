@@ -434,7 +434,9 @@ function barLabel(o) {
         ? t('Customise')
         : o.action === 'live'
           ? t('Live TV')
-          : o.label || '';
+          : o.action === 'quick'
+            ? t('Quick settings')
+            : o.label || '';
 }
 function clockOpts() {
   var c = cfg.clock,
@@ -475,7 +477,7 @@ function toast(t) {
     e.classList.remove('on');
   }, 4000);
 }
-var MIN_SERVICE = '1.7.0';
+var MIN_SERVICE = '1.8.0';
 function oldSvc(v) {
   var a = String(v).split('.'),
     b = MIN_SERVICE.split('.');

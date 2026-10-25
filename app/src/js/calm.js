@@ -48,6 +48,9 @@
       'Thunderstorm': 'Orage',
       'Which city?': 'Quelle ville ?',
       'Remote buttons': 'Boutons de la télécommande',
+      'Quick settings': 'Réglages rapides',
+      'Picture, sound, sleep timer': 'Image, son, mise en veille',
+      'Quick settings are not available': 'Réglages rapides indisponibles',
       'Teach a button...': 'Apprendre un bouton...',
       'Which app should it open?': 'Quelle app doit-il ouvrir ?',
       'Button': 'Bouton',
@@ -111,6 +114,9 @@
       'Thunderstorm': 'Gewitter',
       'Which city?': 'Welche Stadt?',
       'Remote buttons': 'Fernbedienungstasten',
+      'Quick settings': 'Schnelleinstellungen',
+      'Picture, sound, sleep timer': 'Bild, Ton, Sleep-Timer',
+      'Quick settings are not available': 'Schnelleinstellungen nicht verfügbar',
       'Teach a button...': 'Taste anlernen...',
       'Which app should it open?': 'Welche App soll sie öffnen?',
       'Button': 'Taste',
@@ -175,6 +181,9 @@
       'Thunderstorm': 'Onweer',
       'Which city?': 'Welke stad?',
       'Remote buttons': 'Knoppen van de afstandsbediening',
+      'Quick settings': 'Snelle instellingen',
+      'Picture, sound, sleep timer': 'Beeld, geluid, slaaptimer',
+      'Quick settings are not available': 'Snelle instellingen niet beschikbaar',
       'Teach a button...': 'Een knop aanleren...',
       'Which app should it open?': 'Welke app moet hij openen?',
       'Button': 'Knop',
@@ -239,6 +248,9 @@
       'Thunderstorm': 'Tormenta',
       'Which city?': '¿Qué ciudad?',
       'Remote buttons': 'Botones del mando',
+      'Quick settings': 'Ajustes rápidos',
+      'Picture, sound, sleep timer': 'Imagen, sonido, temporizador',
+      'Quick settings are not available': 'Ajustes rápidos no disponibles',
       'Teach a button...': 'Enseñar un botón...',
       'Which app should it open?': '¿Qué app debe abrir?',
       'Button': 'Botón',
@@ -910,12 +922,26 @@ function glassAlign(list, on) {
   });
 }
 
+/* ---------- Quick settings: the panel over the screen (the Inputs picker app, helper/quick.js). The service opens it, as it does for a remote
+   button given to Quick settings ---------- */
+function openQuick() {
+  api('/api/quick', { open: 'quick' }).then(
+    function (x) {
+      if (!x || !x.ok) toast(t('Quick settings are not available'));
+    },
+    function () {
+      toast(t('Quick settings are not available'));
+    }
+  );
+}
+
 /* ---------- Remote buttons (Customise): a button of the remote opens an app or an HDMI input, from anywhere. The service binds it in
    LG's input service (inputkey.js, /api/remap) and waits for the press itself: the button still does its own thing that once, and
    Home may be gone by then ---------- */
 function appName(id) {
   var m = /^com\.webos\.app\.hdmi(\d)$/.exec(id),
     d;
+  if (id === '__quick') return t('Quick settings');
   if (!m) return title(id);
   d = (inputs || []).filter(function (x) {
     return +x.port === +m[1];
@@ -955,7 +981,7 @@ function remapPost(body, done) {
     }
   );
 }
-/* what a button can open: the dock's apps, the HDMI inputs by their device, then every app A to Z */
+/* what a button can open: Quick settings, the dock's apps, the HDMI inputs by their device, then every app A to Z */
 function targetMenu(heading, cb) {
   var seen = {},
     items = [];
@@ -971,6 +997,7 @@ function targetMenu(heading, cb) {
       },
     });
   }
+  add('__quick', t('Quick settings'), t('Picture, sound, sleep timer'));
   dockIds().forEach(function (id) {
     if (id.charAt(0) !== '_') add(id, title(id));
   });

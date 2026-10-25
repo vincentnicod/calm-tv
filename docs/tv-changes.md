@@ -15,7 +15,7 @@ uninstall. Optional features contact other services only when you switch them on
 | `/media/developer/apps/usr/palm/applications/` | The apps `com.cleanyourtv.manager`, `.picker` and `.notify` |
 | `/media/developer/apps/usr/palm/services/com.cleanyourtv.manager.service/` | The installed package contents |
 | `/var/lib/webosbrew/init.d/` | Boot scripts `10-cleanyourtv-home` and, with debloat on, `15-cleanyourtv-debloat` (links into the folder above) |
-| `/home/root/.config/lginputhook/keybinds.json` | Our binds for the Input key, the voice and Guide keys and the remote buttons given to apps (Customise > Remote buttons, run `appkey.sh`); other binds are left alone, and the uninstall removes ours |
+| `/home/root/.config/lginputhook/keybinds.json` | Our binds for the Input key, the voice and Guide keys and the remote buttons given to apps or to Quick settings (Customise > Remote buttons, run `appkey.sh`); other binds are left alone, and the uninstall removes ours |
 | `/media/developer/cytv-setup.log` | The setup log |
 
 ## At boot

@@ -34,7 +34,10 @@ does not separate cleanly shows the app's name instead.
   inputs, or a name (Décodeur, Box TV, ...).
 - **Your apps first.** YouTube AdFree is shown as YouTube, an IPTV player (STZ Player, Smart IPTV, ...) as IPTV, and the dock starts with
   the HDMI card, your TV app (Sunrise TV, Zattoo, blue TV, ...), YouTube and IPTV, found by their names.
-- **Remote buttons.** Customise › Remote buttons gives any button (Netflix, Prime Video, ...) to an app or an HDMI input, from anywhere.
+- **Quick settings.** Picture mode, sound mode, a sleep timer (with a card a minute before: *20 more minutes*) and screen off, in a
+  panel over whatever is playing: from Home, or from a remote button given to it.
+- **Remote buttons.** Customise › Remote buttons gives any button (Netflix, Prime Video, ...) to an app, an HDMI input or Quick
+  settings, from anywhere.
 - **Keys.** 1 to 9 and the red, green, yellow and blue keys open the dock's apps in order.
 - **Idle screen** (fades to a dim, drifting clock after 3 minutes, for the OLED), **night mode** (22:00 to 6:00), **weather** beside the
   date (Open-Meteo, off until you choose a city).

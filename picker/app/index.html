@@ -6,7 +6,8 @@
 html,body{width:1920px;height:1080px;overflow:hidden;background:transparent;color:var(--ink);font-family:var(--font)}
 #dim{position:absolute;left:0;top:0;width:1920px;height:1080px;background:rgba(5,6,9,.78);opacity:0;transition:opacity .12s linear}
 #wrap{position:absolute;left:96px;right:96px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;opacity:0;transition:opacity .12s linear}
-.on #dim,.on #wrap{opacity:1}
+#dim,#wrap,#qdim,#qs,#sw{pointer-events:none}
+.v-inputs #dim,.v-inputs #wrap{opacity:1;pointer-events:auto}
 .cap{font-size:30px;font-weight:600;color:var(--ink2);margin-bottom:20px;letter-spacing:.01em}
 .row{display:flex}
 .row>*+*{margin-left:32px}
@@ -46,12 +47,52 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:transparent;colo
 .tile .bd.gl-sport{background:linear-gradient(150deg,#ffa224,#f0571b)}
 #msg{margin-top:28px;text-align:center;font-size:28px;font-weight:500;color:var(--ink);opacity:.85}
 #msg:empty{display:none}
+/* Quick settings (panel "quick"): a sheet on the right over what is playing. The sleep timer's warning (panel "sleep"): a card at the bottom
+   right. Both are opened by the service (helper/quick.js) */
+#qdim{position:absolute;left:0;top:0;width:1920px;height:1080px;background:linear-gradient(90deg,rgba(5,6,9,0) 30%,rgba(5,6,9,.74));opacity:0;transition:opacity .15s linear}
+#qs{position:absolute;right:64px;top:64px;width:640px;padding:44px 28px 36px;border-radius:44px;background:rgba(18,20,26,.95);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 40px 90px rgba(0,0,0,.55);display:flex;flex-direction:column;opacity:0;transform:translateX(48px);
+  transition:opacity .15s linear,transform .18s ease-out}
+.v-quick #qdim{opacity:1}
+.v-quick #qs{opacity:1;transform:none;pointer-events:auto}
+.qh{font-size:40px;font-weight:700;padding:0 24px 28px;letter-spacing:-.01em}
+.qr{display:flex;align-items:center;height:124px;padding:0 24px;border-radius:30px;color:var(--ink)}
+.qr+.qr{margin-top:8px}
+.qr>svg{width:40px;height:40px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.qt{flex:1 1 auto;min-width:0;margin-left:24px;display:flex;flex-direction:column}
+.ql{font-size:24px;font-weight:500;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qv{margin-top:4px;font-size:34px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qa{display:flex;flex:none;margin-left:16px;opacity:0}
+.qa svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.qa svg+svg{margin-left:4px}
+.qr.f{background:#f5f6f8;color:#0b0c10}
+.qr.f .ql{color:rgba(11,12,16,.58)}
+.qr.f .qa{opacity:.5}
+.qr.act .qa,.qr.na .qa{display:none}
+.qr.na:not(.f){opacity:.5}
+.qf{margin-top:28px;padding:0 24px;font-size:22px;font-weight:500;color:var(--ink2)}
+#sw{position:absolute;right:64px;bottom:64px;width:780px;padding:40px 44px 44px;border-radius:40px;background:rgba(18,20,26,.95);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 40px 90px rgba(0,0,0,.55);opacity:0;transform:translateY(32px);transition:opacity .15s linear,transform .18s ease-out}
+.v-sleep #sw{opacity:1;transform:none;pointer-events:auto}
+.swh{display:flex;align-items:center}
+.swh svg{width:52px;height:52px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.swh>div{margin-left:26px;min-width:0}
+#swH{font-size:38px;font-weight:700}
+#swIn{margin-top:4px;font-size:28px;font-weight:500;color:var(--ink2)}
+.sbs{display:flex;margin-top:36px}
+.sb{flex:1 1 0;min-width:0;height:92px;padding:0 20px;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:rgba(255,255,255,.08);transform:scale(.97);transition:transform .15s ease-out}
+.sb+.sb{margin-left:20px}
+.sb.f{background:#f5f6f8;color:#0b0c10;transform:scale(1.03)}
 </style></head><body>
 <div id="dim"></div>
 <div id="wrap">
   <div id="appsBox"><div class="cap" id="capA"></div><div class="row" id="apps"></div></div>
   <div><div class="cap" id="capI"></div><div class="row" id="inputs"></div><div id="msg"></div></div>
 </div>
+<div id="qdim"></div><div id="qs"></div>
+<div id="sw"><div class="swh"><svg viewBox="0 0 24 24"><path d="M19.5 14.5A8 8 0 1 1 9.5 4.5a6.5 6.5 0 0 0 10 10z"/></svg><div><div id="swH"></div><div id="swIn"></div></div></div>
+  <div class="sbs"><div class="sb" data-s="0"></div><div class="sb" data-s="1"></div></div></div>
 <script>
 /* Inputs picker shown over whatever is playing, opened by the Input key (see the inputhook bind): the dock apps above,
    the inputs (HDMI ports, Live TV) below. The app stays running: starting a web app takes ~8 s before it gets the
@@ -72,7 +113,7 @@ var TX={
 var GL={"youtube":"<path fill-rule=\"evenodd\" fill=\"currentColor\" d=\"M16 14h32a11 11 0 0 1 11 11v14a11 11 0 0 1-11 11H16A11 11 0 0 1 5 39V25a11 11 0 0 1 11-11zM27 23.5v17l14.5-8.5z\"/>","iptv":"<circle cx=\"32\" cy=\"32\" r=\"5.5\" fill=\"currentColor\"/><path d=\"M21.5 21.5a15 15 0 0 0 0 21M42.5 21.5a15 15 0 0 1 0 21M14 14a25.5 25.5 0 0 0 0 36M50 14a25.5 25.5 0 0 1 0 36\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3.6\" stroke-linecap=\"round\"/>","tv":"<rect x=\"6\" y=\"11\" width=\"52\" height=\"35\" rx=\"7\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3.2\"/><path d=\"M22 54h20\" stroke=\"currentColor\" stroke-width=\"3.2\" stroke-linecap=\"round\"/><path d=\"M28 22v13l10.5-6.5z\" fill=\"currentColor\"/>","hdmi":"<path d=\"M7 21h50v13l-8 10H15L7 34z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3.2\" stroke-linejoin=\"round\"/><path d=\"M18 30h28\" stroke=\"currentColor\" stroke-width=\"3.6\" stroke-dasharray=\"3 4\" fill=\"none\"/>","film":"<rect x=\"8\" y=\"25\" width=\"48\" height=\"29\" rx=\"5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3.2\"/><path d=\"M7.5 22.5l45-11.5 2.2 8-45 11.5z\" fill=\"currentColor\"/><path d=\"M27 33v13l10.5-6.5z\" fill=\"currentColor\"/>","music":"<path d=\"M26 46V16l24-5v29\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3.2\" stroke-linejoin=\"round\"/><circle cx=\"20\" cy=\"46\" r=\"6.5\" fill=\"currentColor\"/><circle cx=\"44\" cy=\"40\" r=\"6.5\" fill=\"currentColor\"/>","sport":"<circle cx=\"32\" cy=\"32\" r=\"22\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3.2\"/><path d=\"M32 22l9.5 6.9-3.6 11.1H26.1l-3.6-11.1z\" fill=\"currentColor\"/>"};
 var EN={Apps:'Apps',Inputs:'Inputs',Connected:'Connected',Live:'Live TV',LiveSub:'Your playlist',Nothing:'Nothing connected',nohelper:'Can\u2019t read the inputs. Live TV still works.'};
 var LANG=((window.webOSSystem&&webOSSystem.locale)||navigator.language||'en').slice(0,2);
-function t(k){return (TX[LANG]&&TX[LANG][k])||EN[k]||k}
+function t(k){return (TX[LANG]&&TX[LANG][k])||(TQ[LANG]&&TQ[LANG][k])||EN[k]||EQ[k]||k}
 function $(i){return document.getElementById(i)}
 function call(uri,p){try{var b=new PalmServiceBridge();b.onservicecallback=function(){};b.call(uri,JSON.stringify(p));return true}catch(e){return false}}
 function log(m){try{var x=new XMLHttpRequest();x.open('GET',API+'/api/log?m='+encodeURIComponent('picker '+m));x.send()}catch(e){}}
@@ -87,7 +128,9 @@ function launch(id,params){
 var ondemand=false,idleT=0;
 function closeSoon(){log('close');try{if(window.webOS&&webOS.platformBack)webOS.platformBack()}catch(e){}try{window.close()}catch(e){}}
 function idle(){clearTimeout(idleT);if(ondemand&&shown)idleT=setTimeout(function(){if(shown)hide()},10000)}
-function hide(){log('hide');shown=false;clearTimeout(idleT);document.body.classList.remove('on');try{webOSSystem.hide()}catch(e){}if(ondemand)closeSoon()}
+function hide(){log('hide');var wait=view==='quick'&&qBusy();if(wait)qFlush();shown=false;clearTimeout(idleT);clearTimeout(q.hideT);clearInterval(sw.t);
+  document.body.className='';try{webOSSystem.hide()}catch(e){}
+  if(ondemand){if(wait)setTimeout(closeSoon,2500);else closeSoon()}}   // a change still on its way is sent before the app closes
 function cur(){return row===0?apps:inputs}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(cache))}catch(e){}}
 
@@ -153,9 +196,9 @@ function load(){   // the last known layout, ready before the first open
   try{var c=JSON.parse(localStorage.getItem(KEY)||'null');if(c&&c.inputs&&c.inputs.length){cache=c;cache.icons=cache.icons||{};cache.colors=cache.colors||{}}}catch(e){}
   setData(cache.inputs.length?cache:{apps:[],inputs:buildInputs([])},true)}
 function show(){
-  shown=true;moved=false;shownAt=Date.now();log('show');idle();
+  shown=true;moved=false;shownAt=Date.now();view='inputs';log('show');idle();
   setData({apps:apps,inputs:inputs},true);   // focus back on the active input
-  document.body.classList.add('on');
+  document.body.className='on v-inputs';
   requestAnimationFrame(function(){log('painted')});
   refresh()}
 function params(){var p={};try{p=JSON.parse(webOSSystem.launchParams||'{}')}catch(e){}return p||{}}
@@ -165,21 +208,145 @@ function move(dr,dc){
     var from=cur(),to=nr===0?apps:inputs;col[nr]=Math.min(to.length-1,Math.round(col[row]*(to.length-1)/Math.max(1,from.length-1)));row=nr}
   if(dc){var n=cur().length;col[row]=(col[row]+dc+n)%n}
   paint()}
+
+/* ---------- Quick settings (panel "quick") and the sleep timer's warning (panel "sleep"), opened by the service (helper/quick.js):
+   LG's own picture mode, sound mode and sleep timer, and the screen off, over whatever is playing. A change shows at once and is sent
+   when the arrows rest; the panel closes itself when left alone. ---------- */
+var view='inputs',QKEY='cytv.quick.v1';
+var q={rows:['picture','sound','sleep','screen'],i:0,data:null,pend:{},sendT:{},hideT:0,msg:''};
+var sw={i:0,end:0,t:0};
+var QI={picture:'<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/>',
+  sound:'<path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9a4.5 4.5 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11"/>',
+  sleep:'<path d="M19.5 14.5A8 8 0 1 1 9.5 4.5a6.5 6.5 0 0 0 10 10z"/>',
+  screen:'<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8.5 20.5h7M4 3.5l16 16"/>'};
+var CHEV='<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
+var QLAB={picture:'Picture',sound:'Sound',sleep:'Sleep',screen:'Screen'};
+var EQ={Quick:'Quick settings',Picture:'Picture',Sound:'Sound',Sleep:'Sleep timer',SleepOff:'Off',OffAt:'off at %',Screen:'Screen',ScreenOff:'Turn off',
+  SoundOn:'the sound plays on',Hint:'◀ ▶ to change · Back to close',Refused:'The TV did not take it',NoService:'Quick settings are not available',
+  Soon:'The TV turns off soon',In:'in % s',InMin:'in % min',More:'20 more minutes',LetOff:'Let it turn off'};
+var TQ={
+  fr:{Quick:'Réglages rapides',Picture:'Image',Sound:'Son',Sleep:'Mise en veille',SleepOff:'Désactivée',OffAt:'s’éteint à %',Screen:'Écran',ScreenOff:'Éteindre',
+    SoundOn:'le son continue',Hint:'◀ ▶ pour changer · Retour pour fermer',Refused:'La TV n’a pas accepté',NoService:'Réglages rapides indisponibles',
+    Soon:'La TV va s’éteindre',In:'dans % s',InMin:'dans % min',More:'Encore 20 minutes',LetOff:'Laisser s’éteindre'},
+  de:{Quick:'Schnelleinstellungen',Picture:'Bild',Sound:'Ton',Sleep:'Sleep-Timer',SleepOff:'Aus',OffAt:'aus um %',Screen:'Bildschirm',ScreenOff:'Ausschalten',
+    SoundOn:'der Ton läuft weiter',Hint:'◀ ▶ zum Ändern · Zurück zum Schließen',Refused:'Der Fernseher hat es nicht übernommen',NoService:'Schnelleinstellungen nicht verfügbar',
+    Soon:'Der Fernseher schaltet sich gleich aus',In:'in % s',InMin:'in % Min.',More:'Noch 20 Minuten',LetOff:'Ausschalten lassen'},
+  nl:{Quick:'Snelle instellingen',Picture:'Beeld',Sound:'Geluid',Sleep:'Slaaptimer',SleepOff:'Uit',OffAt:'uit om %',Screen:'Scherm',ScreenOff:'Uitzetten',
+    SoundOn:'het geluid speelt door',Hint:'◀ ▶ om te wijzigen · Terug om te sluiten',Refused:'De tv nam het niet over',NoService:'Snelle instellingen niet beschikbaar',
+    Soon:'De tv gaat zo uit',In:'over % s',InMin:'over % min',More:'Nog 20 minuten',LetOff:'Laten uitgaan'},
+  es:{Quick:'Ajustes rápidos',Picture:'Imagen',Sound:'Sonido',Sleep:'Temporizador',SleepOff:'Desactivado',OffAt:'se apaga a las %',Screen:'Pantalla',ScreenOff:'Apagar',
+    SoundOn:'el sonido sigue',Hint:'◀ ▶ para cambiar · Atrás para cerrar',Refused:'El televisor no lo aceptó',NoService:'Ajustes rápidos no disponibles',
+    Soon:'El televisor se apagará pronto',In:'en % s',InMin:'en % min',More:'20 minutos más',LetOff:'Dejar que se apague'}};
+/* LG's names for its picture and sound modes (an HDR mode is named as its normal one, with HDR beside the heading) */
+var MODES={
+  en:{personalized:'Personalised',vivid:'Vivid',normal:'Standard',standard:'Standard',eco:'Eco',cinema:'Cinema',cinemaBright:'Cinema bright',sports:'Sports',
+    game:'Game',filmMaker:'Filmmaker',photo:'Photo',aiSoundPlus:'AI Sound Pro',aiSound:'AI Sound',movie:'Cinema',news:'Clear voice',music:'Music'},
+  fr:{personalized:'Personnalisé',vivid:'Éclatant',normal:'Standard',standard:'Standard',eco:'Éco',cinema:'Cinéma',cinemaBright:'Cinéma lumineux',sports:'Sport',
+    game:'Jeu',filmMaker:'Filmmaker',photo:'Photo',aiSoundPlus:'Son IA Pro',aiSound:'Son IA',movie:'Cinéma',news:'Voix claire',music:'Musique'},
+  de:{personalized:'Persönlich',vivid:'Lebhaft',normal:'Standard',standard:'Standard',eco:'Eco',cinema:'Kino',cinemaBright:'Kino hell',sports:'Sport',
+    game:'Spiel',filmMaker:'Filmmaker',photo:'Foto',aiSoundPlus:'KI-Sound Pro',aiSound:'KI-Sound',movie:'Kino',news:'Klare Stimme',music:'Musik'},
+  nl:{personalized:'Persoonlijk',vivid:'Levendig',normal:'Standaard',standard:'Standaard',eco:'Eco',cinema:'Bioscoop',cinemaBright:'Bioscoop helder',sports:'Sport',
+    game:'Game',filmMaker:'Filmmaker',photo:'Foto',aiSoundPlus:'AI Sound Pro',aiSound:'AI Sound',movie:'Bioscoop',news:'Heldere stem',music:'Muziek'},
+  es:{personalized:'Personalizado',vivid:'Vívido',normal:'Estándar',standard:'Estándar',eco:'Eco',cinema:'Cine',cinemaBright:'Cine brillante',sports:'Deportes',
+    game:'Juego',filmMaker:'Filmmaker',photo:'Foto',aiSoundPlus:'Sonido IA Pro',aiSound:'Sonido IA',movie:'Cine',news:'Voz clara',music:'Música'}};
+function fam(v){return /^dolbyHdr[A-Z]/.test(v||'')?'Dolby Vision':/^hdr[A-Z]/.test(v||'')?'HDR':''}
+function modeName(v){
+  var b=String(v).replace(/^(dolbyHdr|hdr)([A-Z])/,function(m,a,c){return c.toLowerCase()});
+  var n=(MODES[LANG]&&MODES[LANG][b])||MODES.en[b];
+  if(n)return n;
+  n=b.replace(/_/g,' ').replace(/([a-z])([A-Z0-9])/g,'$1 $2').toLowerCase();   // a mode this page does not know: its own name, readable
+  return n.charAt(0).toUpperCase()+n.slice(1)}
+function sleepName(v){if(v==='off')return t('SleepOff');var m=+v;if(!(m>0))return v;if(m<60)return m+' min';return Math.floor(m/60)+' h'+(m%60?' '+(m%60<10?'0':'')+m%60:'')}
+function hhmm(ms){var d=new Date(ms),h=d.getHours(),m=d.getMinutes();return h+':'+(m<10?'0':'')+m}
+function post(path,b,cb,fail){var x=new XMLHttpRequest();x.open('POST',API+path);x.timeout=8000;x.setRequestHeader('content-type','application/json');
+  x.onload=function(){var j=null;try{j=JSON.parse(x.responseText)}catch(e){}cb(j)};x.onerror=x.ontimeout=function(){fail&&fail()};x.send(JSON.stringify(b))}
+function qBusy(){for(var k in q.pend)return true;return false}
+function qVal(k){if(k in q.pend)return q.pend[k];var s=q.data&&q.data[k];return s?s.value:''}
+function qSet(x){q.data=x;try{localStorage.setItem(QKEY,JSON.stringify({picture:x.picture,sound:x.sound,sleep:{value:x.sleep.value,values:x.sleep.values}}))}catch(e){}}
+function qRender(){
+  var h='<div class="qh"></div>';
+  q.rows.forEach(function(k,i){h+='<div class="qr" data-q="'+i+'"><svg viewBox="0 0 24 24">'+QI[k]+'</svg><div class="qt"><span class="ql"></span><span class="qv"></span></div><i class="qa">'+CHEV+'</i></div>'});
+  $('qs').innerHTML=h+'<div class="qf"></div>';
+  $('qs').querySelector('.qh').textContent=t('Quick');
+  qPaint()}
+function qPaint(){
+  var el=$('qs').querySelectorAll('.qr');if(!el.length)return;
+  q.rows.forEach(function(k,i){
+    var s=q.data&&q.data[k],v=qVal(k),lab=t(QLAB[k]),val,few=k!=='screen'&&!(s&&s.values&&s.values.length>1);
+    if(k==='picture'){val=v?modeName(v):'—';if(fam(v))lab+=' · '+fam(v)}
+    else if(k==='sound')val=v?modeName(v):'—';
+    else if(k==='sleep'){val=v?sleepName(v):'—';if(!(k in q.pend)&&s&&s.endsAt&&v!=='off')lab+=' · '+t('OffAt').replace('%',hhmm(s.endsAt))}
+    else{val=t('ScreenOff');lab+=' · '+t('SoundOn')}
+    el[i].querySelector('.ql').textContent=lab;el[i].querySelector('.qv').textContent=val;
+    el[i].className='qr'+(i===q.i?' f':'')+(few?' na':'')+(k==='screen'?' act':'')});
+  $('qs').querySelector('.qf').textContent=q.msg||t('Hint')}
+function qLoad(keep){get('/api/quick',function(x){if(x&&x.picture&&x.sleep){qSet(x);if(!keep)q.msg=''}else q.msg=t('NoService');qPaint()},function(){q.msg=t('NoService');qPaint()})}   // keep: a message about the last change stays
+function qIdle(){clearTimeout(q.hideT);q.hideT=setTimeout(function(){if(shown&&view==='quick')hide()},20000)}
+/* Left and right step through what the TV offers (the modes go round; the sleep timer stops at its ends unless OK carries on) */
+function qStep(dir,round){
+  var k=q.rows[q.i],s=q.data&&q.data[k];if(k==='screen'||!s||!s.values||s.values.length<2)return;
+  var vs=s.values,c=vs.indexOf(qVal(k)),n;if(c<0)c=0;
+  if(k==='sleep'&&!round){n=Math.max(0,Math.min(vs.length-1,c+dir));if(n===c)return}else n=(c+dir+vs.length)%vs.length;
+  q.pend[k]=vs[n];q.msg='';qPaint();
+  clearTimeout(q.sendT[k]);q.sendT[k]=setTimeout(function(){qSend(k)},700)}
+function qSend(k){
+  clearTimeout(q.sendT[k]);if(!(k in q.pend))return;
+  var v=q.pend[k],b={};b[k]=v;log('quick '+k+' '+v);
+  post('/api/quick',b,function(x){if(q.pend[k]===v)delete q.pend[k];if(x&&x.picture&&x.sleep)qSet(x);else{q.msg=t('Refused');qLoad(true)}qPaint()},
+    function(){if(q.pend[k]===v)delete q.pend[k];q.msg=t('NoService');qPaint()})}
+function qFlush(){for(var k in q.pend)qSend(k)}
+function qScreen(){log('quick screen off');
+  post('/api/quick',{screen:'off'},function(x){if(x&&x.ok)hide();else{q.msg=t('Refused');qPaint()}},function(){q.msg=t('NoService');qPaint()})}
+function qKey(k){qIdle();
+  if(k===38){if(q.i>0){q.i--;qPaint()}}else if(k===40){if(q.i<q.rows.length-1){q.i++;qPaint()}}
+  else if(k===37)qStep(-1);else if(k===39)qStep(1);
+  else if(k===13){if(q.rows[q.i]==='screen')qScreen();else qStep(1,true)}
+  else if(k===461||k===27||k===8||k===10009)hide()}
+/* the warning a minute before the sleep timer turns the TV off: 20 more minutes, or let it */
+function swPaint(){
+  var n=Math.max(0,Math.round((sw.end-Date.now())/1000));
+  $('swIn').textContent=n<90?t('In').replace('%',n):t('InMin').replace('%',Math.round(n/60));
+  var b=$('sw').querySelectorAll('.sb');for(var i=0;i<b.length;i++)b[i].className='sb'+(i===sw.i?' f':'')}
+function swShow(){
+  sw.i=0;sw.end=Date.now()+60000;
+  $('swH').textContent=t('Soon');var b=$('sw').querySelectorAll('.sb');b[0].textContent=t('More');b[1].textContent=t('LetOff');swPaint();
+  get('/api/quick',function(x){if(x&&x.sleep&&x.sleep.endsAt){sw.end=x.sleep.endsAt;swPaint()}},function(){});
+  clearInterval(sw.t);sw.t=setInterval(function(){if(!shown||view!=='sleep')return clearInterval(sw.t);if(Date.now()>sw.end+2000)hide();else swPaint()},1000)}
+function swChoose(){log('sleep '+(sw.i?'let off':'more'));if(sw.i===0)post('/api/quick',{sleep:'more'},function(){},function(){});setTimeout(hide,sw.i?0:300)}
+function swKey(k){if(k===37||k===39){sw.i=1-sw.i;swPaint()}else if(k===13)swChoose();else if(k===461||k===27||k===8||k===10009)hide()}
+function showPanel(p){
+  shown=true;shownAt=Date.now();view=p;log('show '+p);clearTimeout(idleT);
+  if(p==='quick'){q.i=0;q.pend={};q.msg='';try{q.data=JSON.parse(localStorage.getItem(QKEY)||'null')}catch(e){}qRender();qLoad();qIdle()}
+  else swShow();
+  document.body.className='on v-'+p}
 document.addEventListener('keydown',function(e){
   if(!shown)return;
-  idle();
   var k=e.keyCode;
+  if(view!=='inputs'){if(view==='quick')qKey(k);else swKey(k);e.preventDefault();return}
+  idle();
   if(k===37)move(0,-1);else if(k===39)move(0,1);else if(k===38)move(-1,0);else if(k===40)move(1,0);
   else if(k===13)choose();
   else if(k===461||k===27||k===8||k===10009)hide();
   e.preventDefault()});
-document.addEventListener('click',function(e){if(!shown)return;idle();var r=e.target.closest&&e.target.closest('[data-r]');if(r){row=+r.getAttribute('data-r');col[row]=+r.getAttribute('data-i');paint();choose()}else hide()});
-document.addEventListener('mousemove',function(e){var r=e.target.closest&&e.target.closest('[data-r]');if(!r)return;var a=+r.getAttribute('data-r'),i=+r.getAttribute('data-i');if(a!==row||i!==col[row]){moved=true;row=a;col[row]=i;paint()}});
+document.addEventListener('click',function(e){if(!shown)return;var c=function(s){return e.target.closest&&e.target.closest(s)};
+  if(view==='quick'){qIdle();var qr=c('[data-q]');if(qr){q.i=+qr.getAttribute('data-q');qPaint();qKey(13)}else if(!c('#qs'))hide();return}
+  if(view==='sleep'){var sb=c('[data-s]');if(sb){sw.i=+sb.getAttribute('data-s');swChoose()}return}
+  idle();var r=e.target.closest&&e.target.closest('[data-r]');if(r){row=+r.getAttribute('data-r');col[row]=+r.getAttribute('data-i');paint();choose()}else hide()});
+document.addEventListener('mousemove',function(e){if(!shown)return;
+  if(view==='quick'){var qr=e.target.closest&&e.target.closest('[data-q]');if(qr&&+qr.getAttribute('data-q')!==q.i){q.i=+qr.getAttribute('data-q');qPaint();qIdle()}return}
+  if(view==='sleep'){var sb=e.target.closest&&e.target.closest('[data-s]');if(sb&&+sb.getAttribute('data-s')!==sw.i){sw.i=+sb.getAttribute('data-s');swPaint()}return}
+  var r=e.target.closest&&e.target.closest('[data-r]');if(!r)return;var a=+r.getAttribute('data-r'),i=+r.getAttribute('data-i');if(a!==row||i!==col[row]){moved=true;row=a;col[row]=i;paint()}});
 document.addEventListener('webOSRelaunch',function(){
-  log('relaunch shown='+shown);
-  if(params().prewarm)return;
+  var p=params();
+  log('relaunch shown='+shown+' view='+view+' panel='+(p.panel||''));
+  if(p.prewarm)return;
+  if(p.ondemand)ondemand=true;
+  if(p.panel==='quick'||p.panel==='sleep'){
+    if(shown&&view===p.panel){if(p.panel==='quick'&&Date.now()-shownAt>700)hide()}   // its button pressed again closes it
+    else showPanel(p.panel);
+    return}
   idle();
-  if(shown){if(Date.now()-shownAt>700)hide()}   // Input pressed again closes it
+  if(shown&&view==='inputs'){if(Date.now()-shownAt>700)hide()}   // Input pressed again closes it
   else show()});
 ondemand=!!params().ondemand;
 load();
@@ -187,5 +354,6 @@ if(params().prewarm){
   refresh();   // built and filled while hidden
   var done=false,go=function(){if(done)return;done=true;setTimeout(hide,150)};
   window.addEventListener('focus',go);setTimeout(go,12000);
-}else show();
+}else if(params().panel==='quick'||params().panel==='sleep')showPanel(params().panel);
+else show();
 </script></body></html>

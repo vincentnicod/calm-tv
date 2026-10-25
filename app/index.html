@@ -1896,11 +1896,12 @@ svg.st {
 <script>
 var API = 'http://127.0.0.1:8765',
   CACHE_KEY = 'cytv.cache.v4',
-  VERSION = '1.6.0';
+  VERSION = '1.7.0';
 var DEFAULTS = {
   dock: ['netflix', 'youtube.leanback.v4', 'amazon', 'com.disney.disneyplus-prod'],
   topbar: [
     { label: 'Inputs', icon: 'inputs', action: 'inputs' },
+    { label: 'Quick settings', icon: 'quick', action: 'quick' },
     { label: 'Settings', icon: 'settings', app: 'com.palm.app.settings' },
   ],
 };
@@ -1908,10 +1909,12 @@ var PRESETS = [
   { label: 'Inputs', icon: 'inputs', action: 'inputs' },
   { label: 'Settings', icon: 'settings', app: 'com.palm.app.settings' },
   { label: 'Live TV', icon: 'tv', action: 'live' },
+  { label: 'Quick settings', icon: 'quick', action: 'quick' },
 ];
 var ICONS = {
   inputs: '<path d="M15 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/>',
   settings: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+  quick: '<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/>',
   edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
   tv: '<rect x="2" y="7" width="20" height="15" rx="2"/><path d="M17 2l-5 5-5-5"/>',
   grid: '<path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/>',
@@ -2361,7 +2364,9 @@ function barLabel(o) {
         ? t('Customise')
         : o.action === 'live'
           ? t('Live TV')
-          : o.label || '';
+          : o.action === 'quick'
+            ? t('Quick settings')
+            : o.label || '';
 }
 function clockOpts() {
   var c = cfg.clock,
@@ -2402,7 +2407,7 @@ function toast(t) {
     e.classList.remove('on');
   }, 4000);
 }
-var MIN_SERVICE = '1.7.0';
+var MIN_SERVICE = '1.8.0';
 function oldSvc(v) {
   var a = String(v).split('.'),
     b = MIN_SERVICE.split('.');
@@ -2990,6 +2995,7 @@ function act(e) {
   if (o.action === 'customize') return customizeMenu();
   if (o.action === 'live') return LIVE.enter();
   if (o.action === 'inputs') return inputsMenu();
+  if (o.action === 'quick') return openQuick();
   if (o.app) launch(o.app, o.params);
 }
 /* ---------- menus ---------- */
@@ -3439,6 +3445,9 @@ function hiddenMenu() {
       'Thunderstorm': 'Orage',
       'Which city?': 'Quelle ville ?',
       'Remote buttons': 'Boutons de la télécommande',
+      'Quick settings': 'Réglages rapides',
+      'Picture, sound, sleep timer': 'Image, son, mise en veille',
+      'Quick settings are not available': 'Réglages rapides indisponibles',
       'Teach a button...': 'Apprendre un bouton...',
       'Which app should it open?': 'Quelle app doit-il ouvrir ?',
       'Button': 'Bouton',
@@ -3502,6 +3511,9 @@ function hiddenMenu() {
       'Thunderstorm': 'Gewitter',
       'Which city?': 'Welche Stadt?',
       'Remote buttons': 'Fernbedienungstasten',
+      'Quick settings': 'Schnelleinstellungen',
+      'Picture, sound, sleep timer': 'Bild, Ton, Sleep-Timer',
+      'Quick settings are not available': 'Schnelleinstellungen nicht verfügbar',
       'Teach a button...': 'Taste anlernen...',
       'Which app should it open?': 'Welche App soll sie öffnen?',
       'Button': 'Taste',
@@ -3566,6 +3578,9 @@ function hiddenMenu() {
       'Thunderstorm': 'Onweer',
       'Which city?': 'Welke stad?',
       'Remote buttons': 'Knoppen van de afstandsbediening',
+      'Quick settings': 'Snelle instellingen',
+      'Picture, sound, sleep timer': 'Beeld, geluid, slaaptimer',
+      'Quick settings are not available': 'Snelle instellingen niet beschikbaar',
       'Teach a button...': 'Een knop aanleren...',
       'Which app should it open?': 'Welke app moet hij openen?',
       'Button': 'Knop',
@@ -3630,6 +3645,9 @@ function hiddenMenu() {
       'Thunderstorm': 'Tormenta',
       'Which city?': '¿Qué ciudad?',
       'Remote buttons': 'Botones del mando',
+      'Quick settings': 'Ajustes rápidos',
+      'Picture, sound, sleep timer': 'Imagen, sonido, temporizador',
+      'Quick settings are not available': 'Ajustes rápidos no disponibles',
       'Teach a button...': 'Enseñar un botón...',
       'Which app should it open?': '¿Qué app debe abrir?',
       'Button': 'Botón',
@@ -4301,12 +4319,26 @@ function glassAlign(list, on) {
   });
 }
 
+/* ---------- Quick settings: the panel over the screen (the Inputs picker app, helper/quick.js). The service opens it, as it does for a remote
+   button given to Quick settings ---------- */
+function openQuick() {
+  api('/api/quick', { open: 'quick' }).then(
+    function (x) {
+      if (!x || !x.ok) toast(t('Quick settings are not available'));
+    },
+    function () {
+      toast(t('Quick settings are not available'));
+    }
+  );
+}
+
 /* ---------- Remote buttons (Customise): a button of the remote opens an app or an HDMI input, from anywhere. The service binds it in
    LG's input service (inputkey.js, /api/remap) and waits for the press itself: the button still does its own thing that once, and
    Home may be gone by then ---------- */
 function appName(id) {
   var m = /^com\.webos\.app\.hdmi(\d)$/.exec(id),
     d;
+  if (id === '__quick') return t('Quick settings');
   if (!m) return title(id);
   d = (inputs || []).filter(function (x) {
     return +x.port === +m[1];
@@ -4346,7 +4378,7 @@ function remapPost(body, done) {
     }
   );
 }
-/* what a button can open: the dock's apps, the HDMI inputs by their device, then every app A to Z */
+/* what a button can open: Quick settings, the dock's apps, the HDMI inputs by their device, then every app A to Z */
 function targetMenu(heading, cb) {
   var seen = {},
     items = [];
@@ -4362,6 +4394,7 @@ function targetMenu(heading, cb) {
       },
     });
   }
+  add('__quick', t('Quick settings'), t('Picture, sound, sleep timer'));
   dockIds().forEach(function (id) {
     if (id.charAt(0) !== '_') add(id, title(id));
   });

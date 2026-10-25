@@ -34,6 +34,10 @@ run(async () => {
         bad.every(x => x.status === 1),
       'appkey.sh launches the app it is given and refuses anything that is not an app id'
     );
+    // __quick asks the service for the Quick settings panel (curl to 127.0.0.1; nothing listens here) and launches nothing itself
+    const q = ak('__quick');
+    const after = fs.readFileSync(log, 'utf8');
+    ok(q.status === 0 && after === said, 'appkey.sh __quick opens the Quick settings panel through the service, not as an app');
   }
   const jt = path.join(root, 'scripts', 'jtool.js'),
     cfg = path.join(tmp, 'config.json');

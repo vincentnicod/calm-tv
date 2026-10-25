@@ -22,6 +22,7 @@ disk, and a reboot without the boot scripts brings LG's Home back.
 | Downloads, programs, luna, TV paths | `helper/fetch.js`, `helper/exec.js`, `helper/luna.js`, `helper/paths.js` |
 | The manager app and its API (updates, options, keys) | `manager/src/` (built into `manager/app/index.html`), `helper/manager.js`, `helper/updates.js`, `helper/selfupdate.js` |
 | The Input key, the Inputs list over the running app | `helper/inputkey.js`, `helper/inputhook.js`, `helper/picker.js`, `picker/app/`, `scripts/inputkey.sh` |
+| Quick settings (picture, sound, sleep timer, screen off) and remote buttons given to apps | `helper/quick.js`, `picker/app/` (panels `quick` and `sleep`), `helper/inputkey.js` (`/api/remap`), `scripts/appkey.sh` |
 | Home takeover at boot, rollback, undo | `scripts/10-cleanyourtv-home`, `scripts/stage-home.sh`, `scripts/undo-home.sh`, `scripts/bootstrap.sh` |
 | Live TV: playlist, guide, favourites | `helper/live.js` and `app/src/js/live.js` |
 | Picture notifications | `notify/app/`, `helper/notify.js`, `helper/notifyapi.js` |

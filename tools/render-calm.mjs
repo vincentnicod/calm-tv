@@ -119,6 +119,24 @@ const body = req =>
     });
   });
 let conf = { theme: theme.resolved(), options: { liveTv: false } };
+// Quick settings: the service's own module, over a stand-in for LG's settings with the lists an LG C4 (webOS 25) answers
+const tvSet = { pictureMode: 'filmMaker', soundMode: 'aiSoundPlus', sleepTimer: 'off' };
+const offer = (vis, hid) => vis.map(value => ({ visible: true, active: true, value })).concat(hid.map(value => ({ visible: false, active: true, value })));
+const OFFER = {
+  pictureMode: offer(['personalized', 'vivid', 'normal', 'eco', 'cinema', 'sports', 'game', 'filmMaker'], ['hdrCinema', 'hdrStandard']),
+  soundMode: offer(['aiSoundPlus', 'aiSound', 'standard', 'movie', 'news', 'sports', 'music', 'game'], []),
+  sleepTimer: offer(['off', '10', '20', '30', '60', '90', '120', '180', '240'], []),
+};
+const quick = require(path.join(ROOT, 'helper', 'quick.js')).create({
+  luna: async (uri, p) => {
+    if (/getSystemSettingDesc/.test(uri)) return { returnValue: true, results: [{ values: { arrayExt: OFFER[p.keys[0]] } }] };
+    if (/getSystemSettings/.test(uri)) return { returnValue: true, settings: { [p.keys[0]]: tvSet[p.keys[0]] } };
+    if (/setSystemSettings/.test(uri)) return Object.assign(tvSet, p.settings), { returnValue: true };
+    return { returnValue: true, state: 'Active', running: [] };
+  },
+  inputhook: { hookInfo: () => ({ attached: false }) },
+  feature: () => null,
+});
 const srv = http.createServer(async (q, r) => {
   const u = q.url.split('?')[0];
   r.setHeader('Access-Control-Allow-Origin', '*');
@@ -134,6 +152,7 @@ const srv = http.createServer(async (q, r) => {
       r.end(fs.readFileSync(path.join(ROOT, 'app', shipped[1])))
     );
   // the Input key's picker is an overlay: here over a made-up picture, as it would be over a programme
+  const panel = /[?&]panel=(quick|sleep)/.exec(q.url) ? RegExp.$1 : '';
   if (u === '/picker.html')
     return (
       r.writeHead(200, { 'content-type': 'text/html' }),
@@ -142,13 +161,16 @@ const srv = http.createServer(async (q, r) => {
           .readFileSync(path.join(ROOT, 'picker', 'app', 'index.html'), 'utf8')
           .replace(
             '<script>',
-            '<style>html{background:radial-gradient(ellipse at 30% 30%,#7a5a3a,#2a3a4a 60%,#0d1218)}</style><script>window.webOSSystem={launchParams:"{}",locale:"fr-CH",hide:function(){},activate:function(){},platformBack:function(){},setInputRegion:function(){},setKeyMask:function(){}};',
+            '<style>html{background:radial-gradient(ellipse at 30% 30%,#7a5a3a,#2a3a4a 60%,#0d1218)}</style><script>window.webOSSystem={launchParams:' +
+              JSON.stringify(JSON.stringify(panel ? { panel } : {})) +
+              ',locale:"fr-CH",hide:function(){},activate:function(){},platformBack:function(){},setInputRegion:function(){},setKeyMask:function(){}};',
             1
           )
       )
     );
   if (u.startsWith('/api/theme/')) return theme.handle(q, r, u, body);
-  if (u === '/api/apps') return j({ apps: APPS.map(a => ({ id: a[0], title: a[1] })), config: conf, usage, version: '1.7.0' });
+  if (u === '/api/quick') return quick.handle(q, r, u, body);
+  if (u === '/api/apps') return j({ apps: APPS.map(a => ({ id: a[0], title: a[1] })), config: conf, usage, version: '1.8.0' });
   if (u === '/api/inputs') return j({ returnValue: true, devices: INPUTS });
   if (u === '/api/weather') return j({ city: 'lausanne', temp: 12, code: 2, day: true });
   if (u === '/api/remap')
@@ -297,6 +319,21 @@ try {
   await send('Page.navigate', { url: 'http://127.0.0.1:8765/picker.html' });
   await sleep(2500);
   await shot('10-input-key-picker');
+  await send('Page.navigate', { url: 'http://127.0.0.1:8765/picker.html?panel=quick' });
+  await sleep(1500);
+  await shot('17-quick-settings');
+  await key(40, 'ArrowDown');
+  await key(40, 'ArrowDown');
+  await key(39, 'ArrowRight');
+  await key(39, 'ArrowRight');
+  await key(39, 'ArrowRight');
+  await sleep(1500);
+  await shot('18-quick-sleep-timer');
+  const quickState = await js("JSON.stringify({sent: q.data && q.data.sleep, focus: q.i, text: document.getElementById('qs').innerText})");
+  console.log('quick ' + quickState);
+  await send('Page.navigate', { url: 'http://127.0.0.1:8765/picker.html?panel=sleep' });
+  await sleep(1200);
+  await shot('19-sleep-warning');
   if (errors.length) console.log('page errors:\n  ' + errors.join('\n  '));
   ws.close();
   done(errors.length ? 1 : 0);

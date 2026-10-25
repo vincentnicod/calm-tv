@@ -30,7 +30,8 @@ function create(ctx) {
   const remap = () => inputhook.cleanRemap(config.get().remap);
   // the buttons CleanYourTV already uses: they are never given to an app
   const ownKeys = () => [on() ? keyCode() : '', voiceKey(), guideKey()].filter(Boolean);
-  const APP = /^[A-Za-z0-9][\w.\-]{0,119}$/;
+  // an app id, or __quick: the Quick settings panel (scripts/appkey.sh)
+  const APP = /^([A-Za-z0-9][\w.\-]{0,119}|__quick)$/;
   let learning = null; // {app, state: waiting | saved | taken | timeout | unsupported, code, at}
   /** @type {any} */
   let learnT = null;

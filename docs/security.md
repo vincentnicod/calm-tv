@@ -41,6 +41,13 @@ Off until you choose a city in the launcher (Customise > Weather). Then the serv
 current temperature and sky of that city, at most every 15 minutes: the request carries the city's coordinates and, like any request,
 the TV's public address. No account and no key; nothing else about the TV is sent. Customise > Weather > Off stops it.
 
+## Quick settings
+
+The panel changes LG's own picture mode, sound mode and sleep timer through LG's settings service, and only to a value the TV itself
+lists, when you choose it; **Turn off** turns the screen off. Nothing goes on the network. After **Turn off** the service reads the
+input hook's log of button presses, only to turn the screen on again at the next button, and stops at that button, at the power button
+or after six hours.
+
 ## Voice
 
 Optional and off by default. Installing it downloads files over HTTPS from PyPI, Ubuntu's archive and Moonshine's model server;

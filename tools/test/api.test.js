@@ -291,7 +291,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   if (!/^1\.5\./.test(version)) {
     const tv = JSON.parse((await request('GET', '/api/tv', undefined, 'null')).body);
     const sv = JSON.parse((await request('GET', '/api/service', undefined, 'null')).body);
-    const want = ['core', 'notify', 'voice', 'live', 'theme', 'inputkey', 'notifyapi', 'manager', 'apps', 'running', 'weather'];
+    const want = ['core', 'notify', 'voice', 'live', 'theme', 'inputkey', 'notifyapi', 'manager', 'apps', 'running', 'weather', 'quick'];
     const okTv = tv.sdk === '10.2.2' && tv.pickerMode === 'overlay' && tv.notifyWindow === 'topui';
     const okSv = JSON.stringify(sv.features) === JSON.stringify(want) && !Object.keys(sv.failed).length;
     console.log((okTv ? 'ok   ' : 'FAIL ') + 'api: /api/tv gives the TV profile');

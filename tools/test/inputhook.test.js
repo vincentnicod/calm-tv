@@ -136,6 +136,14 @@ run(async () => {
     JSON.stringify(r.j.buttons) === '[{"code":"436","app":"com.webos.app.hdmi1"}]',
     'a button can be given to another app (here an HDMI input)'
   );
+  r = await post({ code: '436', app: '__quick' });
+  ok(
+    r.j.buttons[0].app === '__quick' &&
+      hook.binds({}, false, '241', '', '', { 436: '__quick' })[436].command === hook.APP_COMMAND + '__quick' &&
+      (await post({ code: '436', app: '_x' })).code === 400,
+    'a button can open the Quick settings panel (appkey.sh __quick); no other made-up name'
+  );
+  r = await post({ code: '436', app: 'com.webos.app.hdmi1' });
   r = await post({ code: '777', app: 'com.webos.app.hdmi1' });
   ok(r.code === 400, 'only a button already taught can be changed');
   r = await post({ code: '436', remove: true });

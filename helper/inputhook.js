@@ -183,26 +183,43 @@ const markSaved = () => {
   if (learn && learn.result) learn.result.saved = true;
 };
 function startLearn(name) {
-  let size = 0;
+  learn = { name, size: logSize(), at: Date.now(), result: null };
+}
+// what the hook wrote after a point of its log (at most 64 KB)
+function logSince(size) {
   try {
-    size = fs.statSync(HOOKLOG).size;
-  } catch (_) {}
-  learn = { name, size, at: Date.now(), result: null };
+    const fd = fs.openSync(HOOKLOG, 'r'),
+      st = fs.fstatSync(fd),
+      n = Math.max(0, st.size - size);
+    const b = Buffer.alloc(Math.min(n, 65536));
+    fs.readSync(fd, b, 0, b.length, size);
+    fs.closeSync(fd);
+    return b.toString('utf8');
+  } catch (_) {
+    return '';
+  }
+}
+const logSize = () => {
+  try {
+    return fs.statSync(HOOKLOG).size;
+  } catch (_) {
+    return 0;
+  }
+};
+// the buttons pressed after a point of the log, as uinput codes (the screen-off watch in quick.js waits for one)
+function pressesSince(size) {
+  const re = /keyid=\d+, state=1 uinput_code=(\d+)/g,
+    t = logSince(size),
+    out = [];
+  let m;
+  while ((m = re.exec(t))) out.push(+m[1]);
+  return out;
 }
 function learnState() {
   if (!learn) return { state: 'idle' };
   if (learn.result) return Object.assign({ state: 'got', name: learn.name }, learn.result);
   if (!hookInfo().attached) return { state: 'unsupported', name: learn.name };
-  let t = '';
-  try {
-    const fd = fs.openSync(HOOKLOG, 'r'),
-      st = fs.fstatSync(fd),
-      n = Math.max(0, st.size - learn.size);
-    const b = Buffer.alloc(Math.min(n, 65536));
-    fs.readSync(fd, b, 0, b.length, learn.size);
-    fs.closeSync(fd);
-    t = b.toString('utf8');
-  } catch (_) {}
+  const t = logSince(learn.size);
   const re = /keyid=(\d+), state=1 uinput_code=(\d+)/g;
   let m;
   if (Date.now() - learn.at > 1200) {
@@ -229,6 +246,8 @@ module.exports = {
   markSaved,
   startLearn,
   learnState,
+  logSize,
+  pressesSince,
   hookInfo,
   procs,
   binds,

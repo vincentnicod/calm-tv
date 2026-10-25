@@ -13,7 +13,8 @@ if [ "$M" = launcher ]; then
   mark launcher
   exit 0
 fi
-if [ "$M" = ondemand ]; then P='{"id":"com.cleanyourtv.picker","params":{"ondemand":true}}'; else P='{"id":"com.cleanyourtv.picker"}'; fi
+# the panel is named every time: the same app also shows Quick settings (helper/quick.js)
+if [ "$M" = ondemand ]; then P='{"id":"com.cleanyourtv.picker","params":{"panel":"inputs","ondemand":true}}'; else P='{"id":"com.cleanyourtv.picker","params":{"panel":"inputs"}}'; fi
 r=$(luna-send -n 1 -w 3000 luna://com.webos.applicationManager/launch "$P" </dev/null 2>/dev/null)
 case "$r" in *'"returnValue":true'*) mark "$M"; exit 0 ;; esac
 luna-send -n 1 -w 3000 luna://com.webos.applicationManager/launch "$HOME_INPUTS" </dev/null >/dev/null 2>&1
