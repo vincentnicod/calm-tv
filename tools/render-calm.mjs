@@ -170,7 +170,7 @@ const srv = http.createServer(async (q, r) => {
     );
   if (u.startsWith('/api/theme/')) return theme.handle(q, r, u, body);
   if (u === '/api/quick') return quick.handle(q, r, u, body);
-  if (u === '/api/apps') return j({ apps: APPS.map(a => ({ id: a[0], title: a[1] })), config: conf, usage, version: '1.8.0' });
+  if (u === '/api/apps') return j({ apps: APPS.map(a => ({ id: a[0], title: a[1] })), config: conf, usage, version: '1.9.0' });
   if (u === '/api/inputs') return j({ returnValue: true, devices: INPUTS });
   if (u === '/api/weather') return j({ city: 'lausanne', temp: 12, code: 2, day: true });
   if (u === '/api/remap')
@@ -307,6 +307,9 @@ try {
   await js('RB.close(); 0');
   await js("cfg.weather = 'lausanne'; refreshWeather(true); 0");
   await shot('15-weather');
+  await js("cfg.place = 'lausanne'; closeMenus(); customizeMenu(); stack[0].idx = 4; drawMenu(); 0");
+  await shot('20-city');
+  await js("closeMenus(); cfg.place = undefined; 0");
   await js('idleAt = Date.now() - 4 * 60000; idleCheck(); 0');
   await sleep(2800);
   await shot('16-idle');

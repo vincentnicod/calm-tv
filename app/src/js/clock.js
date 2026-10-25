@@ -477,7 +477,7 @@ function toast(t) {
     e.classList.remove('on');
   }, 4000);
 }
-var MIN_SERVICE = '1.8.0';
+var MIN_SERVICE = '1.9.0';
 function oldSvc(v) {
   var a = String(v).split('.'),
     b = MIN_SERVICE.split('.');

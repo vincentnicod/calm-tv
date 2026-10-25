@@ -37,9 +37,10 @@ releases of this repository; there is no signature.
 
 ## Weather
 
-Off until you choose a city in the launcher (Customise > Weather). Then the service asks [Open-Meteo](https://open-meteo.com) for the
-current temperature and sky of that city, at most every 15 minutes: the request carries the city's coordinates and, like any request,
-the TV's public address. No account and no key; nothing else about the TV is sent. Customise > Weather > Off stops it.
+Off until you turn it on in the launcher (Customise > Weather). Then the service asks [Open-Meteo](https://open-meteo.com) for the
+current temperature and sky of your city, at most every 15 minutes: the request carries the city's coordinates and, like any request,
+the TV's public address. No account and no key; nothing else about the TV is sent. Customise > Weather > Off stops it. Choosing the
+city (Customise > City) sends nothing: sunrise and sunset are worked out on the TV.
 
 ## Quick settings
 

@@ -52,7 +52,24 @@ const dev = (port, label, on, act) => ({
   activate: !!act,
 });
 // what the stand-in answers; each check changes it
-const S = { config: {}, inputs: [], launched: [], saved: [], version: '1.8.0', locale: 'en-GB', remap: {}, learning: null, remapCalls: [], quickCalls: [], quickOk: true, panel: '', realQuick: false, tv: {}, tvCalls: [], refuse: false };
+const S = {
+  config: {},
+  inputs: [],
+  launched: [],
+  saved: [],
+  version: '1.9.0',
+  locale: 'en-GB',
+  remap: {},
+  learning: null,
+  remapCalls: [],
+  quickCalls: [],
+  quickOk: true,
+  panel: '',
+  realQuick: false,
+  tv: {},
+  tvCalls: [],
+  refuse: false,
+};
 const page = () =>
   fs
     .readFileSync(path.join(ROOT, 'app', 'index.html'), 'utf8')
@@ -69,7 +86,8 @@ const pickerPage = () =>
       1
     );
 // with S.realQuick the service's own Quick settings module answers, over a stand-in for LG's settings (S.tv, what an LG C4 offers)
-const offer = (vis, hid) => vis.map(value => ({ visible: true, active: true, value })).concat(hid.map(value => ({ visible: false, active: true, value })));
+const offer = (vis, hid) =>
+  vis.map(value => ({ visible: true, active: true, value })).concat(hid.map(value => ({ visible: false, active: true, value })));
 const OFFER = {
   pictureMode: offer(['personalized', 'vivid', 'normal', 'eco', 'cinema', 'sports', 'game', 'filmMaker'], ['hdrCinema', 'hdrStandard']),
   soundMode: offer(['aiSoundPlus', 'aiSound', 'standard', 'movie', 'news', 'sports', 'music', 'game'], []),
@@ -80,7 +98,8 @@ const quick = require(path.join(ROOT, 'helper', 'quick.js')).create({
     S.tvCalls.push(uri.split('/').pop() + (p.settings ? ' ' + JSON.stringify(p.settings) : ''));
     if (/getSystemSettingDesc/.test(uri)) return { returnValue: true, results: [{ values: { arrayExt: OFFER[p.keys[0]] } }] };
     if (/getSystemSettings/.test(uri)) return { returnValue: true, settings: { [p.keys[0]]: S.tv[p.keys[0]] } };
-    if (/setSystemSettings/.test(uri)) return S.refuse ? { returnValue: false, errorText: 'refused' } : (Object.assign(S.tv, p.settings), { returnValue: true });
+    if (/setSystemSettings/.test(uri))
+      return S.refuse ? { returnValue: false, errorText: 'refused' } : (Object.assign(S.tv, p.settings), { returnValue: true });
     return { returnValue: true, state: 'Active', running: [] };
   },
   inputhook: { hookInfo: () => ({ attached: false }) },
@@ -290,7 +309,10 @@ try {
     (await js("JSON.parse(localStorage.getItem('cytv.mono.v1') || '{}').netflix.w.indexOf('data:image/png')")) === 0,
     'the white logo is remembered, so it is made only once'
   );
-  ok((await js('getComputedStyle(document.body).backgroundImage')).indexOf('scene-lac.jpg') >= 0, 'the lake is the background');
+  ok(
+    /scene-lac(-aube|-jour|-nuit)?\.jpg/.test(await js('getComputedStyle(document.body).backgroundImage')),
+    'the lake is the background (at the time of day of the check)'
+  );
   await key(RIGHT);
   await key(RIGHT);
   await key(RIGHT);
@@ -485,7 +507,7 @@ try {
   ok(/older than this launcher needs/.test(await toastText()), 'an older service is reported');
   ok((await caps()).split('|')[2] === 'YouTube', 'with an older service the automatic looks still apply');
   S.locale = 'en-GB';
-  S.version = '1.8.0';
+  S.version = '1.9.0';
 
   // ---- the grid opens one press down ----
   await fresh();
@@ -609,10 +631,7 @@ try {
   await key(OK, 400);
   await key(OK, 400);
   await key(OK, 900);
-  ok(
-    S.remap['435'] === '__quick' && /^Quick settingsButton 1/.test(await rbCards()),
-    'or the Quick settings panel, named so on its card'
-  );
+  ok(S.remap['435'] === '__quick' && /^Quick settingsButton 1/.test(await rbCards()), 'or the Quick settings panel, named so on its card');
   await key(OK, 400);
   await key(DOWN, 200);
   await key(OK, 900);
@@ -680,6 +699,53 @@ try {
       /scene-lac-nuit\.jpg/.test(await wallAt(23)),
     'Paysage: dawn, day, dusk and night lakes through the day'
   );
+  // with a city the lake follows the sun instead of the clock
+  await js("cfg.place = 'lausanne'; sunKept.key = ''; 0");
+  const wallSun = async mins =>
+    js(
+      '(function () { var D = Date, s = sunToday(new D()), T = s.set + (' +
+        mins +
+        ') * 60000; Date = function (a) { return a === undefined ? new D(T) : new D(a); }; Date.UTC = D.UTC; Date.now = function () { return T; }; scene.period = "x"; sceneCheck(); var w = getComputedStyle(document.documentElement).getPropertyValue("--wall"); Date = D; return w; })()'
+    );
+  ok(
+    /scene-lac-jour\.jpg/.test(await wallSun(-200)) &&
+      /scene-lac\.jpg/.test(await wallSun(-60)) &&
+      /scene-lac\.jpg/.test(await wallSun(30)) &&
+      /scene-lac-nuit\.jpg/.test(await wallSun(60)),
+    "with a city: day, then the dusk lake from 90 minutes before that day's sunset to 40 after, then night"
+  );
+
+  // ---- the city in Customise: the sun's times, and the weather on that city ----
+  await js("cfg.place = undefined; cfg.weather = 'off'; sunKept.key = ''; closeMenus(); customizeMenu(); 0");
+  const custom = async () => JSON.parse(await js("JSON.stringify(stack[0].items.map(function (i) { return [i.label, i.sub || '']; }))"));
+  const pick = (menu, label) =>
+    js('stack[' + menu + '].items.filter(function (i) { return i.label === ' + JSON.stringify(label) + '; })[0].fn(); 0');
+  let cu = await custom();
+  const row = l => (cu.filter(i => i[0] === l)[0] || [])[1];
+  ok(
+    row('City') === 'None (fixed hours)' && row('Weather') === 'Disabled' && row('Night mode') === '22:00–6:00',
+    'Customise: no city yet, so fixed hours, no weather and night mode until 6:00'
+  );
+  await pick(0, 'Weather');
+  ok((await menuTitle()) === 'Which city?', 'turning the weather on without a city asks for one');
+  await pick('stack.length - 1', 'Lausanne');
+  await sleep(400);
+  ok(S.config.place === 'lausanne' && S.config.weather === 'lausanne', 'choosing Lausanne sets the city, with the weather on it');
+  await js('closeMenus(); customizeMenu(); 0');
+  cu = await custom();
+  ok(
+    /^Lausanne · ☀ \d+:\d\d–\d+:\d\d$/.test(row('City')) && row('Weather') === 'Enabled' && row('Night mode') === '22:00 to sunrise',
+    "the City row shows today's sunrise and sunset; night mode lasts until sunrise"
+  );
+  await js('placeMenu(); 0');
+  await pick('stack.length - 1', 'Zurich');
+  await sleep(400);
+  ok(S.config.place === 'zurich' && S.config.weather === 'zurich', 'another city: the weather follows it');
+  await js('closeMenus(); customizeMenu(); 0');
+  await pick(0, 'Weather');
+  await sleep(400);
+  ok(S.config.weather === 'off' && S.config.place === 'zurich', 'the weather off keeps the city for the sun');
+  await js("closeMenus(); cfg.place = undefined; cfg.weather = 'off'; sunKept.key = ''; 0");
 
   // ---- Quick settings over the screen: the picker app's panel, with the service's own module behind it ----
   S.realQuick = true;
@@ -691,7 +757,10 @@ try {
     await send('Page.navigate', { url: 'http://127.0.0.1:8765/picker.html' });
     await sleep(wait);
   };
-  const rows = () => js("[].map.call(document.querySelectorAll('#qs .qr'), function (e) { return e.innerText.replace(/\\n/g, ' ') + (e.classList.contains('f') ? '*' : ''); }).join('|')");
+  const rows = () =>
+    js(
+      "[].map.call(document.querySelectorAll('#qs .qr'), function (e) { return e.innerText.replace(/\\n/g, ' ') + (e.classList.contains('f') ? '*' : ''); }).join('|')"
+    );
   const sets = () => S.tvCalls.filter(c => /^setSystemSettings/.test(c)).map(c => c.slice(18));
   await openPicker('quick');
   ok(
@@ -700,7 +769,10 @@ try {
     "Quick settings: the TV's picture and sound modes, the sleep timer and the screen, read from the TV"
   );
   await key(RIGHT, 1100);
-  ok(S.tv.pictureMode === 'personalized' && /^Picture Personalised\*/.test(await rows()), 'Right: the next picture mode (round from the last), set on the TV');
+  ok(
+    S.tv.pictureMode === 'personalized' && /^Picture Personalised\*/.test(await rows()),
+    'Right: the next picture mode (round from the last), set on the TV'
+  );
   await key(DOWN, 100);
   await key(RIGHT, 80);
   await key(RIGHT, 80);
@@ -714,7 +786,10 @@ try {
   ok(/Sleep timer Off\*/.test(await rows()) && !sets().some(c => /sleepTimer/.test(c)), 'the sleep timer stops at Off');
   await key(RIGHT, 80);
   await key(RIGHT, 1200);
-  ok(S.tv.sleepTimer === '20' && /Sleep timer · off at \d+:\d\d 20 min\*/.test(await rows()), 'two steps: 20 minutes, and when the TV will turn off');
+  ok(
+    S.tv.sleepTimer === '20' && /Sleep timer · off at \d+:\d\d 20 min\*/.test(await rows()),
+    'two steps: 20 minutes, and when the TV will turn off'
+  );
   await key(RIGHT, 80);
   await key(BACK, 900);
   ok(
@@ -742,7 +817,10 @@ try {
   await key(DOWN, 80);
   await key(DOWN, 80);
   await key(OK, 600);
-  ok(S.tvCalls.includes('turnOffScreen') && (await js('document.body.className')) === '', 'Turn off: the screen goes off and the panel closes');
+  ok(
+    S.tvCalls.includes('turnOffScreen') && (await js('document.body.className')) === '',
+    'Turn off: the screen goes off and the panel closes'
+  );
   // the warning a minute before the sleep timer ends (the timer was changed elsewhere, so the page counts the minute itself)
   S.tv.sleepTimer = '10';
   await openPicker('sleep');

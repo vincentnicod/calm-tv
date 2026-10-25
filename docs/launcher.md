@@ -118,14 +118,20 @@ LG's, so it runs even if the service stops; a timer set in LG's own menu gets no
 Sound output (speakers, soundbar, headphones) is not in the panel: the TV does not say which outputs are connected, and choosing one
 that is not would leave the TV silent.
 
-## Idle screen, night mode, weather
+## Idle screen, night mode, city, weather
 
 - **Idle screen.** After 3 minutes without a key on Home (or 10, or never: Customise > **Idle screen**), everything but the background
   and a dim clock fades away and the clock moves a little each minute, so no picture stays lit on an OLED. The first key only wakes it.
-- **Night mode.** From 22:00 to 6:00 Home is a little darker and warmer (Customise > **Night mode** switches it off).
-- **Weather.** Customise > **Weather** chooses a city; the temperature and the sky then show beside the date, from Open-Meteo
-  ([Security](security.md#weather)). Off until a city is chosen.
-- **The time of day.** Paysage's lake and Verre's peaks follow the day: dawn from 6:00, day from 9:00, dusk from 17:00, night from 21:00.
+- **Night mode.** From 22:00 Home is a little darker and warmer, until 6:00, or until sunrise when a city is chosen and the sun rises
+  later (Customise > **Night mode** switches it off).
+- **City.** Customise > **City** chooses where you are, from ten Swiss cities. The row shows today's sunrise and sunset there. The times
+  are worked out on the TV from the date and the city's coordinates (the sunrise equation, within three minutes): nothing is asked of
+  the network. **None** keeps the fixed hours.
+- **Weather.** Customise > **Weather** turns on the temperature and the sky beside the date, for the city, from Open-Meteo
+  ([Security](security.md#weather)). Without a city it first asks for one; a new city moves the weather with it. Off until turned on.
+- **The time of day.** Paysage's lake and Verre's peaks follow the sun: dawn from 40 minutes before sunrise, day from 80 minutes after,
+  dusk from 90 minutes before sunset to 40 minutes after, then night. With no city: dawn from 6:00, day from 9:00, dusk from 17:00, night
+  from 21:00.
 - **The HDMI card's name.** Hold OK on it > **Name...**: Décodeur, Box TV, Apple TV, PlayStation and others, or the device's own name.
 
 ## Running apps
@@ -147,7 +153,7 @@ Steefzar for the original CleanYourTV.
 
 - the **style** (Paysage, Verre, Éditorial, Lin, Aurore, Calm, Original),
 - the **remote buttons** given to apps or to Quick settings,
-- the **idle screen**, **night mode** and the **weather**,
+- the **idle screen**, **night mode**, the **city** and the **weather**,
 - the **top buttons** (add Inputs, Quick settings, Settings, Live TV or any app, or remove one),
 - **hidden apps** (show them again),
 - the **app order** (most used first, or A to Z),
@@ -195,6 +201,7 @@ Settings are stored on the TV in `/media/developer/cleanyourtv/config.json`:
 | `tiles` | How apps look: `{"<app id>": {"label": "IPTV", "icon": "iptv"}}`. Icons: `youtube`, `iptv`, `tv`, `film`, `music`, `sport`, or `""` for the app's own. |
 | `hdmi` | The HDMI card: `auto` or a port, `"1"` to `"8"`. |
 | `idle`, `night`, `weather` | The idle screen (`3`, `10` or `off`), night mode (`on` or `off`), the weather's city (`lausanne`, ...) or `off`. |
+| `place` | The city for the sun's times (`lausanne`, ...) or `none`. When it is missing, the weather's city is used. |
 | `remap` | Remote buttons given to apps: `{"<button code>": "<app id>"}` (an input is `com.webos.app.hdmi1`, Quick settings is `__quick`). Set in Customise > Remote buttons. |
 
 See [`config.example.json`](https://github.com/vincentnicod/calm-tv/blob/main/config.example.json). Change settings in

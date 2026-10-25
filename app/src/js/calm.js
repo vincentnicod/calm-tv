@@ -47,6 +47,9 @@
       'Snow showers': 'Averses de neige',
       'Thunderstorm': 'Orage',
       'Which city?': 'Quelle ville ?',
+      'City': 'Ville',
+      'None (fixed hours)': 'Aucune (heures fixes)',
+      '22:00 to sunrise': '22:00–lever du soleil',
       'Remote buttons': 'Boutons de la télécommande',
       'Quick settings': 'Réglages rapides',
       'Picture, sound, sleep timer': 'Image, son, mise en veille',
@@ -113,6 +116,9 @@
       'Snow showers': 'Schneeschauer',
       'Thunderstorm': 'Gewitter',
       'Which city?': 'Welche Stadt?',
+      'City': 'Stadt',
+      'None (fixed hours)': 'Keine (feste Zeiten)',
+      '22:00 to sunrise': '22:00–Sonnenaufgang',
       'Remote buttons': 'Fernbedienungstasten',
       'Quick settings': 'Schnelleinstellungen',
       'Picture, sound, sleep timer': 'Bild, Ton, Sleep-Timer',
@@ -180,6 +186,9 @@
       'Snow showers': 'Sneeuwbuien',
       'Thunderstorm': 'Onweer',
       'Which city?': 'Welke stad?',
+      'City': 'Stad',
+      'None (fixed hours)': 'Geen (vaste tijden)',
+      '22:00 to sunrise': '22:00–zonsopgang',
       'Remote buttons': 'Knoppen van de afstandsbediening',
       'Quick settings': 'Snelle instellingen',
       'Picture, sound, sleep timer': 'Beeld, geluid, slaaptimer',
@@ -247,6 +256,9 @@
       'Snow showers': 'Chubascos de nieve',
       'Thunderstorm': 'Tormenta',
       'Which city?': '¿Qué ciudad?',
+      'City': 'Ciudad',
+      'None (fixed hours)': 'Ninguna (horas fijas)',
+      '22:00 to sunrise': '22:00–amanecer',
       'Remote buttons': 'Botones del mando',
       'Quick settings': 'Ajustes rápidos',
       'Picture, sound, sleep timer': 'Imagen, sonido, temporizador',
@@ -1060,10 +1072,16 @@ document.addEventListener(
 document.addEventListener('mousemove', wake, true);
 document.addEventListener('visibilitychange', wake);
 
-/* ---------- night mode: from 22:00 to 6:00 Home is a little darker and warmer ---------- */
+/* ---------- night mode: from 22:00 to 6:00 Home is a little darker and warmer; with a city, until sunrise when that is later ---------- */
+function nightEnd(d) {
+  var s = sunToday(d),
+    r = s && new Date(s.rise);
+  return r ? Math.max(360, r.getHours() * 60 + r.getMinutes()) : 360;
+}
 function nightCheck() {
-  var h = new Date().getHours();
-  document.body.classList.toggle('night', cfg.night !== 'off' && (h >= 22 || h < 6));
+  var d = new Date(),
+    h = d.getHours();
+  document.body.classList.toggle('night', cfg.night !== 'off' && (h >= 22 || h * 60 + d.getMinutes() < nightEnd(d)));
 }
 setInterval(function () {
   idleCheck();
@@ -1071,24 +1089,65 @@ setInterval(function () {
   sceneCheck();
 }, 20000);
 
-/* ---------- weather beside the date (Customise > Weather): the service asks Open-Meteo for the chosen city ---------- */
+/* ---------- the city (Customise > City): the sun's times, and the weather's city when the weather is on. [id, name, latitude, longitude], the
+   same places as the service's weather.js (a test keeps them equal) ---------- */
 var CITIES = [
-  ['geneve', 'Genève'],
-  ['lausanne', 'Lausanne'],
-  ['neuchatel', 'Neuchâtel'],
-  ['fribourg', 'Fribourg'],
-  ['sion', 'Sion'],
-  ['berne', 'Berne'],
-  ['bale', 'Bâle'],
-  ['lucerne', 'Lucerne'],
-  ['zurich', 'Zurich'],
-  ['lugano', 'Lugano'],
+  ['geneve', 'Genève', 46.2044, 6.1432],
+  ['lausanne', 'Lausanne', 46.5197, 6.6323],
+  ['neuchatel', 'Neuchâtel', 46.99, 6.9293],
+  ['fribourg', 'Fribourg', 46.8065, 7.162],
+  ['sion', 'Sion', 46.2331, 7.3606],
+  ['berne', 'Berne', 46.948, 7.4474],
+  ['bale', 'Bâle', 47.5596, 7.5886],
+  ['lucerne', 'Lucerne', 47.0502, 8.3093],
+  ['zurich', 'Zurich', 47.3769, 8.5417],
+  ['lugano', 'Lugano', 46.0037, 8.9511],
 ];
+function city(id) {
+  for (var i = 0; i < CITIES.length; i++) if (CITIES[i][0] === id) return CITIES[i];
+  return null;
+}
+/* the chosen city; before there was a City row, the weather's city was the only one */
+function placeId() {
+  return city(cfg.place) ? cfg.place : cfg.place === 'none' ? '' : city(cfg.weather) ? cfg.weather : '';
+}
+/* Sunrise and sunset (ms) of a calendar day (the UTC date of ms) at a latitude and longitude: the sunrise equation (NOAA's simplified
+   form, within three minutes in Switzerland), worked out on the TV; nothing is asked of the network. null on a day without both (polar day
+   or night) */
+function sunTimes(ms, lat, lon) {
+  var rad = Math.PI / 180,
+    n = Math.floor(ms / 86400000) - 10957 /* days from 1 January 2000 */,
+    j = n - lon / 360,
+    m = (357.5291 + 0.98560028 * j) % 360,
+    c = 1.9148 * Math.sin(m * rad) + 0.02 * Math.sin(2 * m * rad) + 0.0003 * Math.sin(3 * m * rad),
+    l = (m + c + 282.9372) % 360,
+    transit = 2451545 + j + 0.0053 * Math.sin(m * rad) - 0.0069 * Math.sin(2 * l * rad),
+    sd = Math.sin(l * rad) * Math.sin(23.4397 * rad),
+    cw = (Math.sin(-0.833 * rad) - Math.sin(lat * rad) * sd) / (Math.cos(lat * rad) * Math.cos(Math.asin(sd)));
+  if (!(cw >= -1 && cw <= 1)) return null;
+  var w = Math.acos(cw) / rad / 360;
+  return { rise: (transit - w - 2440587.5) * 86400000, set: (transit + w - 2440587.5) * 86400000 };
+}
+/* today's sun at the chosen city (kept for the day), or null without a city */
+var sunKept = { key: '', v: null };
+function sunToday(d) {
+  var c = city(placeId());
+  if (!c || !d || !d.getFullYear) return null;
+  var key = c[0] + d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+  if (sunKept.key !== key) sunKept = { key: key, v: sunTimes(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()), c[2], c[3]) };
+  return sunKept.v;
+}
+function hhmm(ms) {
+  var d = new Date(ms);
+  return d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
+}
+
+/* ---------- weather beside the date (Customise > Weather): the service asks Open-Meteo for the chosen city ---------- */
 var weatherNow = null,
   weatherAt = 0;
 function cityName(id) {
-  for (var i = 0; i < CITIES.length; i++) if (CITIES[i][0] === id) return CITIES[i][1];
-  return '';
+  var c = city(id);
+  return c ? c[1] : '';
 }
 function refreshWeather(force) {
   var c = cfg.weather;
@@ -1153,7 +1212,7 @@ function refreshCustomise() {
 function nightItem() {
   return {
     label: t('Night mode'),
-    sub: cfg.night === 'off' ? t('Disabled') : '22:00–6:00',
+    sub: cfg.night === 'off' ? t('Disabled') : placeId() ? t('22:00 to sunrise') : '22:00–6:00',
     stay: true,
     fn: function () {
       cfg.night = cfg.night === 'off' ? 'on' : 'off';
@@ -1163,43 +1222,86 @@ function nightItem() {
     },
   };
 }
+/* City: where the sun's times are worked out for, and the weather's city. Choosing one keeps the weather on that city if it is on */
+function placeMenu(then) {
+  var items = [
+    {
+      label: t('None (fixed hours)'),
+      sub: placeId() ? '' : '✓',
+      fn: function () {
+        cfg.place = 'none';
+        saveCfg();
+        sunChanged();
+      },
+    },
+  ];
+  CITIES.forEach(function (c) {
+    items.push({
+      label: c[1],
+      sub: placeId() === c[0] ? '✓' : '',
+      fn: function () {
+        cfg.place = c[0];
+        if (city(cfg.weather) || then === 'weather') cfg.weather = c[0];
+        saveCfg();
+        refreshWeather(true);
+        sunChanged();
+      },
+    });
+  });
+  openMenu(t('Which city?'), items);
+}
+/* the scenes and night mode follow a new city at once */
+function sunChanged() {
+  sunKept.key = '';
+  nightCheck();
+  sceneCheck();
+}
+function placeItem() {
+  var s = sunToday(new Date());
+  return {
+    label: t('City'),
+    sub: placeId() ? cityName(placeId()) + (s ? ' · ☀ ' + hhmm(s.rise) + '–' + hhmm(s.set) : '') : t('None (fixed hours)'),
+    stay: true,
+    fn: function () {
+      placeMenu();
+    },
+  };
+}
+/* Weather: on (for the city) or off; without a city, turning it on asks for one */
 function weatherItem() {
   return {
     label: t('Weather'),
-    sub: cityName(cfg.weather) || t('Disabled'),
+    sub: city(cfg.weather) ? t('Enabled') : t('Disabled'),
     stay: true,
     fn: function () {
-      var items = [
-        {
-          label: t('Disabled'),
-          sub: cityName(cfg.weather) ? '' : '✓',
-          fn: function () {
-            cfg.weather = 'off';
-            saveCfg();
-            refreshWeather(true);
-          },
-        },
-      ];
-      CITIES.forEach(function (c) {
-        items.push({
-          label: c[1],
-          sub: cfg.weather === c[0] ? '✓' : '',
-          fn: function () {
-            cfg.weather = c[0];
-            saveCfg();
-            refreshWeather(true);
-          },
-        });
-      });
-      openMenu(t('Which city?'), items);
+      if (city(cfg.weather)) cfg.weather = 'off';
+      else if (placeId()) cfg.weather = placeId();
+      else return placeMenu('weather');
+      saveCfg();
+      refreshWeather(true);
+      refreshCustomise();
     },
   };
 }
 
 /* ---------- the scene of the style (theme.js), at the time of day when the style asks for it ---------- */
 var scene = { name: '', glass: '', daily: false, period: '' };
+/* With a city the light follows the sun: dawn from 40 minutes before sunrise, day from 80 minutes after, dusk (the scene itself, '') from
+   90 minutes before sunset to 40 minutes after, then night. Without one: dawn 6:00, day 9:00, dusk 17:00, night 21:00 */
 function dayPeriod() {
-  var h = new Date().getHours();
+  var d = new Date(),
+    s = sunToday(d),
+    M = 60000,
+    now = d.getTime(),
+    h = d.getHours();
+  if (s)
+    return now >= s.rise - 40 * M && now < s.rise + 80 * M
+      ? 'aube'
+      : now >= s.rise + 80 * M && now < s.set - 90 * M
+        ? 'jour'
+        : now >= s.set - 90 * M && now < s.set + 40 * M
+          ? ''
+          : 'nuit';
   return h >= 6 && h < 9 ? 'aube' : h >= 9 && h < 17 ? 'jour' : h >= 17 && h < 21 ? '' : 'nuit'; /* '' is dusk, the scene itself */
 }
 function sceneApply() {

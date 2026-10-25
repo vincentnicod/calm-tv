@@ -139,10 +139,11 @@ function create(ctx) {
     }
     // the HDMI card: 'auto' (the device that is on) or always one port
     if (b.hdmi === 'auto' || /^[1-8]$/.test(String(b.hdmi))) out.hdmi = String(b.hdmi);
-    // the idle screen after 3 or 10 minutes, or off; night mode on or off; the weather's city, or off
+    // the idle screen after 3 or 10 minutes, or off; night mode on or off; the weather's city, or off; the city for the sun's times, or none
     if (['3', '10', 'off'].indexOf(b.idle) >= 0) out.idle = b.idle;
     if (b.night === 'on' || b.night === 'off') out.night = b.night;
     if (b.weather === 'off' || Object.prototype.hasOwnProperty.call(require('./weather').CITIES, b.weather)) out.weather = b.weather;
+    if (b.place === 'none' || Object.prototype.hasOwnProperty.call(require('./weather').CITIES, b.place)) out.place = b.place;
     config.update('launcher', c => {
       for (const k of LAUNCHER_KEYS) delete c[k];
       return Object.assign(c, out);

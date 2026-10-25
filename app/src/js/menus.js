@@ -288,6 +288,7 @@ function customizeMenu() {
     { label: t('Remote buttons'), stay: true, fn: RB.open },
     idleItem(),
     nightItem(),
+    placeItem(),
     weatherItem(),
     {
       label: 'Dock',

@@ -25,7 +25,7 @@ manager app come from that project; see [LICENSE](LICENSE) and [THIRD-PARTY.md](
 | **Calm** | Near-black, a large light clock and four dark cards lit in their app's colour. |
 | **Original** | The original CleanYourTV layout. |
 
-Paysage and Verre follow the time of day (dawn, day, dusk, night). The white logos are made once from each app's own icon; an icon that
+Paysage and Verre follow the time of day (dawn, day, dusk, night): the real sunrise and sunset once you choose your city. The white logos are made once from each app's own icon; an icon that
 does not separate cleanly shows the app's name instead.
 
 **What it does**
@@ -39,8 +39,9 @@ does not separate cleanly shows the app's name instead.
 - **Remote buttons.** Customise › Remote buttons gives any button (Netflix, Prime Video, ...) to an app, an HDMI input or Quick
   settings, from anywhere.
 - **Keys.** 1 to 9 and the red, green, yellow and blue keys open the dock's apps in order.
-- **Idle screen** (fades to a dim, drifting clock after 3 minutes, for the OLED), **night mode** (22:00 to 6:00), **weather** beside the
-  date (Open-Meteo, off until you choose a city).
+- **The sun.** Choose your city and Paysage's lake and Verre's peaks follow that day's real sunrise and sunset, worked out on the TV.
+- **Idle screen** (fades to a dim, drifting clock after 3 minutes, for the OLED), **night mode** (22:00 until 6:00 or sunrise), **weather** beside the
+  date (Open-Meteo, off until you turn it on).
 - From CleanYourTV: the Inputs list on the remote's Input key, Live TV from your own playlist, picture notifications, optional voice,
   an optional debloat of LG's ads and telemetry, and a manager app that sets up, updates and removes everything.
 
