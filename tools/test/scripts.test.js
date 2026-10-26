@@ -26,14 +26,42 @@ run(async () => {
       "the boot watchdog checks /api/version, which the service answers without asking the TV's app manager"
     );
   }
-  // going to LG's Home closes our page before unmounting its files: a page left open loads index.html again from the empty folder and
-  // shows "file not found" (-6) until LG's Home comes up
+  // going to LG's Home: the web engine closes our page (killApp) before its files are unmounted. sam does not close Home, and a killed
+  // page process is reopened by the engine from the empty folder: "file not found" (-6), seen on an LG C4 (webOS 25)
   {
     const undo = fs.readFileSync(path.join(root, 'scripts', 'undo-home.sh'), 'utf8');
-    const close = undo.search(/closeByAppId '\{"id":"com\.webos\.app\.home"\}'/),
-      unmount = undo.indexOf('umount $m'),
-      sam = undo.indexOf('systemctl restart sam');
-    ok(close > 0 && close < unmount && close < sam, 'undo-home.sh closes our Home page before it unmounts the files and restarts sam');
+    const fns = (/\nweb_home\(\)[^\n]*\nclose_web_home\(\) \{[\s\S]*?\n\}\n/.exec(undo) || [''])[0];
+    const body = undo.replace(fns, '\n');
+    const first = body.indexOf('close_web_home'),
+      unmount = body.indexOf('umount $m'),
+      sam = body.indexOf('systemctl restart sam');
+    ok(
+      !!fns && first > 0 && first < unmount && first < sam && !/pkill -f "\[a\]pp-id=com\.webos\.app\.home"/.test(body),
+      'undo-home.sh closes our Home page through the web engine before unmounting, and never kills its process outside close_web_home'
+    );
+    // close_web_home with stand-ins: the page goes after killApp (no kill), or stays (killed as a last resort)
+    const fb = path.join(tmp, 'webhome-bin'),
+      log = path.join(tmp, 'webhome.log'),
+      state = path.join(tmp, 'webhome.state');
+    cp.spawnSync('mkdir', ['-p', fb]);
+    const tool = (n, s) => fs.writeFileSync(path.join(fb, n), '#!/bin/sh\n' + s + '\n', { mode: 0o755 });
+    tool('luna-send', 'echo "luna $*" >> ' + log + '; [ "$(cat ' + state + ')" = obeys ] && echo gone > ' + state + '; exit 0');
+    tool('pgrep', '[ "$(cat ' + state + ')" != gone ]');
+    tool('pkill', 'echo "pkill $*" >> ' + log + '; echo gone > ' + state);
+    tool('sleep', 'exit 0');
+    const runClose = how => {
+      fs.writeFileSync(state, how);
+      fs.writeFileSync(log, '');
+      cp.spawnSync('sh', ['-c', fns + '\nclose_web_home'], { env: Object.assign({}, process.env, { PATH: fb + ':' + process.env.PATH }) });
+      return fs.readFileSync(log, 'utf8');
+    };
+    const obeys = runClose('obeys'),
+      refuses = runClose('refuses');
+    ok(
+      /luna -n 1 -w 5000 luna:\/\/com\.palm\.webappmanager\/killApp \{"appId":"com\.webos\.app\.home"\}/.test(obeys) && !/pkill/.test(obeys),
+      'the web engine is asked to close the page (killApp), and nothing is killed when it does'
+    );
+    ok(/killApp[\s\S]*\npkill -f \[a\]pp-id=com\.webos\.app\.home/.test(refuses), 'a page the engine keeps is killed as a last resort');
   }
   // appkey.sh (a remote button given to an app): launches only an app id, never anything a shell would read
   {
