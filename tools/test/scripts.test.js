@@ -26,6 +26,15 @@ run(async () => {
       "the boot watchdog checks /api/version, which the service answers without asking the TV's app manager"
     );
   }
+  // going to LG's Home closes our page before unmounting its files: a page left open loads index.html again from the empty folder and
+  // shows "file not found" (-6) until LG's Home comes up
+  {
+    const undo = fs.readFileSync(path.join(root, 'scripts', 'undo-home.sh'), 'utf8');
+    const close = undo.search(/closeByAppId '\{"id":"com\.webos\.app\.home"\}'/),
+      unmount = undo.indexOf('umount $m'),
+      sam = undo.indexOf('systemctl restart sam');
+    ok(close > 0 && close < unmount && close < sam, 'undo-home.sh closes our Home page before it unmounts the files and restarts sam');
+  }
   // appkey.sh (a remote button given to an app): launches only an app id, never anything a shell would read
   {
     const fb = path.join(tmp, 'appkey-bin'),
