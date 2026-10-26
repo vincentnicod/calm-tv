@@ -89,13 +89,20 @@ const theme = require(path.join(ROOT, 'helper', 'theme.js')).create({
   config: require(path.join(ROOT, 'helper', 'config.js')).memory({}),
   noStartup: true,
 });
-// in front of the page's own script: report script errors on <html data-errors>, and the TV's webOSSystem with the page's launch parameters
-const PROBE = params =>
+// in front of the page's own script: report script errors on <html data-errors>, and the TV's webOSSystem with the page's launch parameters.
+// Near the end of the page time the page also posts its own DOM to the stand-in (/__dom): headless Chromium 79 now and then fails its
+// --dump-dom ("Failed to serialize document: Uncaught") on a page that rendered fine, and this copy does not go through that step
+const PROBE = (params, report) =>
   '<script>window.onerror=function(m,s,l){var h=document.documentElement;h.setAttribute("data-errors",(h.getAttribute("data-errors")||"")+m+" (line "+l+"); ")};' +
   'window.webOSSystem={launchParams:' +
   JSON.stringify(JSON.stringify(params || {})) +
-  ',locale:"en-GB",hide:function(){},activate:function(){},platformBack:function(){},setInputRegion:function(){},setKeyMask:function(){}};</script>';
-const page = (f, params) => fs.readFileSync(path.join(ROOT, f), 'utf8').replace('<script>', PROBE(params) + '<script>');
+  ',locale:"en-GB",hide:function(){},activate:function(){},platformBack:function(){},setInputRegion:function(){},setKeyMask:function(){}};' +
+  'setTimeout(function(){try{var x=new XMLHttpRequest();x.open("POST","/__dom");x.send(document.documentElement.outerHTML)}catch(e){}},' +
+  report +
+  ');</script>';
+const page = (f, params, budget) =>
+  fs.readFileSync(path.join(ROOT, f), 'utf8').replace('<script>', PROBE(params, Math.round((budget || 8000) * 0.75)) + '<script>');
+let posted = ''; // the DOM the page posted itself (PROBE)
 // [name, file, what it draws, how many at least, milliseconds of page time to wait, launch parameters]
 const PAGES = [
   ['launcher', 'app/index.html', /class="tile[ "]/g, 8, 8000],
@@ -120,8 +127,17 @@ function serve() {
     r.setHeader('Access-Control-Allow-Headers', 'content-type');
     if (q.method === 'OPTIONS') return r.writeHead(204), r.end();
     const json = o => (r.writeHead(200, { 'content-type': 'application/json' }), r.end(JSON.stringify(o)));
+    if (u === '/__dom' && q.method === 'POST') {
+      let b = '';
+      q.on('data', d => (b += d));
+      q.on('end', () => {
+        posted = b;
+        json({});
+      });
+      return;
+    }
     const p = PAGES.filter(x => '/' + x[0] + '.html' === u)[0];
-    if (p) return r.writeHead(200, { 'content-type': 'text/html' }), r.end(page(p[1], p[5]));
+    if (p) return r.writeHead(200, { 'content-type': 'text/html' }), r.end(page(p[1], p[5], p[4]));
     if (u === '/qrcode.js')
       return (
         r.writeHead(200, { 'content-type': 'text/javascript' }),
@@ -212,17 +228,31 @@ function run(bin, url, extra, budget) {
         current = p[0];
         // headless Chromium 79 on Linux now and then fails to hand over the page ("Failed to serialize document") or hangs, and Chromium 68
         // now and then hands over an empty document (<html><head></head><body></body></html>) instead of the page: try again until the
-        // dump holds the page itself (the stand-in's webOSSystem script is in every page). Five tries were not always enough on a busy
-        // runner (Chromium 79's "Failed to serialize document: Uncaught" on a different page each run): pause between tries, and give
-        // the later ones a longer budget in case the dump was taken while the page was still busy
+        // dump holds the page itself (the stand-in's webOSSystem script is in every page). When the dump fails, the DOM the page posted
+        // itself (PROBE) stands in for it, so a failed dump alone does not cost a try
         let r = null,
-          tries = 0;
+          tries = 0,
+          fromPage = false;
         for (; tries < 8; tries++) {
           if (tries) await new Promise(res => setTimeout(res, 1000));
-          r = await run(bin, url, ['--dump-dom'], tries < 4 ? p[4] : (p[4] || 8000) * 2);
+          posted = '';
+          r = await run(bin, url, ['--dump-dom'], p[4]);
           if (r.status === 0 && (r.stdout || '').indexOf('webOSSystem') >= 0) break;
+          if (posted.indexOf('webOSSystem') >= 0) {
+            r = { status: 0, stdout: posted, stderr: r.stderr, error: '' };
+            fromPage = true;
+            break;
+          }
         }
-        if (tries) console.log('     ' + e[0] + ': ' + p[0] + ' needed ' + Math.min(tries + 1, 8) + ' tries (a flaky old engine)');
+        if (tries || fromPage)
+          console.log(
+            '     ' +
+              e[0] +
+              ': ' +
+              p[0] +
+              (fromPage ? ' read from the page itself (the dump failed)' : '') +
+              (tries ? ', ' + (tries + 1) + ' tries' : '')
+          );
         const dom = r.stdout || '';
         const errs = (/data-errors="([^"]*)"/.exec(dom) || [])[1] || '';
         const n = (dom.match(p[2]) || []).length;
