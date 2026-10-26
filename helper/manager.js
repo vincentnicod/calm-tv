@@ -1,6 +1,6 @@
 // The manager app's API (/api/manager/*): status, updates (updates.js), options, learning remote buttons, the update channel, LG's
-// Home or ours, and uninstalling. Also POST /api/frontend-ok (a new launcher reports that it started) and POST /api/undo (the
-// launcher's "LG's Home" button).
+// Home or ours, and uninstalling. Also POST /api/frontend-ok (a new launcher reports that it started), POST /api/undo (LG's Home
+// from now on) and POST /api/lg-home (the launcher's "LG Home" button: LG's Home until the manager's "Back to CleanYourTV" or a restart).
 const fs = require('fs');
 const P = require('./paths'),
   web = require('./web'),
@@ -24,6 +24,32 @@ function setHome(enabled) {
     fixLastApp();
   }
   exec.detached('sleep 3; reboot');
+}
+// is our launcher mounted over LG's Home right now
+function ours() {
+  try {
+    return fs.readFileSync(P.PROC + '/mounts', 'utf8').includes(' ' + P.HOME_APP + ' ');
+  } catch (_) {
+    return false;
+  }
+}
+// LG's Home for a while, without a restart: the boot scripts and DISABLE stay as they are, so the next start brings ours back
+function lgHomeForNow() {
+  exec.detached('sleep 1; sh ' + P.D + '/undo-home.sh temp');
+}
+// what a start does, without the restart: our Home, then the debloat by the rules of its boot script (15-cleanyourtv-debloat)
+function backToOurs() {
+  exec.detached(
+    'sleep 1; sh ' +
+      P.D +
+      '/10-cleanyourtv-home; [ -e ' +
+      P.INITD +
+      '/15-cleanyourtv-debloat ] && [ ! -e ' +
+      P.D +
+      '/DISABLE-DEBLOAT ] && sh ' +
+      P.D +
+      '/debloat-stop.sh'
+  );
 }
 const KEY_NAMES = ['home', 'voice', 'guide'];
 const PICKER_MODES = ['overlay', 'ondemand', 'launcher'];
@@ -50,16 +76,12 @@ function create(ctx) {
     const opts = config.options(),
       voice = ctx.feature('voice'),
       napi = ctx.feature('notifyapi');
-    let ours = false;
-    try {
-      ours = fs.readFileSync(P.PROC + '/mounts', 'utf8').includes(' ' + P.HOME_APP + ' ');
-    } catch (_) {}
     return Object.assign(updates.status(), {
       options: opts,
       picker: Object.assign({}, config.get().picker || {}, { mode: inputkey().mode(), released: !!opts.inputKey && !inputkey().on() }),
       voice: voice ? (v => ({ installed: v.installed, enabled: v.enabled }))(voice.status()) : null,
       notifyApi: napi ? { enabled: napi.info().enabled, port: napi.info().port } : { enabled: false },
-      home: { enabled: !fs.existsSync(P.DISABLE), fullhome: fs.existsSync(P.FULLHOME_APP), ours },
+      home: { enabled: !fs.existsSync(P.DISABLE), fullhome: fs.existsSync(P.FULLHOME_APP), ours: ours() },
       inputhook: inputhook.status(keys().input),
       keys: keys(),
       job: updates.job(),
@@ -129,6 +151,11 @@ function create(ctx) {
       setHome(false);
       return json({ returnValue: true });
     }
+    if (u === '/api/lg-home' && req.method === 'POST') {
+      if (!ours()) return json({ error: 'LG’s Home is already on' }, 409);
+      lgHomeForNow();
+      return json({ returnValue: true });
+    }
     const act = u.replace('/api/manager/', '');
     const napi = ctx.feature('notifyapi');
     if (act === 'status') {
@@ -173,6 +200,12 @@ function create(ctx) {
       setHome(b.enabled !== false);
       return json({ returnValue: true });
     }
+    if (act === 'back-home') {
+      if (fs.existsSync(P.DISABLE)) return json({ error: 'LG’s Home is chosen: switch CleanYourTV as Home on' }, 409);
+      if (ours()) return json({ error: 'CleanYourTV is already Home' }, 409);
+      backToOurs();
+      return json({ returnValue: true });
+    }
     if (act === 'restore') {
       setHome(false);
       return json({ returnValue: true });
@@ -195,7 +228,7 @@ function create(ctx) {
   return {
     name: 'manager',
     prefix: '/api/manager/',
-    paths: ['/api/frontend-ok', '/api/undo'],
+    paths: ['/api/frontend-ok', '/api/undo', '/api/lg-home'],
     handle,
     check: updates.check,
     status,

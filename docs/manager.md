@@ -6,6 +6,7 @@
 
 | Row | Function |
 |---|---|
+| Back to CleanYourTV | Only while LG's Home is showing for now (the launcher's **LG Home** button): puts the launcher back as Home without a restart. |
 | Launcher, Service | Installed version; offers an update when the latest release is newer. |
 | Check for updates | Asks GitHub for the latest release. |
 | Update channel | Follow the stable releases or a [test build](managing.md#test-builds). |

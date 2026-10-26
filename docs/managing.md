@@ -41,6 +41,8 @@ Switching restarts the TV (about a minute).
 
 | Action | How |
 |---|---|
+| LG's Home for now | The launcher's **LG Home** top button (add it in Customise > **Top buttons**). No restart, about a minute with a black screen; the launcher stays the Home the TV starts with, and the debloat is lifted while LG's Home shows. |
+| Back from LG's Home for now | **Back to CleanYourTV** in the manager app (from LG's app list), or restart the TV. |
 | Use LG's Home | **CleanYourTV as Home** off in the manager app. |
 | Use the launcher again | **CleanYourTV as Home** on, from LG's app list. |
 | Over SSH | `touch /media/developer/cleanyourtv/DISABLE; reboot` for LG's Home, `rm /media/developer/cleanyourtv/DISABLE; reboot` for ours. |

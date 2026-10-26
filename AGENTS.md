@@ -43,7 +43,8 @@ disk, and a reboot without the boot scripts brings LG's Home back.
 - Root SSH works with a key (`ssh root@<tv-ip>`). `luna-send` must have stdin redirected: `luna-send -n 1 -w 5000 -f <uri> '<json>' </dev/null`.
 - The service listens on `127.0.0.1:8765` (use `curl` on the TV). Other ports: 8766 Live TV pairing, 8767 network notifications (opt-in),
   8768+ share log, 8769 voice setup. The last four are short-lived or off by default.
-- Going back to LG's Home: manager app > CleanYourTV as Home off, or `sh /media/developer/cleanyourtv/undo-home.sh`. If a boot crashes,
+- Going back to LG's Home: manager app > CleanYourTV as Home off, or `sh /media/developer/cleanyourtv/undo-home.sh`. For now only: the
+  launcher's LG Home button (`undo-home.sh temp`), back with the manager's Back to CleanYourTV or a restart. If a boot crashes,
   the Homebrew Channel's failsafe mode skips the boot scripts.
 - A TV's own state can be the problem: a stuck media pipeline (black video, no sound) is cleared by a reboot; check
   `luna://com.webos.media/getActivePipelines` before blaming the code.

@@ -44,7 +44,7 @@ top (for example **Original**) show no names under the dock.
 |---|---|
 | Open an app | OK |
 | Open the first, second, ... card of the dock | **1** to **9**, or the **red**, **green**, **yellow** and **blue** keys |
-| App options (dock, hide) | Hold OK on an app |
+| App options (dock, hide, uninstall) | Hold OK on an app |
 | Remove a top button | Hold OK on it |
 | Customise | The **Customise** button |
 | Live TV | The **Live TV** button or tile |
@@ -75,6 +75,19 @@ Hold OK on an app and choose **Icon and name...** to draw it as YouTube, IPTV, T
 to go back to **The app's own icon**. Two are automatic: **YouTube AdFree** (webosbrew) shows as YouTube, and an IPTV player
 (Smart IPTV, SS IPTV, IPTV Smarters, OTT Navigator, Televizo, TiviMate, ibo Player, STB Emulator, ...) as IPTV. The Input key's picker
 shows the same icons.
+
+## Uninstalling an app
+
+Hold OK on an app and choose **Uninstall...**, then **Yes, uninstall** (Cancel is first). It is LG's own uninstall, the one LG's Home
+uses, and it is offered only for apps the TV lets you remove: never LG's built-in apps, the Homebrew Channel (removing it would lose
+root) or CleanYourTV's own apps.
+
+## LG's Home for a moment
+
+Some things are only in LG's Home. **Customise** > **Top buttons** > **Add a button...** > **LG Home** adds a button that shows
+LG's Home for now, without a restart: about a minute with a black screen. The launcher stays the Home the TV starts with. To come
+back, open **CleanYourTV** from LG's app list and choose **Back to CleanYourTV**, or restart the TV. While LG's Home shows, the
+[debloat](debloat.md) is lifted, because LG's Home does not start without the services it stops.
 
 ## Remote buttons
 
@@ -154,7 +167,7 @@ Steefzar for the original CleanYourTV.
 - the **style** (Paysage, Verre, Éditorial, Lin, Aurore, Calm, Original),
 - the **remote buttons** given to apps or to Quick settings,
 - the **idle screen**, **night mode**, the **city** and the **weather**,
-- the **top buttons** (add Inputs, Quick settings, Settings, Live TV or any app, or remove one),
+- the **top buttons** (add Inputs, Quick settings, Settings, Live TV, LG Home or any app, or remove one),
 - **hidden apps** (show them again),
 - the **app order** (most used first, or A to Z),
 - the **clock** format (automatic, 12 or 24 hour),

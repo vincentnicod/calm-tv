@@ -89,7 +89,7 @@ function load() {
       if (sig === lastSig) return;
       lastSig = sig;
       apps = x.apps.map(function (a) {
-        return { id: a.id, title: a.title };
+        return { id: a.id, title: a.title, removable: a.removable === true };
       });
       cfg = x.config || {};
       applyTheme(cfg.theme);

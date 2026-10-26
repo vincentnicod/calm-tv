@@ -67,4 +67,61 @@ run(async () => {
   ok(c.hdmi === undefined && c.tiles === undefined, 'an unknown HDMI port and looks that are not an object are dropped');
   await call(a2, '/api/config', 'POST', { hdmi: 'auto' });
   ok(conf.get().hdmi === 'auto', 'the HDMI card can go back to automatic');
+
+  // uninstalling: only what the TV marks removable, never the Homebrew Channel or our own apps; dev apps go through dev/remove
+  const removed = [];
+  let refuse = false;
+  const luna3 = async (uri, p, o) => {
+    if (/listApps/.test(uri))
+      return {
+        returnValue: true,
+        apps: [
+          { id: 'netflix', title: 'Netflix', folderPath: '/media/cryptofs/apps/usr/palm/applications/netflix', removable: true },
+          { id: 'youtube.leanback.v4', title: 'YouTube', folderPath: '/media/developer/apps/usr/palm/applications/yt', removable: true },
+          { id: 'com.webos.app.browser', title: 'Browser', folderPath: '/usr/palm/applications/b', removable: false, systemApp: true },
+          { id: 'old.firmware', title: 'Old', folderPath: '/media/cryptofs/apps/o' },
+          { id: 'org.webosbrew.hbchannel', title: 'Homebrew Channel', folderPath: '/media/developer/apps/h', removable: true },
+          { id: 'com.cleanyourtv.manager', title: 'CleanYourTV', folderPath: '/media/developer/apps/c', removable: true },
+        ],
+      };
+    if (/appInstallService/.test(uri)) {
+      removed.push(uri.replace('luna://com.webos.appInstallService/', '') + ' ' + p.id + ' ' + o.wait);
+      return refuse ? { returnValue: false, errorText: 'busy' } : { returnValue: true };
+    }
+    return { returnValue: true };
+  };
+  const a3 = req('apps').create({ config: memoryConfig({}), luna: luna3, version: '1.9.0', feature: () => null });
+  r = await call(a3, '/api/apps');
+  const rm = {};
+  r.j.apps.forEach(a => (rm[a.id] = a.removable));
+  ok(
+    rm.netflix === true &&
+      rm['youtube.leanback.v4'] === true &&
+      rm['com.webos.app.browser'] === false &&
+      rm['old.firmware'] === false &&
+      rm['org.webosbrew.hbchannel'] === false &&
+      rm['com.cleanyourtv.manager'] === false,
+    'the app list says which apps can be uninstalled: not system apps, the Homebrew Channel or ours'
+  );
+  const codes = [];
+  for (const id of ['com.webos.app.browser', 'org.webosbrew.hbchannel', 'com.cleanyourtv.manager', 'not.there', 'bad id'])
+    codes.push((await call(a3, '/api/uninstall', 'POST', { id })).code);
+  ok(codes.join() === '403,403,403,404,400' && removed.length === 0, 'apps that cannot be removed are refused without asking the TV');
+  refuse = true;
+  r = await call(a3, '/api/uninstall', 'POST', { id: 'netflix' });
+  ok(r.code === 502 && r.j.error === 'busy', 'a refusal from the TV is passed on');
+  refuse = false;
+  r = await call(a3, '/api/uninstall', 'POST', { id: 'netflix' });
+  const r2 = await call(a3, '/api/uninstall', 'POST', { id: 'youtube.leanback.v4' });
+  ok(
+    r.j.returnValue === true &&
+      r2.j.returnValue === true &&
+      removed.slice(1).join() === 'remove netflix 20000,dev/remove youtube.leanback.v4 20000',
+    'a store app is removed with remove, a developer-mode app with dev/remove'
+  );
+  r = await call(a3, '/api/apps');
+  ok(
+    !r.j.apps.some(a => a.id === 'netflix' || a.id === 'youtube.leanback.v4'),
+    'an uninstalled app leaves the list at once, before the app manager catches up'
+  );
 });

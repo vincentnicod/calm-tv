@@ -14,6 +14,7 @@
      "folder": "<tmp>/apps/netflix",
      "icon": "icon.png",
      "id": "netflix",
+     "removable": false,
      "title": "Netflix",
      "type": "web"
     },
@@ -21,6 +22,7 @@
      "folder": "<tmp>/apps/youtube",
      "icon": "missing.png",
      "id": "youtube.leanback.v4",
+     "removable": false,
      "title": "YouTube",
      "type": "web"
     }
@@ -254,6 +256,7 @@
      "folder": "<tmp>/apps/netflix",
      "icon": "icon.png",
      "id": "netflix",
+     "removable": false,
      "title": "Netflix",
      "type": "web"
     },
@@ -261,6 +264,7 @@
      "folder": "<tmp>/apps/youtube",
      "icon": "missing.png",
      "id": "youtube.leanback.v4",
+     "removable": false,
      "title": "YouTube",
      "type": "web"
     }
@@ -418,6 +422,7 @@
      "folder": "<tmp>/apps/netflix",
      "icon": "icon.png",
      "id": "netflix",
+     "removable": false,
      "title": "Netflix",
      "type": "web"
     },
@@ -425,6 +430,7 @@
      "folder": "<tmp>/apps/youtube",
      "icon": "missing.png",
      "id": "youtube.leanback.v4",
+     "removable": false,
      "title": "YouTube",
      "type": "web"
     }

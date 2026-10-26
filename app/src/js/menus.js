@@ -257,7 +257,133 @@ function appMenu(a) {
       hideApp(a.id);
     },
   });
+  if (a.removable === true)
+    items.push({
+      label: t('Uninstall...'),
+      stay: true,
+      fn: function () {
+        uninstallMenu(a);
+      },
+    });
   openMenu(look(a).label, items);
+}
+
+/* LG's own uninstall, through the service; Cancel comes first so a second OK does nothing harmful */
+(function () {
+  var add = {
+    fr: {
+      'Uninstall...': 'Désinstaller...',
+      'Uninstall this app?': 'Désinstaller cette app ?',
+      'Yes, uninstall': 'Oui, désinstaller',
+      'Uninstalling...': 'Désinstallation...',
+      'Uninstalled': 'Désinstallée',
+      'Could not uninstall': 'Impossible de désinstaller',
+      'Switch to LG Home?': 'Passer à LG Home ?',
+      'Switch now': 'Passer maintenant',
+      'about a minute': 'environ une minute',
+      'Switching to LG Home... Come back with the CleanYourTV app or a restart.':
+        'Passage à LG Home… Revenez avec l’app CleanYourTV ou en redémarrant.',
+      'Could not switch': 'Impossible de basculer',
+    },
+    de: {
+      'Uninstall...': 'Deinstallieren...',
+      'Uninstall this app?': 'Diese App deinstallieren?',
+      'Yes, uninstall': 'Ja, deinstallieren',
+      'Uninstalling...': 'Wird deinstalliert...',
+      'Uninstalled': 'Deinstalliert',
+      'Could not uninstall': 'Deinstallieren nicht möglich',
+      'Switch to LG Home?': 'Zu LG Home wechseln?',
+      'Switch now': 'Jetzt wechseln',
+      'about a minute': 'etwa eine Minute',
+      'Switching to LG Home... Come back with the CleanYourTV app or a restart.':
+        'Wechsel zu LG Home… Zurück mit der App CleanYourTV oder einem Neustart.',
+      'Could not switch': 'Wechseln nicht möglich',
+    },
+    nl: {
+      'Uninstall...': 'Verwijderen...',
+      'Uninstall this app?': 'Deze app verwijderen?',
+      'Yes, uninstall': 'Ja, verwijderen',
+      'Uninstalling...': 'Bezig met verwijderen...',
+      'Uninstalled': 'Verwijderd',
+      'Could not uninstall': 'Verwijderen mislukt',
+      'Switch to LG Home?': 'Naar LG Home?',
+      'Switch now': 'Nu wisselen',
+      'about a minute': 'ongeveer een minuut',
+      'Switching to LG Home... Come back with the CleanYourTV app or a restart.':
+        'Naar LG Home… Terug met de app CleanYourTV of een herstart.',
+      'Could not switch': 'Wisselen mislukt',
+    },
+    es: {
+      'Uninstall...': 'Desinstalar...',
+      'Uninstall this app?': '¿Desinstalar esta app?',
+      'Yes, uninstall': 'Sí, desinstalar',
+      'Uninstalling...': 'Desinstalando...',
+      'Uninstalled': 'Desinstalada',
+      'Could not uninstall': 'No se pudo desinstalar',
+      'Switch to LG Home?': '¿Cambiar a LG Home?',
+      'Switch now': 'Cambiar ahora',
+      'about a minute': 'un minuto aprox.',
+      'Switching to LG Home... Come back with the CleanYourTV app or a restart.':
+        'Cambiando a LG Home… Vuelva con la app CleanYourTV o reiniciando.',
+      'Could not switch': 'No se pudo cambiar',
+    },
+  };
+  for (var l in add) {
+    TXL[l] = TXL[l] || {};
+    for (var k in add[l]) TXL[l][k] = add[l][k];
+  }
+})();
+function uninstallMenu(a) {
+  var name = look(a).label;
+  openMenu(t('Uninstall this app?'), [
+    { label: t('Cancel'), fn: function () {} },
+    {
+      label: t('Yes, uninstall'),
+      sub: name,
+      fn: function () {
+        toast(t('Uninstalling...') + ' ' + name);
+        api('/api/uninstall', { id: a.id }).then(
+          function (x) {
+            if (!x || x.returnValue !== true) return toast(t('Could not uninstall') + ' ' + name);
+            apps = apps.filter(function (b) {
+              return b.id !== a.id;
+            });
+            store();
+            rebuild();
+            toast(t('Uninstalled') + ': ' + name);
+          },
+          function () {
+            toast(t('Could not uninstall') + ' ' + name);
+          }
+        );
+      },
+    },
+  ]);
+}
+
+/* LG's Home until the manager app's "Back to CleanYourTV" or the next restart; CleanYourTV stays the Home the TV starts with */
+function lgHomeMenu() {
+  openMenu(t('Switch to LG Home?'), [
+    { label: t('Cancel'), fn: function () {} },
+    {
+      label: t('Switch now'),
+      sub: t('about a minute'),
+      fn: function () {
+        api('/api/lg-home', {}).then(
+          function (x) {
+            toast(
+              x && x.returnValue === true
+                ? t('Switching to LG Home... Come back with the CleanYourTV app or a restart.')
+                : t('Could not switch')
+            );
+          },
+          function () {
+            toast(t('Could not switch'));
+          }
+        );
+      },
+    },
+  ]);
 }
 
 function removeButton(o) {
