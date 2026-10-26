@@ -279,6 +279,7 @@ function appMenu(a) {
       'Uninstalled': 'Désinstallée',
       'Could not uninstall': 'Impossible de désinstaller',
       'Switch to LG Home?': 'Passer à LG Home ?',
+      'for now, without a restart': 'pour l’instant, sans redémarrer',
       'Switch now': 'Passer maintenant',
       'about a minute': 'environ une minute',
       'Switching to LG Home... Come back with the CleanYourTV app or a restart.':
@@ -293,6 +294,7 @@ function appMenu(a) {
       'Uninstalled': 'Deinstalliert',
       'Could not uninstall': 'Deinstallieren nicht möglich',
       'Switch to LG Home?': 'Zu LG Home wechseln?',
+      'for now, without a restart': 'vorübergehend, ohne Neustart',
       'Switch now': 'Jetzt wechseln',
       'about a minute': 'etwa eine Minute',
       'Switching to LG Home... Come back with the CleanYourTV app or a restart.':
@@ -307,6 +309,7 @@ function appMenu(a) {
       'Uninstalled': 'Verwijderd',
       'Could not uninstall': 'Verwijderen mislukt',
       'Switch to LG Home?': 'Naar LG Home?',
+      'for now, without a restart': 'tijdelijk, zonder herstart',
       'Switch now': 'Nu wisselen',
       'about a minute': 'ongeveer een minuut',
       'Switching to LG Home... Come back with the CleanYourTV app or a restart.':
@@ -321,6 +324,7 @@ function appMenu(a) {
       'Uninstalled': 'Desinstalada',
       'Could not uninstall': 'No se pudo desinstalar',
       'Switch to LG Home?': '¿Cambiar a LG Home?',
+      'for now, without a restart': 'por ahora, sin reiniciar',
       'Switch now': 'Cambiar ahora',
       'about a minute': 'un minuto aprox.',
       'Switching to LG Home... Come back with the CleanYourTV app or a restart.':
@@ -412,6 +416,7 @@ function customizeMenu() {
       fn: styleMenu,
     },
     { label: t('Remote buttons'), stay: true, fn: RB.open },
+    { label: 'LG Home', sub: t('for now, without a restart'), stay: true, fn: lgHomeMenu },
     idleItem(),
     nightItem(),
     placeItem(),

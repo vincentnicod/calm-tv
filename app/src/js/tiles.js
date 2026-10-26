@@ -4,7 +4,11 @@
 function tile(a) {
   var lk = look(a),
     sig = lk.glyph + '|' + (a.id === '__hdmi' ? '' : lk.label);
-  if (tiles[a.id] && tiles[a.id]._sig === sig) return tiles[a.id];
+  /* a kept tile takes the app's latest details: the first paint comes from the saved list, which can be older (no removable) */
+  if (tiles[a.id] && tiles[a.id]._sig === sig) {
+    tiles[a.id]._a = a;
+    return tiles[a.id];
+  }
   var d = document.createElement('div'),
     tint = document.createElement('div'),
     face = document.createElement('div'),

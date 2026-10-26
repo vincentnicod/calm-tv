@@ -27,7 +27,7 @@
 - **Something is broken after an update.** A launcher or service that does not start is replaced by the previous version
   automatically. **Go back to launcher** in the manager returns to the previous launcher by hand.
 - **Back to LG's Home right now.** In the manager, **CleanYourTV as Home** off, or `sh /media/developer/cleanyourtv/undo-home.sh`
-  over SSH. For a moment only (to change something in LG's Home): the launcher's **LG Home** top button, then **Back to CleanYourTV**
+  over SSH. For a moment only (to change something in LG's Home): Customise > **LG Home** in the launcher, then **Back to CleanYourTV**
   in the manager.
 
 ## Reporting a problem

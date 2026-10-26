@@ -1,7 +1,7 @@
 // Behaviour checks of the Calm additions in a real browser: the launcher (app/index.html, as built) runs in headless Chrome or Brave against
 // a stand-in for the TV's service, and the remote's keys are pressed. It checks the HDMI card (which input OK opens), the number and colour
 // keys, hold OK, app looks, the favourites the dock starts with, French text, and that no script error happens.
-//   node tools/calm-check.mjs        (Node 22+; CHROME=<path> when Chrome or Brave is not found; port 8765 must be free)
+//   node tools/calm-check.mjs        (Node 22+; CHROME=<path> when Chrome or Brave is not found; port 8765 must be free, or CYTV_CHECK_PORT=<port>)
 // It uses a current engine: tools/oldchrome.js runs the launcher in Chromium 68 and 79 (CI).
 import http from 'node:http';
 import fs from 'node:fs';
@@ -35,14 +35,19 @@ const ok = (c, name) => {
   if (!c) failed++;
 };
 
+// the pages call the service on 8765; another port (CYTV_CHECK_PORT) is written into the pages served here
+const PORT = +process.env.CYTV_CHECK_PORT || 8765,
+  BASE = 'http://127.0.0.1:' + PORT;
+const toPort = html => html.split('http://127.0.0.1:8765').join(BASE);
+// [id, title, removable]
 const APPS = [
-  ['youtube.leanback.v4', 'YouTube AdFree'],
-  ['ch.sunrise.tv', 'Sunrise TV'],
-  ['com.siptv.smartiptv', 'Smart IPTV'],
-  ['netflix', 'Netflix'],
-  ['amazon', 'Prime Video'],
-  ['spotify-beehive', 'Spotify'],
-  ['com.webos.app.browser', 'Web Browser'],
+  ['youtube.leanback.v4', 'YouTube AdFree', true],
+  ['ch.sunrise.tv', 'Sunrise TV', true],
+  ['com.siptv.smartiptv', 'Smart IPTV', true],
+  ['netflix', 'Netflix', true],
+  ['amazon', 'Prime Video', true],
+  ['spotify-beehive', 'Spotify - Music and Podcasts', true],
+  ['com.webos.app.browser', 'Web Browser', false],
 ];
 const dev = (port, label, on, act) => ({
   id: 'HDMI_' + port,
@@ -57,6 +62,8 @@ const S = {
   config: {},
   inputs: [],
   launched: [],
+  uninstalled: [],
+  lgHome: 0,
   saved: [],
   version: '1.9.0',
   locale: 'en-GB',
@@ -72,20 +79,24 @@ const S = {
   refuse: false,
 };
 const page = () =>
-  fs
-    .readFileSync(path.join(ROOT, 'app', 'index.html'), 'utf8')
-    .replace('<script>', '<script>window.webOSSystem={launchParams:"{}",locale:' + JSON.stringify(S.locale) + '};', 1);
+  toPort(
+    fs
+      .readFileSync(path.join(ROOT, 'app', 'index.html'), 'utf8')
+      .replace('<script>', '<script>window.webOSSystem={launchParams:"{}",locale:' + JSON.stringify(S.locale) + '};', 1)
+  );
 // the Input key's picker app, which also shows Quick settings and the sleep timer's warning: opened with the launch params of S.panel
 const pickerPage = () =>
-  fs
-    .readFileSync(path.join(ROOT, 'picker', 'app', 'index.html'), 'utf8')
-    .replace(
-      '<script>',
-      '<script>window.__hidden=0;window.webOSSystem={launchParams:' +
-        JSON.stringify(JSON.stringify(S.panel ? { panel: S.panel } : {})) +
-        ',locale:"en-GB",hide:function(){window.__hidden++},platformBack:function(){}};',
-      1
-    );
+  toPort(
+    fs
+      .readFileSync(path.join(ROOT, 'picker', 'app', 'index.html'), 'utf8')
+      .replace(
+        '<script>',
+        '<script>window.__hidden=0;window.webOSSystem={launchParams:' +
+          JSON.stringify(JSON.stringify(S.panel ? { panel: S.panel } : {})) +
+          ',locale:"en-GB",hide:function(){window.__hidden++},platformBack:function(){}};',
+        1
+      )
+  );
 // with S.realQuick the service's own Quick settings module answers, over a stand-in for LG's settings (S.tv, what an LG C4 offers)
 const offer = (vis, hid) =>
   vis.map(value => ({ visible: true, active: true, value })).concat(hid.map(value => ({ visible: false, active: true, value })));
@@ -135,7 +146,7 @@ const srv = http.createServer(async (q, r) => {
   if (u.startsWith('/api/theme/')) return theme.handle(q, r, u, body);
   if (u === '/api/apps')
     return j({
-      apps: APPS.map(a => ({ id: a[0], title: a[1] })),
+      apps: APPS.map(a => ({ id: a[0], title: a[1], removable: a[2] })),
       config: Object.assign({}, S.config, { theme: theme.resolved(), options: { liveTv: false } }),
       usage: {},
       version: S.version,
@@ -155,6 +166,8 @@ const srv = http.createServer(async (q, r) => {
     return j({ buttons: Object.keys(S.remap).map(c => ({ code: c, app: S.remap[c] })), learning: S.learning, attached: true });
   }
   if (u === '/api/launch') return S.launched.push((await body(q)).id), j({ returnValue: true });
+  if (u === '/api/uninstall') return S.uninstalled.push((await body(q)).id), j({ returnValue: true });
+  if (u === '/api/lg-home') return S.lgHome++, j({ returnValue: true });
   if (u === '/api/quick' && S.realQuick) return quick.handle(q, r, u, body);
   if (u === '/api/quick') return S.quickCalls.push(await body(q)), j(S.quickOk ? { ok: true } : { error: 'not installed' });
   if (u === '/picker.html') return r.writeHead(200, { 'content-type': 'text/html' }), r.end(pickerPage());
@@ -177,9 +190,9 @@ const srv = http.createServer(async (q, r) => {
 });
 await new Promise((res, rej) => {
   srv.on('error', rej);
-  srv.listen(8765, '127.0.0.1', res);
+  srv.listen(PORT, '127.0.0.1', res);
 }).catch(e => {
-  console.error('port 8765 is in use: ' + e.message);
+  console.error('port ' + PORT + ' is in use: ' + e.message);
   process.exit(2);
 });
 
@@ -334,10 +347,10 @@ try {
   const fresh = async (wait = 1500) => {
     S.saved = [];
     S.config = {};
-    await send('Page.navigate', { url: 'http://127.0.0.1:8765/home.html' });
+    await send('Page.navigate', { url: BASE + '/home.html' });
     await sleep(400);
     await js('localStorage.clear(); 0');
-    await send('Page.navigate', { url: 'http://127.0.0.1:8765/home.html' });
+    await send('Page.navigate', { url: BASE + '/home.html' });
     await sleep(wait);
     S.launched = [];
   };
@@ -367,8 +380,8 @@ try {
   );
   ok((await focusId()) === '__hdmi', 'Home opens with the focus on the first card');
   ok(
-    ((await js('document.documentElement.outerHTML')).match(/class="(?:tile gl gl-|chip on)/g) || []).length === 4,
-    'the markup tools/oldchrome.js counts in Chromium 68 and 79 is there (three drawn cards and a green port)'
+    ((await js('document.documentElement.outerHTML')).match(/class="(?:tile gl gl-|chip on)/g) || []).length === 5,
+    'the markup tools/oldchrome.js counts in Chromium 68 and 79 is there (three drawn cards, Spotify drawn in All apps, a green port)'
   );
   ok(
     JSON.stringify((S.saved[0] || {}).dock) === '["__hdmi","ch.sunrise.tv","youtube.leanback.v4","com.siptv.smartiptv","netflix"]' &&
@@ -539,6 +552,8 @@ try {
   await js("stack[0].idx = stack[0].items.map(function (i) { return i.label; }).indexOf('Icon and name...'); drawMenu(); 0");
   await key(OK);
   ok((await menuTitle()) === 'Icon and name', 'it lists the icons');
+  // the app's own icon, YouTube, Spotify, IPTV, then TV
+  await key(DOWN);
   await key(DOWN);
   await key(DOWN);
   await key(DOWN);
@@ -565,6 +580,65 @@ try {
   await key(LEFT);
   await sleep(200);
   ok((await focusId()) === '__hdmi', 'moving left reaches the HDMI card');
+  S.config = {};
+
+  // ---- Spotify drawn as its mark; Uninstall on removable apps, also when the first paint came from an older saved list ----
+  await fresh();
+  S.config = { dock: ['spotify-beehive', 'netflix', 'com.webos.app.browser'] };
+  await send('Page.navigate', { url: BASE + '/home.html' });
+  await sleep(1500);
+  ok(
+    (await caps()).split('|')[0] === 'Spotify' && (await js("tiles['spotify-beehive'].classList.contains('gl-spotify')")),
+    'Spotify shows its drawn mark and the plain name Spotify'
+  );
+  // the list saved by a launcher from before removable existed: the first paint builds the tiles from it, the fresh list reuses them
+  await js(
+    'var c = JSON.parse(localStorage.getItem(CACHE_KEY)); c.apps = c.apps.map(function (a) { return { id: a.id, title: a.title }; }); localStorage.setItem(CACHE_KEY, JSON.stringify(c)); 0'
+  );
+  await send('Page.navigate', { url: BASE + '/home.html' });
+  await sleep(1500);
+  const holdLabels = async () => {
+    await down(OK);
+    await sleep(900);
+    await up(OK);
+    await sleep(300);
+    return js('stack.length ? stack[0].items.map(function (i) { return i.label; }) : []');
+  };
+  ok(
+    (await focusId()) === 'spotify-beehive' && (await holdLabels()).indexOf('Uninstall...') >= 0,
+    'hold OK on a removable app offers Uninstall, also after a first paint from an older saved list'
+  );
+  await js('closeMenus(); 0');
+  await key(RIGHT);
+  await key(RIGHT);
+  ok(
+    (await focusId()) === 'com.webos.app.browser' && (await holdLabels()).indexOf('Uninstall...') < 0,
+    'an app the TV does not let you remove has no Uninstall'
+  );
+  await js('closeMenus(); 0');
+  await key(LEFT);
+  await holdLabels();
+  await js("stack[0].idx = stack[0].items.map(function (i) { return i.label; }).indexOf('Uninstall...'); drawMenu(); 0");
+  await key(OK);
+  ok(
+    (await menuTitle()) === 'Uninstall this app?' && (await js('stack[stack.length - 1].idx')) === 0,
+    'Uninstall asks first, with Cancel focused'
+  );
+  await key(DOWN);
+  await key(OK, 600);
+  ok(S.uninstalled.join() === 'netflix' && !(await js("dockIds().indexOf('netflix') >= 0")), 'Yes uninstalls the app and its card goes');
+
+  // ---- LG Home for now: in Customise directly, and as a top button ----
+  await js('closeMenus(); customizeMenu(); 0');
+  const customItems = await js('stack[0].items.map(function (i) { return i.label; })');
+  ok(customItems.indexOf('LG Home') >= 0 && customItems.indexOf('LG Home') < 8, 'Customise offers LG Home without scrolling');
+  await js("stack[0].idx = stack[0].items.map(function (i) { return i.label; }).indexOf('LG Home'); drawMenu(); 0");
+  await key(OK);
+  ok((await menuTitle()) === 'Switch to LG Home?' && (await js('stack[stack.length - 1].idx')) === 0, 'it asks first, with Cancel focused');
+  await key(DOWN);
+  await key(OK, 600);
+  ok(S.lgHome === 1, 'Switch now asks the service for LG Home');
+  await js('closeMenus(); 0');
   S.config = {};
 
   // ---- Quick settings: a button at the top of Home, between Inputs and Settings; the service opens the panel over the screen ----
@@ -896,7 +970,7 @@ try {
   const openPicker = async (panel, wait = 1200) => {
     S.panel = panel;
     S.tvCalls = [];
-    await send('Page.navigate', { url: 'http://127.0.0.1:8765/picker.html' });
+    await send('Page.navigate', { url: BASE + '/picker.html' });
     await sleep(wait);
   };
   const rows = () =>

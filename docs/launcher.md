@@ -85,8 +85,8 @@ root) or CleanYourTV's own apps.
 
 ## LG's Home for a moment
 
-Some things are only in LG's Home. **Customise** > **Top buttons** > **Add a button...** > **LG Home** adds a button that shows
-LG's Home for now, without a restart: about a minute with a black screen. The launcher stays the Home the TV starts with. To come
+Some things are only in LG's Home. **Customise** > **LG Home** shows LG's Home for now, without a restart: about a minute with a
+black screen. For a button on Home itself: **Customise** > **Top buttons** > **Add a button...** > **LG Home**. The launcher stays the Home the TV starts with. To come
 back, open **CleanYourTV** from LG's app list and choose **Back to CleanYourTV**, or restart the TV. While LG's Home shows, the
 [debloat](debloat.md) is lifted, because LG's Home does not start without the services it stops.
 
