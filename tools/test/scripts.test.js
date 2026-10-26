@@ -14,6 +14,18 @@ run(async () => {
     const r = cp.spawnSync('sh', ['-n', path.join(root, f)], { encoding: 'utf8' });
     ok(r.status === 0, 'shell syntax ' + f + (r.status ? ': ' + r.stderr : ''));
   }
+  // the boot watchdog falls back to LG's Home after 6 missed checks: it must ask something the service answers without luna, or a
+  // busy app manager (slower than curl's 3 s) would look like a dead service
+  {
+    const home = fs.readFileSync(path.join(root, 'scripts', '10-cleanyourtv-home'), 'utf8');
+    const probe = (/curl [^\n]*http:\/\/127\.0\.0\.1:8765(\/api\/[\w-]+)/.exec(home) || [])[1];
+    const answer = (/\n\s*if \(u === '\/api\/version'\)([^\n]*)/.exec(fs.readFileSync(path.join(root, 'helper', 'helper.js'), 'utf8')) ||
+      [])[1];
+    ok(
+      probe === '/api/version' && !!answer && !/luna/.test(answer),
+      "the boot watchdog checks /api/version, which the service answers without asking the TV's app manager"
+    );
+  }
   // appkey.sh (a remote button given to an app): launches only an app id, never anything a shell would read
   {
     const fb = path.join(tmp, 'appkey-bin'),
