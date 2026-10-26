@@ -71,10 +71,11 @@ device is on. Hold OK on the card for **Automatic**, **Always HDMI 1** ... **4**
 
 ## Icon and name
 
-Hold OK on an app and choose **Icon and name...** to draw it as YouTube, IPTV, TV, Films, Music or Sport instead of its own icon, or
-to go back to **The app's own icon**. Two are automatic: **YouTube AdFree** (webosbrew) shows as YouTube, and an IPTV player
-(Smart IPTV, SS IPTV, IPTV Smarters, OTT Navigator, Televizo, TiviMate, ibo Player, STB Emulator, ...) as IPTV. The Input key's picker
-shows the same icons.
+Hold OK on an app and choose **Icon and name...** to draw it as YouTube, Spotify, IPTV, TV, Films, Music or Sport instead of its own
+icon, or to go back to **The app's own icon**. Three are automatic: **YouTube AdFree** (webosbrew) shows as YouTube, **Spotify** as
+its mark alone (its own icon carries the wordmark) named Spotify, and an IPTV player (Smart IPTV, SS IPTV, IPTV Smarters, OTT Navigator,
+Televizo, TiviMate, ibo Player, STZ Player, STB Emulator, ...) as IPTV, a screen with a live signal. The Input key's picker shows the
+same icons.
 
 ## Uninstalling an app
 
@@ -211,7 +212,7 @@ Settings are stored on the TV in `/media/developer/cleanyourtv/config.json`:
 | `hidden` | App ids you hid. |
 | `sort` | `usage` or `alpha`. |
 | `clock` | `auto`, `12` or `24`. |
-| `tiles` | How apps look: `{"<app id>": {"label": "IPTV", "icon": "iptv"}}`. Icons: `youtube`, `iptv`, `tv`, `film`, `music`, `sport`, or `""` for the app's own. |
+| `tiles` | How apps look: `{"<app id>": {"label": "IPTV", "icon": "iptv"}}`. Icons: `youtube`, `spotify`, `iptv`, `tv`, `film`, `music`, `sport`, or `""` for the app's own. |
 | `hdmi` | The HDMI card: `auto` or a port, `"1"` to `"8"`. |
 | `idle`, `night`, `weather` | The idle screen (`3`, `10` or `off`), night mode (`on` or `off`), the weather's city (`lausanne`, ...) or `off`. |
 | `place` | The city for the sun's times (`lausanne`, ...) or `none`. When it is missing, the weather's city is used. |

@@ -592,6 +592,9 @@ body {
 .gl-iptv {
   background-image: linear-gradient(140deg, #4b6cff, #8a4dff 60%, #b84dff);
 }
+.gl-spotify {
+  background-image: linear-gradient(150deg, #2ee16f, #13a44a);
+}
 .gl-tv {
   background-image: linear-gradient(140deg, #2b95ff, #0a5be0);
 }

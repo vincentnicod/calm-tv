@@ -11,7 +11,7 @@ const P = require('./paths'),
 
 const HALF_LIFE = 30 * 24 * 3600 * 1000; // usage counts halve every 30 days
 // the drawn icons the launcher has (app/src/js/calm.js, GLYPHS); '' is the app's own icon
-const GLYPHS = ['', 'youtube', 'iptv', 'tv', 'hdmi', 'film', 'music', 'sport'];
+const GLYPHS = ['', 'youtube', 'iptv', 'spotify', 'tv', 'hdmi', 'film', 'music', 'sport'];
 const APP_ID = /^[\w.\-]{1,120}$/;
 const HOME = 'com.webos.app.home';
 // never offered for uninstalling even when the TV allows it: removing the Homebrew Channel loses root, ours removes the launcher
