@@ -10,6 +10,7 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import zlib from 'node:zlib';
 const require = createRequire(import.meta.url),
   ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const chromePath =
@@ -124,6 +125,13 @@ const srv = http.createServer(async (q, r) => {
   if (q.method === 'OPTIONS') return r.writeHead(204), r.end();
   const j = o => (r.writeHead(200, { 'content-type': 'application/json' }), r.end(JSON.stringify(o)));
   if (u === '/home.html') return r.writeHead(200, { 'content-type': 'text/html' }), r.end(page());
+  // the files that ship next to the page on the TV: the backgrounds and the fonts (the pills are measured in the real typefaces)
+  const shipped = /^\/(scene-[a-z-]+\.jpg|font-[a-z-]+\.woff2)$/.exec(u);
+  if (shipped && fs.existsSync(path.join(ROOT, 'app', shipped[1])))
+    return (
+      r.writeHead(200, { 'content-type': /jpg$/.test(u) ? 'image/jpeg' : 'font/woff2' }),
+      r.end(fs.readFileSync(path.join(ROOT, 'app', shipped[1])))
+    );
   if (u.startsWith('/api/theme/')) return theme.handle(q, r, u, body);
   if (u === '/api/apps')
     return j({
@@ -174,6 +182,82 @@ await new Promise((res, rej) => {
   console.error('port 8765 is in use: ' + e.message);
   process.exit(2);
 });
+
+// a PNG screenshot as {w, h, px(x, y) -> [r, g, b]}: 8-bit RGB or RGBA, not interlaced, which is what Chrome writes
+function png(buf) {
+  let o = 8,
+    w = 0,
+    h = 0,
+    ch = 4;
+  const idat = [];
+  while (o < buf.length) {
+    const len = buf.readUInt32BE(o),
+      type = buf.toString('latin1', o + 4, o + 8),
+      data = buf.subarray(o + 8, o + 8 + len);
+    if (type === 'IHDR') (w = data.readUInt32BE(0)), (h = data.readUInt32BE(4)), (ch = data[9] === 6 ? 4 : 3);
+    if (type === 'IDAT') idat.push(data);
+    o += 12 + len;
+  }
+  const raw = zlib.inflateSync(Buffer.concat(idat)),
+    stride = w * ch,
+    out = Buffer.alloc(h * stride);
+  for (let y = 0; y < h; y++) {
+    const f = raw[y * (stride + 1)],
+      row = raw.subarray(y * (stride + 1) + 1, (y + 1) * (stride + 1));
+    for (let x = 0; x < stride; x++) {
+      const a = x >= ch ? out[y * stride + x - ch] : 0,
+        b = y ? out[(y - 1) * stride + x] : 0,
+        c = x >= ch && y ? out[(y - 1) * stride + x - ch] : 0;
+      const pr = () => {
+        const p = a + b - c,
+          pa = Math.abs(p - a),
+          pb = Math.abs(p - b),
+          pc = Math.abs(p - c);
+        return pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
+      };
+      out[y * stride + x] = (row[x] + [0, a, b, (a + b) >> 1, pr()][f]) & 255;
+    }
+  }
+  return { w, h, px: (x, y) => [out[y * stride + x * ch], out[y * stride + x * ch + 1], out[y * stride + x * ch + 2]] };
+}
+// Where the ink of a pill's content lies inside the pill: the pixels that differ from the pill's own colour (its most common colour),
+// inside its rounded outline. The gaps to the four sides, in screen pixels
+function inkGaps(img, radius) {
+  const count = {};
+  let best = '',
+    bg = null;
+  for (let y = 0; y < img.h; y += 2)
+    for (let x = 0; x < img.w; x += 2) {
+      const k = img
+        .px(x, y)
+        .map(v => v >> 3)
+        .join();
+      count[k] = (count[k] || 0) + 1;
+      if (!best || count[k] > count[best]) best = k;
+    }
+  bg = best.split(',').map(v => (+v << 3) + 4);
+  const r = Math.min(radius, img.h / 2) + 2;
+  const inside = (x, y) => {
+    const cx = x < r ? r : x > img.w - 1 - r ? img.w - 1 - r : x,
+      cy = y < r ? r : y > img.h - 1 - r ? img.h - 1 - r : y;
+    return (x - cx) * (x - cx) + (y - cy) * (y - cy) <= (r - 2) * (r - 2) && x > 2 && y > 2 && x < img.w - 3 && y < img.h - 3;
+  };
+  let x0 = img.w,
+    x1 = -1,
+    y0 = img.h,
+    y1 = -1;
+  for (let y = 0; y < img.h; y++)
+    for (let x = 0; x < img.w; x++) {
+      if (!inside(x, y)) continue;
+      const p = img.px(x, y);
+      if (Math.abs(p[0] - bg[0]) + Math.abs(p[1] - bg[1]) + Math.abs(p[2] - bg[2]) < 120) continue;
+      x0 = Math.min(x0, x);
+      x1 = Math.max(x1, x);
+      y0 = Math.min(y0, y);
+      y1 = Math.max(y1, y);
+    }
+  return x1 < 0 ? null : { left: x0, right: img.w - 1 - x1, top: y0, bottom: img.h - 1 - y1 };
+}
 
 const port = 9700 + Math.floor(Math.random() * 200),
   sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -570,6 +654,64 @@ try {
   await js('styleMenu(); 0');
   await key(OK, 1500);
   ok((await js("document.body.getAttribute('data-dockstyle')")) === 'logo', 'and Paysage comes back');
+
+  // ---- the top buttons: in every style the focused pill holds its word in the middle, measured on the pixels. Left and right on the
+  // word as written; up and down on capitals only (HHH), since accents and descenders are not what the eye centres on ----
+  const shot = async rect =>
+    png(
+      Buffer.from((await send('Page.captureScreenshot', { format: 'png', clip: Object.assign({ scale: 1 }, rect) })).result.data, 'base64')
+    );
+  const pillRect = i =>
+    js(
+      "(function () { var b = $('bar').children[" +
+        i +
+        "].getBoundingClientRect(); return JSON.stringify({ x: Math.round(b.left), y: Math.round(b.top), width: Math.round(b.width), height: Math.round(b.height), r: parseFloat(getComputedStyle($('bar').children[" +
+        i +
+        ']).borderTopLeftRadius) }); })()'
+    );
+  const off = [];
+  let worstX = 0,
+    worstY = 0;
+  for (const id of ['classic', 'verre', 'editorial', 'lin', 'aurore', 'calm', 'original']) {
+    await js("setStyle('" + id + "'); 0");
+    await sleep(1600);
+    const n = await js("$('bar').children.length");
+    for (let i = 0; i < n; i++) {
+      await js("[].forEach.call($('bar').children, function (e, j) { e.classList.toggle('f', j === " + i + '); }); 0');
+      await sleep(350);
+      let b = JSON.parse(await pillRect(i));
+      const g = inkGaps(await shot(b), b.r);
+      await js(
+        "(function () { var s = $('bar').children[" +
+          i +
+          "].querySelector('span'); s.setAttribute('data-was', s.textContent); s.textContent = 'HHH'; })(); 0"
+      );
+      await sleep(150);
+      b = JSON.parse(await pillRect(i));
+      const v = inkGaps(await shot(b), b.r);
+      const name = await js(
+        "(function () { var s = $('bar').children[" +
+          i +
+          "].querySelector('span'); s.textContent = s.getAttribute('data-was'); return s.textContent; })()"
+      );
+      if (g && v) (worstX = Math.max(worstX, Math.abs(g.left - g.right) / 2)), (worstY = Math.max(worstY, Math.abs(v.top - v.bottom) / 2));
+      if (!g || !v) off.push(id + ' "' + name + '": no ink found');
+      else if (Math.abs(g.left - g.right) > 2 || Math.abs(v.top - v.bottom) > 2)
+        off.push(id + ' "' + name + '": ' + g.left + ' left / ' + g.right + ' right, ' + v.top + ' above / ' + v.bottom + ' below');
+    }
+    await js("[].forEach.call($('bar').children, function (e) { e.classList.remove('f'); }); 0");
+  }
+  ok(
+    !off.length,
+    'the top buttons: the word sits in the middle of its pill in every style (furthest from the middle: ' +
+      worstX +
+      ' px sideways, ' +
+      worstY +
+      ' px up or down)' +
+      (off.length ? ':\n  ' + off.join('\n  ') : '')
+  );
+  await js("setStyle('classic'); 0");
+  await sleep(1500);
   await key(DOWN, 500);
   ok((await js("getComputedStyle($('clock')).opacity")) === '0', 'Paysage: the clock at the bottom steps aside while the app grid is open');
   await key(8, 500);

@@ -223,8 +223,11 @@ body {
 .pill {
   display: flex;
   align-items: center;
+  justify-content: center;
   height: var(--pill-h);
-  padding: 0 30px 0 24px;
+  /* icon and word are centred as one; the icons' drawings sit 1 to 4 px inside their box, which equal padding evens out (measured by
+     tools/calm-check.mjs on the pixels) */
+  padding: 0 27px;
   border-radius: var(--pill-r);
   font-size: calc(26px * var(--fs));
   font-weight: 500;
@@ -1027,6 +1030,15 @@ body {
 [data-bar="text"] .pill svg,
 [data-bar="caps"] .pill svg {
   display: none;
+}
+/* the icon is hidden, so the word keeps no gap for it: it sits in the middle of its pill */
+[data-bar="text"] .pill > * + *,
+[data-bar="caps"] .pill > * + * {
+  margin-left: 0;
+}
+/* the spacing of capitals follows every letter, the last one too: taken back after the word so it stays centred */
+[data-bar="caps"] .pill span {
+  margin-right: -0.2em;
 }
 [data-bar="caps"] .pill {
   font-size: calc(16px * var(--fs));
@@ -1896,7 +1908,7 @@ svg.st {
 <script>
 var API = 'http://127.0.0.1:8765',
   CACHE_KEY = 'cytv.cache.v4',
-  VERSION = '1.8.0';
+  VERSION = '1.8.1';
 var DEFAULTS = {
   dock: ['netflix', 'youtube.leanback.v4', 'amazon', 'com.disney.disneyplus-prod'],
   topbar: [
