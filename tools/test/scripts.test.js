@@ -58,7 +58,8 @@ run(async () => {
     const obeys = runClose('obeys'),
       refuses = runClose('refuses');
     ok(
-      /luna -n 1 -w 5000 luna:\/\/com\.palm\.webappmanager\/killApp \{"appId":"com\.webos\.app\.home"\}/.test(obeys) && !/pkill/.test(obeys),
+      /luna -n 1 -w 5000 luna:\/\/com\.palm\.webappmanager\/killApp \{"appId":"com\.webos\.app\.home"\}/.test(obeys) &&
+        !/pkill/.test(obeys),
       'the web engine is asked to close the page (killApp), and nothing is killed when it does'
     );
     ok(/killApp[\s\S]*\npkill -f \[a\]pp-id=com\.webos\.app\.home/.test(refuses), 'a page the engine keeps is killed as a last resort');
