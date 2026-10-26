@@ -654,6 +654,25 @@ function build() {
             : 'Cannot check'
           : 'Up to date';
   };
+  // LG's Home is showing for a while (the launcher's LG Home button, or the watchdog): the way back comes first
+  if (st.home && st.home.enabled && !st.home.ours) {
+    rows.push({
+      label: 'Back to CleanYourTV',
+      sub: 'LG’s Home is showing for now',
+      fn: function () {
+        api('/api/manager/back-home', {}).then(
+          function (x) {
+            if (x && x.returnValue === true) banner('Going back to CleanYourTV… the screen goes black for a moment.', 'work');
+            else banner((x && x.error) || 'Could not go back', 'err');
+          },
+          function () {
+            banner('The service did not answer', 'err');
+          }
+        );
+      },
+    });
+    rows.push({ sep: true });
+  }
   // updates, then the settings, then support; the destructive row last
   rows.push({
     label: 'Launcher ' + fe.version,

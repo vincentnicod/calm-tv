@@ -14,6 +14,73 @@ run(async () => {
     const r = cp.spawnSync('sh', ['-n', path.join(root, f)], { encoding: 'utf8' });
     ok(r.status === 0, 'shell syntax ' + f + (r.status ? ': ' + r.stderr : ''));
   }
+  // the boot watchdog falls back to LG's Home after 6 missed checks: it must ask something the service answers without luna, or a
+  // busy app manager (slower than curl's 3 s) would look like a dead service
+  {
+    const home = fs.readFileSync(path.join(root, 'scripts', '10-cleanyourtv-home'), 'utf8');
+    const probe = (/curl [^\n]*http:\/\/127\.0\.0\.1:8765(\/api\/[\w-]+)/.exec(home) || [])[1];
+    const answer = (/\n\s*if \(u === '\/api\/version'\)([^\n]*)/.exec(fs.readFileSync(path.join(root, 'helper', 'helper.js'), 'utf8')) ||
+      [])[1];
+    ok(
+      probe === '/api/version' && !!answer && !/luna/.test(answer),
+      "the boot watchdog checks /api/version, which the service answers without asking the TV's app manager"
+    );
+  }
+  // going to LG's Home (seen on an LG C4, webOS 25): the web engine is not restarted with sam and keeps our page; a killed page process is
+  // reopened by the engine from the unmounted folder ("file not found", -6), and sam reopens Home whenever it is closed. So the page is
+  // closed through the engine (killApp) only after sam restarted, when sam's reopening brings LG's own Home
+  {
+    const undo = fs.readFileSync(path.join(root, 'scripts', 'undo-home.sh'), 'utf8');
+    const fns = (/\nweb_home_pid\(\)[^\n]*\nclose_web_home\(\) \{[\s\S]*?\n\}\n/.exec(undo) || [''])[0];
+    const body = undo.replace(fns, '\n');
+    const first = body.indexOf('close_web_home'),
+      sam = body.indexOf('systemctl restart sam');
+    ok(
+      !!fns && sam > 0 && first > sam && !/pkill -f "\[a\]pp-id=com\.webos\.app\.home"/.test(body),
+      'undo-home.sh closes our Home page through the web engine only after sam restarted, and never kills its process outside close_web_home'
+    );
+    // close_web_home with stand-ins for the TV's tools: the page's process id is kept in a file
+    const fb = path.join(tmp, 'webhome-bin'),
+      log = path.join(tmp, 'webhome.log'),
+      pidf = path.join(tmp, 'webhome.pid'),
+      modef = path.join(tmp, 'webhome.mode');
+    cp.spawnSync('mkdir', ['-p', fb]);
+    const tool = (n, s) => fs.writeFileSync(path.join(fb, n), '#!/bin/sh\n' + s + '\n', { mode: 0o755 });
+    tool(
+      'luna-send',
+      'echo "luna $*" >> ' +
+        log +
+        '; case "$(cat ' +
+        modef +
+        ')" in gone) : > ' +
+        pidf +
+        ';; reopened) echo 22222 > ' +
+        pidf +
+        ';; esac; exit 0'
+    );
+    tool('pgrep', 'p=$(cat ' + pidf + '); [ -n "$p" ] && echo "$p"');
+    tool('pkill', 'echo "pkill $*" >> ' + log + '; : > ' + pidf);
+    tool('sleep', 'exit 0');
+    const runClose = mode => {
+      fs.writeFileSync(pidf, '11008\n');
+      fs.writeFileSync(modef, mode);
+      fs.writeFileSync(log, '');
+      cp.spawnSync('sh', ['-c', fns + '\nclose_web_home'], { env: Object.assign({}, process.env, { PATH: fb + ':' + process.env.PATH }) });
+      return fs.readFileSync(log, 'utf8');
+    };
+    const gone = runClose('gone'),
+      reopened = runClose('reopened'),
+      refuses = runClose('refuses');
+    ok(
+      /luna -n 1 -w 5000 luna:\/\/com\.palm\.webappmanager\/killApp \{"appId":"com\.webos\.app\.home"\}/.test(gone) && !/pkill/.test(gone),
+      'the web engine is asked to close the page (killApp), and nothing is killed when it does'
+    );
+    ok(/killApp/.test(reopened) && !/pkill/.test(reopened), 'a page sam reopened (a new process) is not killed');
+    ok(
+      /killApp[\s\S]*\npkill -f \[a\]pp-id=com\.webos\.app\.home/.test(refuses),
+      'the same page still there after 5 s is killed as a last resort'
+    );
+  }
   // appkey.sh (a remote button given to an app): launches only an app id, never anything a shell would read
   {
     const fb = path.join(tmp, 'appkey-bin'),

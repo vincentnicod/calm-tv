@@ -84,6 +84,39 @@ run(async () => {
     lines.some(l => /keys\.guide "" -> "362"|keys\.guide undefined -> "362"/.test(l)),
     'learned keys are logged too'
   );
+  // LG's Home for a while (the launcher's button) and back (the manager), without a restart and without touching DISABLE
+  const exec = req('exec'),
+    detachedWas = exec.detached,
+    started = [];
+  exec.detached = s => started.push(s);
+  const mounts = path.join(process.env.CYTV_PROC, 'mounts'),
+    disable = path.join(process.env.CYTV_DIR, 'DISABLE');
+  fs.writeFileSync(mounts, '/dev/x /usr/palm/applications/com.webos.app.home none bind 0 0\n');
+  r = await call(m, '/api/lg-home', 'POST');
+  ok(
+    r.j.returnValue === true && started.length === 1 && /undo-home\.sh temp$/.test(started[0]) && !fs.existsSync(disable),
+    'the LG Home button runs the temporary undo and leaves CleanYourTV as the Home of the next start'
+  );
+  r = await ask('back-home', 'POST');
+  ok(r.code === 409 && started.length === 1, 'going back is refused while our Home is still mounted');
+  fs.writeFileSync(mounts, '/dev/root / ext4 ro 0 0\n');
+  r = await call(m, '/api/lg-home', 'POST');
+  ok(r.code === 409 && started.length === 1, "the LG Home button does nothing when LG's Home is already on");
+  fs.writeFileSync(disable, '');
+  r = await ask('back-home', 'POST');
+  ok(r.code === 409 && started.length === 1, "going back is refused when LG's Home is the chosen Home");
+  fs.unlinkSync(disable);
+  r = await ask('back-home', 'POST');
+  ok(
+    r.j.returnValue === true &&
+      started.length === 2 &&
+      /10-cleanyourtv-home;.*15-cleanyourtv-debloat.*DISABLE-DEBLOAT.*debloat-stop\.sh$/.test(started[1]),
+    'going back mounts our Home again, then the debloat by its boot rules'
+  );
+  r = await ask('status', 'GET');
+  ok(r.j.home.enabled === true && r.j.home.ours === false, "the status says CleanYourTV is chosen but LG's Home is showing");
+  exec.detached = detachedWas;
+
   r = await ask('nope', 'POST');
   ok(r.code === 404, 'an unknown action');
   r = await ask('options', 'GET');

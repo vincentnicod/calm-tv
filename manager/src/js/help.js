@@ -8,6 +8,8 @@ var INFO = {
   'Update channel':
     'Stable releases are what most people want. A test build is a change someone asks you to try, built from a branch of the repository; it can be less finished. Choose a test build here, then use the Launcher and Service rows to install it. Going back to Stable offers the latest release again.',
   'Go back to launcher': 'Swaps the previous launcher version back in. The newer one stays available as an update.',
+  'Back to CleanYourTV':
+    'LG’s Home is showing for now (the launcher’s LG Home button). This puts CleanYourTV back as Home without restarting the TV; the screen goes black for a moment. A restart does the same.',
   'CleanYourTV as Home':
     'On: the Home button opens this launcher. Off: LG\u2019s own Home. Switching restarts the TV (about a minute); the service keeps running either way.',
   'Debloat LG\u2019s ads and telemetry':

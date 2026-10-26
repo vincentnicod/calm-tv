@@ -31,7 +31,8 @@ mount --bind $L/home-overlay $H && { (sleep 3; pkill -9 -f /usr/palm/application
   bad=0
   while grep -q " $H " /proc/mounts; do
     sleep 10
-    if curl -s -m 3 -o /dev/null http://127.0.0.1:8765/api/foreground; then bad=0; else
+    # /api/version is answered by the service alone: a busy app manager (luna) must not look like a dead service
+    if curl -s -m 3 -o /dev/null http://127.0.0.1:8765/api/version; then bad=0; else
       pgrep -f cleanyourtv/helper.js >/dev/null || (nohup node $L/helper.js >/tmp/cleanyourtv-helper.log 2>&1 </dev/null &)
       bad=$((bad+1)); [ $bad -ge 6 ] && { sh $L/undo-home.sh temp; break; }
     fi

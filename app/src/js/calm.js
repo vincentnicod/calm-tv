@@ -302,8 +302,16 @@ var GLYPHS = {
     b: [84, 66, 230],
     c: [118, 92, 255],
     svg:
-      '<circle cx="32" cy="32" r="5.5" fill="currentColor"/>' +
-      '<path d="M21.5 21.5a15 15 0 0 0 0 21M42.5 21.5a15 15 0 0 1 0 21M14 14a25.5 25.5 0 0 0 0 36M50 14a25.5 25.5 0 0 1 0 36" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>',
+      '<rect x="4" y="9" width="56" height="38" rx="8" fill="none" stroke="currentColor" stroke-width="4"/>' +
+      '<path d="M20 56h24" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>' +
+      '<circle cx="32" cy="28" r="4.2" fill="currentColor"/>' +
+      '<path d="M26.34 22.34a8 8 0 0 0 0 11.32M37.66 22.34a8 8 0 0 1 0 11.32M22.1 18.1a14 14 0 0 0 0 19.8M41.9 18.1a14 14 0 0 1 0 19.8" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>',
+  },
+  spotify: {
+    name: 'Spotify',
+    b: [30, 215, 96],
+    c: [30, 215, 96],
+    svg: '<path fill-rule="evenodd" fill="currentColor" d="M32 8a24 24 0 1 1 0 48a24 24 0 1 1 0-48ZM16 22.6Q30 12.6 48.5 26.6A2.9 2.9 0 0 1 48.5 32.4Q30 18.4 16 28.4A2.9 2.9 0 0 1 16 22.6ZM18.5 32Q30.5 23.5 46 35A2.5 2.5 0 0 1 46 40Q30.5 28.5 18.5 37A2.5 2.5 0 0 1 18.5 32ZM20.5 40.4Q30.5 33.4 43 42.4A2.1 2.1 0 0 1 43 46.6Q30.5 37.6 20.5 44.6A2.1 2.1 0 0 1 20.5 40.4Z"/>',
   },
   tv: {
     name: 'TV',
@@ -346,7 +354,7 @@ var GLYPHS = {
       '<path d="M32 22l9.5 6.9-3.6 11.1H26.1l-3.6-11.1z" fill="currentColor"/>',
   },
 };
-var GLYPH_MENU = ['youtube', 'iptv', 'tv', 'film', 'music', 'sport'];
+var GLYPH_MENU = ['youtube', 'spotify', 'iptv', 'tv', 'film', 'music', 'sport'];
 function glyphSvg(g) {
   return '<svg class="glyph" viewBox="0 0 64 64">' + GLYPHS[g].svg + '</svg>';
 }
@@ -410,6 +418,8 @@ function autoLook(a) {
   if (a.id === '__hdmi') return { label: hdmiLabel(), icon: 'hdmi' };
   if (a.id === 'youtube.leanback.v4') return { label: 'YouTube', icon: a.title === 'YouTube' ? '' : 'youtube' }; /* YouTube AdFree */
   if (a.id.charAt(0) !== '_' && a.id === iptvId()) return { label: 'IPTV', icon: 'iptv' };
+  /* Spotify's own icon carries the wordmark: the drawn mark alone, and the plain name */
+  if (/^spotify/.test(a.id) || /^spotify\b/i.test(a.title || '')) return { label: 'Spotify', icon: 'spotify' };
   return {};
 }
 function look(a) {

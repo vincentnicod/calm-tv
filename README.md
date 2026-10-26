@@ -75,6 +75,7 @@ pass, publishes a pre-release named `test-main`. The manager app on the TV offer
 | To | How |
 |---|---|
 | LG's Home | Manager app › **CleanYourTV as Home** off, or `sh /media/developer/cleanyourtv/undo-home.sh` |
+| LG's Home for a moment | Customise › **LG Home** in the launcher; back with the manager's **Back to CleanYourTV** or a restart |
 | The original layout | Customise › **Style** › **Original** |
 | Nothing at all | Manager app › **Uninstall** |
 

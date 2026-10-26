@@ -1,6 +1,7 @@
 // The launcher's own API: the list of apps with their icons, how often each is used, the inputs, launching, and the launcher's
-// settings (dock, hidden apps, sort order, clock, top buttons).
+// settings (dock, hidden apps, sort order, clock, top buttons), and uninstalling an app.
 //   GET /api/apps  GET /api/inputs  GET /api/foreground  POST /api/launch {id, params}  POST /api/config {...}  GET /icon/<app id>
+//   POST /api/uninstall {id}
 const fs = require('fs'),
   path = require('path');
 const P = require('./paths'),
@@ -10,9 +11,14 @@ const P = require('./paths'),
 
 const HALF_LIFE = 30 * 24 * 3600 * 1000; // usage counts halve every 30 days
 // the drawn icons the launcher has (app/src/js/calm.js, GLYPHS); '' is the app's own icon
-const GLYPHS = ['', 'youtube', 'iptv', 'tv', 'hdmi', 'film', 'music', 'sport'];
+const GLYPHS = ['', 'youtube', 'iptv', 'spotify', 'tv', 'hdmi', 'film', 'music', 'sport'];
 const APP_ID = /^[\w.\-]{1,120}$/;
 const HOME = 'com.webos.app.home';
+// never offered for uninstalling even when the TV allows it: removing the Homebrew Channel loses root, ours removes the launcher
+const KEEP = /^(com\.webos\.app\.home|org\.webosbrew\.hbchannel|com\.cleanyourtv\..*)$/;
+// apps installed in developer mode (Homebrew Channel, ares) are removed through appInstallService's dev/ methods
+const DEV_DIR = '/media/developer/apps/';
+const isDev = a => String(a.folder || '').indexOf(DEV_DIR) === 0;
 
 function create(ctx) {
   const { config, luna } = ctx;
@@ -30,7 +36,14 @@ function create(ctx) {
         if (!Array.isArray(r.apps)) return appCache || [];
         appCache = r.apps
           .filter(a => a.visible !== false && a.id !== HOME)
-          .map(a => ({ id: a.id, title: a.title, icon: a.largeIcon || a.icon, folder: a.folderPath, type: a.type }));
+          .map(a => ({
+            id: a.id,
+            title: a.title,
+            icon: a.largeIcon || a.icon,
+            folder: a.folderPath,
+            type: a.type,
+            removable: a.removable === true && !KEEP.test(a.id),
+          }));
         appCacheAt = Date.now();
         return appCache;
       });
@@ -160,6 +173,21 @@ function create(ctx) {
     return theme ? Object.assign(c, { theme: theme.resolved() }) : c;
   }
 
+  // LG's own uninstall (what LG's Home does when you delete an app); only apps the TV marks removable, never the ones in KEEP.
+  // Resolves [reply, status] for web.json.
+  async function uninstall(id) {
+    if (!APP_ID.test(id || '')) return [{ error: 'bad id' }, 400];
+    const a = (await apps()).find(x => x.id === id);
+    if (!a) return [{ error: 'not installed' }, 404];
+    if (!a.removable) return [{ error: 'not removable' }, 403];
+    const uri = 'luna://com.webos.appInstallService/' + (isDev(a) ? 'dev/remove' : 'remove');
+    const r = await luna(uri, { id, subscribe: false }, { wait: 20000 });
+    if (r.returnValue === false) return [{ error: r.errorText || 'refused by the TV' }, 502];
+    // the app manager lists it for a moment longer: drop it now so Home does not show it again
+    if (appCache) appCache = appCache.filter(x => x.id !== id);
+    return [{ returnValue: true }, 200];
+  }
+
   async function handle(req, res, u, body) {
     if (u === '/api/apps')
       return web.json(res, { apps: await apps(), config: launcherConfig(), usage: usageScores(), version: ctx.version });
@@ -174,6 +202,7 @@ function create(ctx) {
       saveLauncherConfig(await body(req));
       return web.json(res, { returnValue: true });
     }
+    if (u === '/api/uninstall' && req.method === 'POST') return web.json(res, ...(await uninstall((await body(req)).id)));
     const m = u.match(/^\/icon\/([\w.\-]+)$/);
     if (m) {
       const a = (await apps()).find(x => x.id === m[1]);
@@ -187,7 +216,7 @@ function create(ctx) {
 
   return {
     name: 'apps',
-    paths: ['/api/apps', '/api/inputs', '/api/foreground', '/api/launch', '/api/config'],
+    paths: ['/api/apps', '/api/inputs', '/api/foreground', '/api/launch', '/api/config', '/api/uninstall'],
     prefix: '/icon/',
     handle,
     start: () => setInterval(pollForeground, 4000),

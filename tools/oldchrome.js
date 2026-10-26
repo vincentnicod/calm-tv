@@ -212,12 +212,17 @@ function run(bin, url, extra, budget) {
         current = p[0];
         // headless Chromium 79 on Linux now and then fails to hand over the page ("Failed to serialize document") or hangs, and Chromium 68
         // now and then hands over an empty document (<html><head></head><body></body></html>) instead of the page: try again until the
-        // dump holds the page itself (the stand-in's webOSSystem script is in every page)
-        let r = null;
-        for (let tries = 0; tries < 5; tries++) {
-          r = await run(bin, url, ['--dump-dom'], p[4]);
+        // dump holds the page itself (the stand-in's webOSSystem script is in every page). Five tries were not always enough on a busy
+        // runner (Chromium 79's "Failed to serialize document: Uncaught" on a different page each run): pause between tries, and give
+        // the later ones a longer budget in case the dump was taken while the page was still busy
+        let r = null,
+          tries = 0;
+        for (; tries < 8; tries++) {
+          if (tries) await new Promise(res => setTimeout(res, 1000));
+          r = await run(bin, url, ['--dump-dom'], tries < 4 ? p[4] : (p[4] || 8000) * 2);
           if (r.status === 0 && (r.stdout || '').indexOf('webOSSystem') >= 0) break;
         }
+        if (tries) console.log('     ' + e[0] + ': ' + p[0] + ' needed ' + Math.min(tries + 1, 8) + ' tries (a flaky old engine)');
         const dom = r.stdout || '';
         const errs = (/data-errors="([^"]*)"/.exec(dom) || [])[1] || '';
         const n = (dom.match(p[2]) || []).length;
