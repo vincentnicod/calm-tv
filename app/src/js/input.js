@@ -9,7 +9,8 @@ var lastMove = 0,
   lastKey = 0,
   lastMX = -1,
   lastMY = -1,
-  lastEnter = 0;
+  lastEnter = 0,
+  menuHold = false;
 function hit(e) {
   e.addEventListener('mousedown', function () {
     held = false;
@@ -69,6 +70,20 @@ document.addEventListener('keydown', function (e) {
       downEnter = true;
       lastEnter = Date.now();
       swallowUp = true;
+      /* a row with a hold action (an input) opens on release; held, it shows its options */
+      var mh = stack[stack.length - 1],
+        heldRow = mh.items[mh.idx];
+      if (heldRow && heldRow.hold) {
+        menuHold = true;
+        held = false;
+        clearTimeout(downT);
+        downT = setTimeout(function () {
+          held = true;
+          heldRow.hold();
+        }, 650);
+        e.preventDefault();
+        return;
+      }
     }
     if (menuKey(k)) e.preventDefault();
     return;
@@ -134,6 +149,15 @@ document.addEventListener('keyup', function (e) {
   clearTimeout(downT);
   var pr = document.querySelector('.press');
   if (pr) pr.classList.remove('press');
+  if (menuHold) {
+    var wasHeld = held;
+    menuHold = false;
+    swallowUp = false;
+    downEnter = false;
+    held = false;
+    if (!wasHeld) pickMenu();
+    return;
+  }
   if (swallowUp) {
     swallowUp = false;
     downEnter = false;

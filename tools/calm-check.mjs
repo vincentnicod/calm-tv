@@ -64,6 +64,9 @@ const S = {
   launched: [],
   uninstalled: [],
   lgHome: 0,
+  powerOff: 0,
+  pinned: [],
+  iconFail: false,
   saved: [],
   version: '1.9.0',
   locale: 'en-GB',
@@ -146,7 +149,12 @@ const srv = http.createServer(async (q, r) => {
   if (u.startsWith('/api/theme/')) return theme.handle(q, r, u, body);
   if (u === '/api/apps')
     return j({
-      apps: APPS.map(a => ({ id: a[0], title: a[1], removable: a[2] })),
+      apps: APPS.map(a => ({ id: a[0], title: a[1], removable: a[2] })).concat(
+        S.pinned.map(id => {
+          const d = S.inputs.find(x => x.appId === id);
+          return { id, title: d.label, input: d.port, off: !d.hdmiPlugIn };
+        })
+      ),
       config: Object.assign({}, S.config, { theme: theme.resolved(), options: { liveTv: false } }),
       usage: {},
       version: S.version,
@@ -168,6 +176,12 @@ const srv = http.createServer(async (q, r) => {
   if (u === '/api/launch') return S.launched.push((await body(q)).id), j({ returnValue: true });
   if (u === '/api/uninstall') return S.uninstalled.push((await body(q)).id), j({ returnValue: true });
   if (u === '/api/lg-home') return S.lgHome++, j({ returnValue: true });
+  if (u === '/api/power/off') return S.powerOff++, j({ returnValue: true });
+  if (u === '/api/inputs/pin') {
+    const b = await body(q);
+    S.pinned = S.pinned.filter(i => i !== b.id).concat(b.on === false ? [] : [b.id]);
+    return j({ returnValue: true, pinned: b.on !== false });
+  }
   if (u === '/api/quick' && S.realQuick) return quick.handle(q, r, u, body);
   if (u === '/api/quick') return S.quickCalls.push(await body(q)), j(S.quickOk ? { ok: true } : { error: 'not installed' });
   if (u === '/picker.html') return r.writeHead(200, { 'content-type': 'text/html' }), r.end(pickerPage());
@@ -177,6 +191,7 @@ const srv = http.createServer(async (q, r) => {
     S.config = b;
     return j({ returnValue: true });
   }
+  if (u.startsWith('/icon/') && S.iconFail) return r.writeHead(404), r.end();
   if (u.startsWith('/icon/'))
     return (
       r.writeHead(200, { 'content-type': 'image/svg+xml' }),
@@ -640,6 +655,91 @@ try {
   ok(S.lgHome === 1, 'Switch now asks the service for LG Home');
   await js('closeMenus(); 0');
   S.config = {};
+
+  // ---- Power off: a top button to add, asked first ----
+  await fresh();
+  ok(
+    (await js('PRESETS.map(function (p) { return barLabel(p); }).join()')).indexOf('Power off') >= 0,
+    'Power off can be added as a top button'
+  );
+  await js('powerOffMenu(); 0');
+  ok(
+    (await menuTitle()) === 'Power off completely?' &&
+      (await js('stack[stack.length - 1].items[stack[stack.length - 1].idx].label')) === 'Cancel',
+    'Power off asks first, with Cancel focused'
+  );
+  await key(OK, 400);
+  ok(S.powerOff === 0, 'Cancel does nothing');
+  await js('closeMenus(); powerOffMenu(); 0');
+  await key(DOWN);
+  await key(OK, 600);
+  ok(S.powerOff === 1, 'Yes asks the service to power off');
+
+  // ---- inputs on Home: hold OK in the Inputs list, or Customise; a tile like an app ----
+  S.inputs = [dev(1, 'UPC', true, true), dev(3, 'PS4', false)];
+  S.pinned = [];
+  await fresh();
+  await js('inputsMenu(); 0');
+  await sleep(400);
+  await key(OK, 500);
+  ok(S.launched[0] === 'com.webos.app.hdmi1' && !(await menuTitle()), 'a short OK on an input still opens it');
+  await js('inputsMenu(); 0');
+  await sleep(400);
+  await down(OK);
+  await sleep(900);
+  await up(OK);
+  await sleep(300);
+  ok((await menuTitle()) === 'UPC', 'hold OK on an input opens its options');
+  await key(DOWN);
+  await key(OK, 900);
+  ok(S.pinned.join() === 'com.webos.app.hdmi1' && !!(await js("!!tiles['com.webos.app.hdmi1']")), 'Add to Home makes it a tile at once');
+  ok(
+    await js(
+      "tiles['com.webos.app.hdmi1'].classList.contains('gl-hdmi') && tiles['com.webos.app.hdmi1'].querySelector('.cap').textContent === 'UPC'"
+    ),
+    "the tile is drawn with the HDMI symbol and the input's name"
+  );
+  S.launched = [];
+  await js("act(tiles['com.webos.app.hdmi1']); 0");
+  await sleep(300);
+  ok(
+    S.launched[0] === 'com.webos.app.hdmi1' && (await js("localStorage.getItem('cytv.hdmi.last')")) === '1',
+    'OK on the tile opens the input and remembers it'
+  );
+  await js("closeMenus(); appMenu(tiles['com.webos.app.hdmi1']._a); 0");
+  const pinOpts = await js('stack[0].items.map(function (i) { return i.label; })');
+  ok(
+    pinOpts.indexOf('Remove from Home') >= 0 && pinOpts.indexOf('Hide app') < 0 && pinOpts.indexOf('Uninstall...') < 0,
+    'its options: Remove from Home, not Hide or Uninstall'
+  );
+  await js('closeMenus(); customizeMenu(); 0');
+  ok(
+    (await js('stack[0].items.map(function (i) { return i.label; })')).slice(0, 8).indexOf('Inputs on Home') >= 0,
+    'Customise offers Inputs on Home without scrolling'
+  );
+  await js('closeMenus(); pinMenu(); 0');
+  await sleep(400);
+  await key(DOWN);
+  ok((await menuTitle()) === 'Inputs on Home', 'it lists the inputs');
+  await key(OK, 900);
+  ok(
+    S.pinned.length === 2 && (await js("tiles['com.webos.app.hdmi3'].classList.contains('nosignal')")),
+    'an input with nothing connected is dimmed'
+  );
+  S.pinned = [];
+
+  // ---- icons that failed: the dock's white logos and the grid come back once the service answers ----
+  S.config = {};
+  S.iconFail = true;
+  await fresh();
+  ok(await js("!!tiles.netflix.querySelector('.mono .mt')"), 'with no icon the white logo shows the name');
+  S.iconFail = false;
+  await js('load(); 0');
+  await sleep(900);
+  ok(
+    await js("!!tiles.netflix.querySelector('.mono img') && !tiles.netflix.querySelector('.mono .mt')"),
+    'the logo comes back when the next app list arrives'
+  );
 
   // ---- Quick settings: a button at the top of Home, between Inputs and Settings; the service opens the panel over the screen ----
   await js('RB.close(); closeMenus(); 0');

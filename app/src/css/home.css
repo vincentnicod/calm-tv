@@ -607,6 +607,10 @@ body {
 .tile.gl-hdmi.f {
   box-shadow: 0 24px 36px rgba(0, 0, 0, 0.6);
 }
+/* an input on Home with nothing connected */
+.tile.nosignal {
+  opacity: 0.55;
+}
 .gl-film {
   background-image: linear-gradient(150deg, #ef3b57, #a3173a);
 }

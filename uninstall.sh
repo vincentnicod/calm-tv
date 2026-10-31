@@ -15,7 +15,8 @@ done
 LASTAPP=/var/luna/preferences/bootd_last_foreground_app_id.json
 grep -q cleanyourtv $LASTAPP 2>/dev/null && echo '{"lastAppId":"com.webos.app.home"}' > $LASTAPP
 [ -f $D/debloat-undo.sh ] && sh $D/debloat-undo.sh </dev/null
-pkill -f "[1]0-cleanyourtv-home"   # the watchdog would restart the service
+pkill -f "[c]leanyourtv/watchdog.sh"   # it would restart the service
+pkill -f "[1]0-cleanyourtv-home"       # the watchdog of a version before watchdog.sh
 pkill -f "[c]leanyourtv/helper.js"
 # our Input-key bind
 node $D/jtool.js rmbind 2>/dev/null

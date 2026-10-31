@@ -191,7 +191,7 @@ function refresh(){
   function done(){if(!got.apps||!got.inputs)return;cache.apps=got.apps;cache.inputs=got.inputs;persist();$('msg').textContent='';setData(cache,false)}
   get('/api/apps',function(x){liveOn=!(x.config&&x.config.options&&x.config.options.liveTv===false);var by={};(x.apps||[]).forEach(function(a){by[a.id]=a});
     var looks=(x.config&&x.config.tiles)||{};   // a drawn icon chosen in the launcher (Icon and name)
-    got.apps=((x.config&&x.config.dock)||[]).filter(function(id){return by[id]}).map(function(id){var lk=looks[id]||{},g=lk.icon;return {id:id,title:by[id].title,name:typeof lk.label==='string'&&lk.label?lk.label:by[id].title,g:GL[g]?g:''}});done()},function(){});
+    got.apps=((x.config&&x.config.dock)||[]).filter(function(id){return by[id]}).map(function(id){var lk=looks[id]||{},g=lk.icon;return {id:id,title:by[id].title,name:typeof lk.label==='string'&&lk.label?lk.label:by[id].title,g:GL[g]?g:by[id].input?'hdmi':''}});done()},function(){});
   get('/api/inputs',function(x){got.inputs=buildInputs(x.devices);done()},function(){if(shown&&inputs.length<=1)$('msg').textContent=t('nohelper')})}
 function load(){   // the last known layout, ready before the first open
   try{var c=JSON.parse(localStorage.getItem(KEY)||'null');if(c&&c.inputs&&c.inputs.length){cache=c;cache.icons=cache.icons||{};cache.colors=cache.colors||{}}}catch(e){}

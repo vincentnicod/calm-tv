@@ -612,6 +612,10 @@ body {
 .tile.gl-hdmi.f {
   box-shadow: 0 24px 36px rgba(0, 0, 0, 0.6);
 }
+/* an input on Home with nothing connected */
+.tile.nosignal {
+  opacity: 0.55;
+}
 .gl-film {
   background-image: linear-gradient(150deg, #ef3b57, #a3173a);
 }
@@ -1926,6 +1930,7 @@ var PRESETS = [
   { label: 'Live TV', icon: 'tv', action: 'live' },
   { label: 'Quick settings', icon: 'quick', action: 'quick' },
   { label: 'LG Home', icon: 'restore', action: 'lghome' },
+  { label: 'Power off', icon: 'power', action: 'poweroff' },
 ];
 var ICONS = {
   inputs: '<path d="M15 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/>',
@@ -1935,6 +1940,7 @@ var ICONS = {
   tv: '<rect x="2" y="7" width="20" height="15" rx="2"/><path d="M17 2l-5 5-5-5"/>',
   grid: '<path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/>',
   hdmi: '<path d="M4 8h16v7l-3 3H7l-3-3z"/><path d="M9 11v3M12 11v3M15 11v3"/>',
+  power: '<path d="M12 3v9"/><path d="M18 6.5a8.5 8.5 0 1 1-12 0"/>',
   restore: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
 };
 function svg(name) {
@@ -2382,7 +2388,9 @@ function barLabel(o) {
           ? t('Live TV')
           : o.action === 'quick'
             ? t('Quick settings')
-            : o.label || '';
+            : o.action === 'poweroff'
+              ? t('Power off')
+              : o.label || '';
 }
 function clockOpts() {
   var c = cfg.clock,
@@ -2730,13 +2738,14 @@ function tile(a) {
   /* a kept tile takes the app's latest details: the first paint comes from the saved list, which can be older (no removable) */
   if (tiles[a.id] && tiles[a.id]._sig === sig) {
     tiles[a.id]._a = a;
+    tiles[a.id].classList.toggle('nosignal', !!a.off);
     return tiles[a.id];
   }
   var d = document.createElement('div'),
     tint = document.createElement('div'),
     face = document.createElement('div'),
     cap = document.createElement('div');
-  d.className = 'tile' + (a.sys ? ' sys' : '');
+  d.className = 'tile' + (a.sys ? ' sys' : '') + (a.off ? ' nosignal' : '');
   d._a = a;
   d._sig = sig;
   tiles[a.id] = d;
@@ -2768,6 +2777,12 @@ function tile(a) {
   d._i = i;
   if (!known) i.crossOrigin = 'anonymous';
   i.onload = function () {
+    d._iconFailed = false;
+    if (d._iconText) {
+      d._iconText.remove();
+      d._iconText = null;
+    }
+    if (!i.parentNode) face.appendChild(i);
     if (!colors[a.id]) {
       var col = iconColor(i, a.id);
       d._col = col;
@@ -2781,11 +2796,15 @@ function tile(a) {
     }
   };
   i.onerror = function () {
+    d._iconFailed = true;
     i.remove();
-    var t = document.createElement('div');
-    t.className = 't';
-    t.textContent = lk.label;
-    face.appendChild(t);
+    if (!d._iconText) {
+      var t = document.createElement('div');
+      t.className = 't';
+      t.textContent = lk.label;
+      d._iconText = t;
+      face.appendChild(t);
+    }
     if (!colors[a.id]) {
       var f = hsl2rgb(hashHue(a.id), 0.42, 0.42);
       paint(d, { c: f, b: hsl2rgb(hashHue(a.id), 0.4, 0.2) });
@@ -2795,6 +2814,20 @@ function tile(a) {
   face.appendChild(i);
   if (i.decode) i.decode().catch(function () {});
   return d;
+}
+
+/* the first paint can beat the service, and a kept tile is not drawn again: once the service answers, icons that failed are asked for
+   again, twice at most. The text stays until a picture really loads. The dock's white logos have their own picture (calm.js, retryMono). */
+function retryTileIcons() {
+  Object.keys(tiles).forEach(function (id) {
+    var d = tiles[id];
+    if (id === '__live') return;
+    retryMono(d);
+    if (!d._iconFailed || !d._i || (d._iconTries || 0) >= 2) return;
+    d._iconFailed = false;
+    d._iconTries = (d._iconTries || 0) + 1;
+    d._i.src = API + '/icon/' + encodeURIComponent(id) + '?retry=' + d._iconTries;
+  });
 }
 
 /* ---------- ambient glow: two layers cross-fade, updated only once focus settles ---------- */
@@ -3009,6 +3042,7 @@ function act(e) {
         e.classList.remove('launching');
       }, 4000);
     }
+    if (a.input) rememberInput(a.input);
     return launch(a.id);
   }
   var o = e._o || {};
@@ -3017,6 +3051,7 @@ function act(e) {
   if (o.action === 'inputs') return inputsMenu();
   if (o.action === 'quick') return openQuick();
   if (o.action === 'lghome') return lgHomeMenu();
+  if (o.action === 'poweroff') return powerOffMenu();
   if (o.app) launch(o.app, o.params);
 }
 /* ---------- menus ---------- */
@@ -3085,7 +3120,26 @@ function drawMenu() {
     var it = m.items[+row.getAttribute('data-i')];
     row.querySelector('.lb').textContent = it.label;
     if (it.sub) row.querySelector('.st').textContent = it.sub;
+    var pressT = 0,
+      rowHeld = false;
+    if (it.hold) {
+      row.addEventListener('mousedown', function () {
+        rowHeld = false;
+        clearTimeout(pressT);
+        pressT = setTimeout(function () {
+          rowHeld = true;
+          it.hold();
+        }, 650);
+      });
+      row.addEventListener('mouseup', function () {
+        clearTimeout(pressT);
+      });
+    }
     row.addEventListener('click', function () {
+      if (rowHeld) {
+        rowHeld = false;
+        return;
+      }
       m.idx = +row.getAttribute('data-i');
       pickMenu();
     });
@@ -3272,12 +3326,20 @@ function appMenu(a) {
         looksMenu(a);
       },
     });
-  items.push({
-    label: t('Hide app'),
-    fn: function () {
-      hideApp(a.id);
-    },
-  });
+  if (a.input)
+    items.push({
+      label: t('Remove from Home'),
+      fn: function () {
+        pinInput(a.id, look(a).label, false);
+      },
+    });
+  else
+    items.push({
+      label: t('Hide app'),
+      fn: function () {
+        hideApp(a.id);
+      },
+    });
   if (a.removable === true)
     items.push({
       label: t('Uninstall...'),
@@ -3300,6 +3362,19 @@ function appMenu(a) {
       'Uninstalled': 'Désinstallée',
       'Could not uninstall': 'Impossible de désinstaller',
       'Switch to LG Home?': 'Passer à LG Home ?',
+      'Power off': 'Éteindre',
+      'Power off completely?': 'Éteindre complètement ?',
+      'Yes, power off': 'Oui, éteindre',
+      'The next start is slower, and Wake-on-LAN will not wake the TV.':
+        'Le prochain démarrage est plus lent, et Wake-on-LAN ne réveillera pas le téléviseur.',
+      'Powering off...': 'Extinction...',
+      'Could not power off': 'Impossible d’éteindre',
+      'Add to Home': 'Ajouter à l’accueil',
+      'Remove from Home': 'Retirer de l’accueil',
+      'Inputs on Home': 'Entrées sur l’accueil',
+      '%s added to Home': '%s ajouté à l’accueil',
+      '%s removed from Home': '%s retiré de l’accueil',
+      'Could not change Home': 'Impossible de modifier l’accueil',
       'for now, without a restart': 'pour l’instant, sans redémarrer',
       'Switch now': 'Passer maintenant',
       'about a minute': 'environ une minute',
@@ -3315,6 +3390,19 @@ function appMenu(a) {
       'Uninstalled': 'Deinstalliert',
       'Could not uninstall': 'Deinstallieren nicht möglich',
       'Switch to LG Home?': 'Zu LG Home wechseln?',
+      'Power off': 'Ausschalten',
+      'Power off completely?': 'Ganz ausschalten?',
+      'Yes, power off': 'Ja, ausschalten',
+      'The next start is slower, and Wake-on-LAN will not wake the TV.':
+        'Der nächste Start dauert länger, und Wake-on-LAN weckt den Fernseher nicht.',
+      'Powering off...': 'Wird ausgeschaltet...',
+      'Could not power off': 'Ausschalten nicht möglich',
+      'Add to Home': 'Zu Home hinzufügen',
+      'Remove from Home': 'Von Home entfernen',
+      'Inputs on Home': 'Eingänge auf Home',
+      '%s added to Home': '%s zu Home hinzugefügt',
+      '%s removed from Home': '%s von Home entfernt',
+      'Could not change Home': 'Home konnte nicht geändert werden',
       'for now, without a restart': 'vorübergehend, ohne Neustart',
       'Switch now': 'Jetzt wechseln',
       'about a minute': 'etwa eine Minute',
@@ -3330,6 +3418,18 @@ function appMenu(a) {
       'Uninstalled': 'Verwijderd',
       'Could not uninstall': 'Verwijderen mislukt',
       'Switch to LG Home?': 'Naar LG Home?',
+      'Power off': 'Uitschakelen',
+      'Power off completely?': 'Helemaal uitschakelen?',
+      'Yes, power off': 'Ja, uitschakelen',
+      'The next start is slower, and Wake-on-LAN will not wake the TV.': 'De volgende start duurt langer, en Wake-on-LAN wekt de tv niet.',
+      'Powering off...': 'Uitschakelen...',
+      'Could not power off': 'Uitschakelen mislukt',
+      'Add to Home': 'Aan Home toevoegen',
+      'Remove from Home': 'Van Home verwijderen',
+      'Inputs on Home': 'Ingangen op Home',
+      '%s added to Home': '%s is aan Home toegevoegd',
+      '%s removed from Home': '%s is van Home verwijderd',
+      'Could not change Home': 'Kan Home niet aanpassen',
       'for now, without a restart': 'tijdelijk, zonder herstart',
       'Switch now': 'Nu wisselen',
       'about a minute': 'ongeveer een minuut',
@@ -3345,6 +3445,19 @@ function appMenu(a) {
       'Uninstalled': 'Desinstalada',
       'Could not uninstall': 'No se pudo desinstalar',
       'Switch to LG Home?': '¿Cambiar a LG Home?',
+      'Power off': 'Apagar',
+      'Power off completely?': '¿Apagar por completo?',
+      'Yes, power off': 'Sí, apagar',
+      'The next start is slower, and Wake-on-LAN will not wake the TV.':
+        'El próximo inicio será más lento y Wake-on-LAN no despertará el televisor.',
+      'Powering off...': 'Apagando...',
+      'Could not power off': 'No se pudo apagar',
+      'Add to Home': 'Añadir a Inicio',
+      'Remove from Home': 'Quitar de Inicio',
+      'Inputs on Home': 'Entradas en Inicio',
+      '%s added to Home': '%s añadido a Inicio',
+      '%s removed from Home': '%s quitado de Inicio',
+      'Could not change Home': 'No se pudo cambiar Inicio',
       'for now, without a restart': 'por ahora, sin reiniciar',
       'Switch now': 'Cambiar ahora',
       'about a minute': 'un minuto aprox.',
@@ -3384,6 +3497,72 @@ function uninstallMenu(a) {
       },
     },
   ]);
+}
+
+/* the TV off completely, unlike the remote's power key (Quick Start+ standby): asked first, Cancel focused */
+function powerOffMenu() {
+  openMenu(t('Power off completely?'), [
+    { label: t('Cancel'), fn: function () {} },
+    {
+      label: t('Yes, power off'),
+      sub: t('The next start is slower, and Wake-on-LAN will not wake the TV.'),
+      fn: function () {
+        toast(t('Powering off...'));
+        api('/api/power/off', {}).then(
+          function (x) {
+            if (x && x.error) toast(t('Could not power off'));
+          },
+          function () {}
+        );
+      },
+    },
+  ]);
+}
+
+/* an input on Home: the service keeps it and lists it with the apps (helper/apps.js) */
+function pinInput(id, name, on) {
+  api('/api/inputs/pin', { id: id, on: on }).then(
+    function (x) {
+      if (!x || x.returnValue !== true) return toast(t('Could not change Home'));
+      toast((on ? t('%s added to Home') : t('%s removed from Home')).replace('%s', name));
+      lastSig = '';
+      load();
+    },
+    function () {
+      toast(t('Could not change Home'));
+    }
+  );
+}
+function isPinned(id) {
+  return apps.some(function (a) {
+    return a.id === id && a.input;
+  });
+}
+/* Customise > Inputs on Home: every input, OK puts it on Home or takes it off */
+function pinMenu() {
+  api('/api/inputs').then(
+    function (x) {
+      var devs = gotInputs(x);
+      if (!devs.length) return toast(t('No HDMI inputs found'));
+      openMenu(
+        t('Inputs on Home'),
+        devs.map(function (d) {
+          var on = isPinned(d.appId);
+          return {
+            icon: 'hdmi',
+            label: devName(d),
+            sub: on ? '✓' : '',
+            fn: function () {
+              pinInput(d.appId, devName(d), !on);
+            },
+          };
+        })
+      );
+    },
+    function () {
+      toast(t('Could not read the inputs'));
+    }
+  );
 }
 
 /* LG's Home until the manager app's "Back to CleanYourTV" or the next restart; CleanYourTV stays the Home the TV starts with */
@@ -3438,6 +3617,7 @@ function customizeMenu() {
     },
     { label: t('Remote buttons'), stay: true, fn: RB.open },
     { label: 'LG Home', sub: t('for now, without a restart'), stay: true, fn: lgHomeMenu },
+    { label: t('Inputs on Home'), stay: true, fn: pinMenu },
     idleItem(),
     nightItem(),
     placeItem(),
@@ -3923,7 +4103,7 @@ var IPTV_RE = /iptv|smarters|stb ?emu|siptv|ott ?(navigator|player)|televizo|tiv
 function findApp(re, not) {
   var m = apps
     .filter(function (a) {
-      return a.id.charAt(0) !== '_' && a.id !== not && re.test(a.title || '');
+      return a.id.charAt(0) !== '_' && !a.input && a.id !== not && re.test(a.title || '');
     })
     .sort(function (a, b) {
       return a.title.localeCompare(b.title);
@@ -3966,6 +4146,7 @@ function saveStartingDock() {
 /* ---------- how an app looks: a name and a drawn icon chosen in the launcher (cfg.tiles), else a few automatic ones ---------- */
 function autoLook(a) {
   if (a.id === '__hdmi') return { label: hdmiLabel(), icon: 'hdmi' };
+  if (a.input) return { label: a.title, icon: 'hdmi' };
   if (a.id === 'youtube.leanback.v4') return { label: 'YouTube', icon: a.title === 'YouTube' ? '' : 'youtube' }; /* YouTube AdFree */
   if (a.id.charAt(0) !== '_' && a.id === iptvId()) return { label: 'IPTV', icon: 'iptv' };
   /* Spotify's own icon carries the wordmark: the drawn mark alone, and the plain name */
@@ -4113,10 +4294,7 @@ function setHdmiName(n) {
   hdmiPaint();
 }
 function openInput(d) {
-  try {
-    localStorage.setItem(HDMI_LAST, String(+d.port));
-  } catch (e) {}
-  hdmiPaint(); /* the card takes the name of the input chosen */
+  rememberInput(d.port); /* the card takes the name of the input chosen */
   launch(d.appId);
 }
 function gotInputs(x) {
@@ -4219,6 +4397,31 @@ function hdmiItems() {
   items.push({ label: t('Name...'), sub: hdmiName(), stay: true, fn: hdmiNameMenu });
   return items;
 }
+/* hold OK on an input: open it, or put it on Home as a tile */
+function inputMenu(d) {
+  var on = isPinned(d.appId),
+    name = devName(d);
+  openMenu(name, [
+    {
+      label: t('Open'),
+      fn: function () {
+        openInput(d);
+      },
+    },
+    {
+      label: on ? t('Remove from Home') : t('Add to Home'),
+      fn: function () {
+        pinInput(d.appId, name, !on);
+      },
+    },
+  ]);
+}
+function rememberInput(port) {
+  try {
+    localStorage.setItem(HDMI_LAST, String(+port));
+  } catch (e) {}
+  hdmiPaint();
+}
 /* the Inputs list: devices that are on first */
 function showInputs(devs, title) {
   if (!devs.length) return toast(t('No HDMI inputs found'));
@@ -4241,6 +4444,9 @@ function showInputs(devs, title) {
         dim: !d.hdmiPlugIn,
         fn: function () {
           openInput(d);
+        },
+        hold: function () {
+          inputMenu(d);
         },
       };
     })
@@ -4300,6 +4506,7 @@ function monoTile(d) {
   var box = document.createElement('div');
   box.className = 'mono';
   d.appendChild(box);
+  d._monoBox = box;
   if (monos[a.id]) return fillMono(d, box, monos[a.id]);
   var i = new Image();
   i.crossOrigin = 'anonymous';
@@ -4315,9 +4522,19 @@ function monoTile(d) {
     fillMono(d, box, m);
   };
   i.onerror = function () {
+    d._monoFailed = true;
     fillMono(d, box, { fail: 1 }); /* not remembered: the icon can come back */
   };
-  i.src = a.id === '__live' ? LIVE_ICON : API + '/icon/' + encodeURIComponent(a.id);
+  i.src = a.id === '__live' ? LIVE_ICON : API + '/icon/' + encodeURIComponent(a.id) + (d._monoTries ? '?retry=' + d._monoTries : '');
+}
+/* a white logo whose icon failed is made again, twice at most (tiles.js, retryTileIcons) */
+function retryMono(d) {
+  if (!d._monoFailed || (d._monoTries || 0) >= 2) return;
+  d._monoFailed = false;
+  d._monoTries = (d._monoTries || 0) + 1;
+  d._monoBox.remove();
+  d._mono = false;
+  monoTile(d);
 }
 function fillMono(d, box, m) {
   if (m && m.w && m.k) {
@@ -5196,15 +5413,18 @@ function load() {
       });
       var sig = JSON.stringify([
         x.apps.map(function (a) {
-          return a.id;
+          return a.input ? [a.id, a.title, a.off] : a.id;
         }),
         x.config,
         rank,
       ]);
+      retryTileIcons();
       if (sig === lastSig) return;
       lastSig = sig;
       apps = x.apps.map(function (a) {
-        return { id: a.id, title: a.title, removable: a.removable === true };
+        return a.input
+          ? { id: a.id, title: a.title, input: a.input, off: !!a.off }
+          : { id: a.id, title: a.title, removable: a.removable === true };
       });
       cfg = x.config || {};
       applyTheme(cfg.theme);
@@ -5235,7 +5455,8 @@ var lastMove = 0,
   lastKey = 0,
   lastMX = -1,
   lastMY = -1,
-  lastEnter = 0;
+  lastEnter = 0,
+  menuHold = false;
 function hit(e) {
   e.addEventListener('mousedown', function () {
     held = false;
@@ -5295,6 +5516,20 @@ document.addEventListener('keydown', function (e) {
       downEnter = true;
       lastEnter = Date.now();
       swallowUp = true;
+      /* a row with a hold action (an input) opens on release; held, it shows its options */
+      var mh = stack[stack.length - 1],
+        heldRow = mh.items[mh.idx];
+      if (heldRow && heldRow.hold) {
+        menuHold = true;
+        held = false;
+        clearTimeout(downT);
+        downT = setTimeout(function () {
+          held = true;
+          heldRow.hold();
+        }, 650);
+        e.preventDefault();
+        return;
+      }
     }
     if (menuKey(k)) e.preventDefault();
     return;
@@ -5360,6 +5595,15 @@ document.addEventListener('keyup', function (e) {
   clearTimeout(downT);
   var pr = document.querySelector('.press');
   if (pr) pr.classList.remove('press');
+  if (menuHold) {
+    var wasHeld = held;
+    menuHold = false;
+    swallowUp = false;
+    downEnter = false;
+    held = false;
+    if (!wasHeld) pickMenu();
+    return;
+  }
   if (swallowUp) {
     swallowUp = false;
     downEnter = false;

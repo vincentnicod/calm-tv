@@ -64,7 +64,26 @@ function drawMenu() {
     var it = m.items[+row.getAttribute('data-i')];
     row.querySelector('.lb').textContent = it.label;
     if (it.sub) row.querySelector('.st').textContent = it.sub;
+    var pressT = 0,
+      rowHeld = false;
+    if (it.hold) {
+      row.addEventListener('mousedown', function () {
+        rowHeld = false;
+        clearTimeout(pressT);
+        pressT = setTimeout(function () {
+          rowHeld = true;
+          it.hold();
+        }, 650);
+      });
+      row.addEventListener('mouseup', function () {
+        clearTimeout(pressT);
+      });
+    }
     row.addEventListener('click', function () {
+      if (rowHeld) {
+        rowHeld = false;
+        return;
+      }
       m.idx = +row.getAttribute('data-i');
       pickMenu();
     });
@@ -251,12 +270,20 @@ function appMenu(a) {
         looksMenu(a);
       },
     });
-  items.push({
-    label: t('Hide app'),
-    fn: function () {
-      hideApp(a.id);
-    },
-  });
+  if (a.input)
+    items.push({
+      label: t('Remove from Home'),
+      fn: function () {
+        pinInput(a.id, look(a).label, false);
+      },
+    });
+  else
+    items.push({
+      label: t('Hide app'),
+      fn: function () {
+        hideApp(a.id);
+      },
+    });
   if (a.removable === true)
     items.push({
       label: t('Uninstall...'),
@@ -279,6 +306,19 @@ function appMenu(a) {
       'Uninstalled': 'Désinstallée',
       'Could not uninstall': 'Impossible de désinstaller',
       'Switch to LG Home?': 'Passer à LG Home ?',
+      'Power off': 'Éteindre',
+      'Power off completely?': 'Éteindre complètement ?',
+      'Yes, power off': 'Oui, éteindre',
+      'The next start is slower, and Wake-on-LAN will not wake the TV.':
+        'Le prochain démarrage est plus lent, et Wake-on-LAN ne réveillera pas le téléviseur.',
+      'Powering off...': 'Extinction...',
+      'Could not power off': 'Impossible d’éteindre',
+      'Add to Home': 'Ajouter à l’accueil',
+      'Remove from Home': 'Retirer de l’accueil',
+      'Inputs on Home': 'Entrées sur l’accueil',
+      '%s added to Home': '%s ajouté à l’accueil',
+      '%s removed from Home': '%s retiré de l’accueil',
+      'Could not change Home': 'Impossible de modifier l’accueil',
       'for now, without a restart': 'pour l’instant, sans redémarrer',
       'Switch now': 'Passer maintenant',
       'about a minute': 'environ une minute',
@@ -294,6 +334,19 @@ function appMenu(a) {
       'Uninstalled': 'Deinstalliert',
       'Could not uninstall': 'Deinstallieren nicht möglich',
       'Switch to LG Home?': 'Zu LG Home wechseln?',
+      'Power off': 'Ausschalten',
+      'Power off completely?': 'Ganz ausschalten?',
+      'Yes, power off': 'Ja, ausschalten',
+      'The next start is slower, and Wake-on-LAN will not wake the TV.':
+        'Der nächste Start dauert länger, und Wake-on-LAN weckt den Fernseher nicht.',
+      'Powering off...': 'Wird ausgeschaltet...',
+      'Could not power off': 'Ausschalten nicht möglich',
+      'Add to Home': 'Zu Home hinzufügen',
+      'Remove from Home': 'Von Home entfernen',
+      'Inputs on Home': 'Eingänge auf Home',
+      '%s added to Home': '%s zu Home hinzugefügt',
+      '%s removed from Home': '%s von Home entfernt',
+      'Could not change Home': 'Home konnte nicht geändert werden',
       'for now, without a restart': 'vorübergehend, ohne Neustart',
       'Switch now': 'Jetzt wechseln',
       'about a minute': 'etwa eine Minute',
@@ -309,6 +362,18 @@ function appMenu(a) {
       'Uninstalled': 'Verwijderd',
       'Could not uninstall': 'Verwijderen mislukt',
       'Switch to LG Home?': 'Naar LG Home?',
+      'Power off': 'Uitschakelen',
+      'Power off completely?': 'Helemaal uitschakelen?',
+      'Yes, power off': 'Ja, uitschakelen',
+      'The next start is slower, and Wake-on-LAN will not wake the TV.': 'De volgende start duurt langer, en Wake-on-LAN wekt de tv niet.',
+      'Powering off...': 'Uitschakelen...',
+      'Could not power off': 'Uitschakelen mislukt',
+      'Add to Home': 'Aan Home toevoegen',
+      'Remove from Home': 'Van Home verwijderen',
+      'Inputs on Home': 'Ingangen op Home',
+      '%s added to Home': '%s is aan Home toegevoegd',
+      '%s removed from Home': '%s is van Home verwijderd',
+      'Could not change Home': 'Kan Home niet aanpassen',
       'for now, without a restart': 'tijdelijk, zonder herstart',
       'Switch now': 'Nu wisselen',
       'about a minute': 'ongeveer een minuut',
@@ -324,6 +389,19 @@ function appMenu(a) {
       'Uninstalled': 'Desinstalada',
       'Could not uninstall': 'No se pudo desinstalar',
       'Switch to LG Home?': '¿Cambiar a LG Home?',
+      'Power off': 'Apagar',
+      'Power off completely?': '¿Apagar por completo?',
+      'Yes, power off': 'Sí, apagar',
+      'The next start is slower, and Wake-on-LAN will not wake the TV.':
+        'El próximo inicio será más lento y Wake-on-LAN no despertará el televisor.',
+      'Powering off...': 'Apagando...',
+      'Could not power off': 'No se pudo apagar',
+      'Add to Home': 'Añadir a Inicio',
+      'Remove from Home': 'Quitar de Inicio',
+      'Inputs on Home': 'Entradas en Inicio',
+      '%s added to Home': '%s añadido a Inicio',
+      '%s removed from Home': '%s quitado de Inicio',
+      'Could not change Home': 'No se pudo cambiar Inicio',
       'for now, without a restart': 'por ahora, sin reiniciar',
       'Switch now': 'Cambiar ahora',
       'about a minute': 'un minuto aprox.',
@@ -363,6 +441,72 @@ function uninstallMenu(a) {
       },
     },
   ]);
+}
+
+/* the TV off completely, unlike the remote's power key (Quick Start+ standby): asked first, Cancel focused */
+function powerOffMenu() {
+  openMenu(t('Power off completely?'), [
+    { label: t('Cancel'), fn: function () {} },
+    {
+      label: t('Yes, power off'),
+      sub: t('The next start is slower, and Wake-on-LAN will not wake the TV.'),
+      fn: function () {
+        toast(t('Powering off...'));
+        api('/api/power/off', {}).then(
+          function (x) {
+            if (x && x.error) toast(t('Could not power off'));
+          },
+          function () {}
+        );
+      },
+    },
+  ]);
+}
+
+/* an input on Home: the service keeps it and lists it with the apps (helper/apps.js) */
+function pinInput(id, name, on) {
+  api('/api/inputs/pin', { id: id, on: on }).then(
+    function (x) {
+      if (!x || x.returnValue !== true) return toast(t('Could not change Home'));
+      toast((on ? t('%s added to Home') : t('%s removed from Home')).replace('%s', name));
+      lastSig = '';
+      load();
+    },
+    function () {
+      toast(t('Could not change Home'));
+    }
+  );
+}
+function isPinned(id) {
+  return apps.some(function (a) {
+    return a.id === id && a.input;
+  });
+}
+/* Customise > Inputs on Home: every input, OK puts it on Home or takes it off */
+function pinMenu() {
+  api('/api/inputs').then(
+    function (x) {
+      var devs = gotInputs(x);
+      if (!devs.length) return toast(t('No HDMI inputs found'));
+      openMenu(
+        t('Inputs on Home'),
+        devs.map(function (d) {
+          var on = isPinned(d.appId);
+          return {
+            icon: 'hdmi',
+            label: devName(d),
+            sub: on ? '✓' : '',
+            fn: function () {
+              pinInput(d.appId, devName(d), !on);
+            },
+          };
+        })
+      );
+    },
+    function () {
+      toast(t('Could not read the inputs'));
+    }
+  );
 }
 
 /* LG's Home until the manager app's "Back to CleanYourTV" or the next restart; CleanYourTV stays the Home the TV starts with */
@@ -417,6 +561,7 @@ function customizeMenu() {
     },
     { label: t('Remote buttons'), stay: true, fn: RB.open },
     { label: 'LG Home', sub: t('for now, without a restart'), stay: true, fn: lgHomeMenu },
+    { label: t('Inputs on Home'), stay: true, fn: pinMenu },
     idleItem(),
     nightItem(),
     placeItem(),

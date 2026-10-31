@@ -49,6 +49,7 @@ top (for example **Original**) show no names under the dock.
 | Customise | The **Customise** button |
 | Live TV | The **Live TV** button or tile |
 | Switch input | The **Inputs** button |
+| Put an input on Home | Hold OK on it in the Inputs list |
 | Close running apps | Back on the home screen |
 
 The Magic Remote pointer works too: pointing and clicking, and holding the button on an app for its options.
@@ -82,6 +83,19 @@ same icons.
 Hold OK on an app and choose **Uninstall...**, then **Yes, uninstall** (Cancel is first). It is LG's own uninstall, the one LG's Home
 uses, and it is offered only for apps the TV lets you remove: never LG's built-in apps, the Homebrew Channel (removing it would lose
 root) or CleanYourTV's own apps.
+
+## Inputs on Home
+
+Hold OK on an input in the **Inputs** list and choose **Add to Home**, or use **Customise** > **Inputs on Home**. The input becomes a tile
+in All apps, with the HDMI symbol and the name the TV gives it, dimmed while nothing is connected. It is a tile like an app: OK switches
+to the input, and holding OK offers **Add to dock** and **Remove from Home**. An input in the dock also shows in the Input key's picker.
+Suggested and first built by ibexes for the original CleanYourTV.
+
+## Power off
+
+**Customise** > **Top buttons** > **Add a button...** > **Power off** adds a button that switches the TV off completely, unlike the
+remote's power key, which keeps Quick Start+ standby. It asks first. The next start is a cold boot, so it takes longer, and Wake-on-LAN
+does not wake the TV.
 
 ## LG's Home for a moment
 
@@ -167,8 +181,9 @@ Steefzar for the original CleanYourTV.
 
 - the **style** (Paysage, Verre, Éditorial, Lin, Aurore, Calm, Original),
 - the **remote buttons** given to apps or to Quick settings,
+- **LG Home** and **Inputs on Home**,
 - the **idle screen**, **night mode**, the **city** and the **weather**,
-- the **top buttons** (add Inputs, Quick settings, Settings, Live TV, LG Home or any app, or remove one),
+- the **top buttons** (add Inputs, Quick settings, Settings, Live TV, LG Home, Power off or any app, or remove one),
 - **hidden apps** (show them again),
 - the **app order** (most used first, or A to Z),
 - the **clock** format (automatic, 12 or 24 hour),
@@ -210,6 +225,7 @@ Settings are stored on the TV in `/media/developer/cleanyourtv/config.json`:
 | `dock` | App ids in the dock (up to four). |
 | `topbar` | The buttons at the top. |
 | `hidden` | App ids you hid. |
+| `pinnedInputs` | The inputs on Home: `{id, label, port}`, `id` being the input's app (`com.webos.app.hdmi2`). |
 | `sort` | `usage` or `alpha`. |
 | `clock` | `auto`, `12` or `24`. |
 | `tiles` | How apps look: `{"<app id>": {"label": "IPTV", "icon": "iptv"}}`. Icons: `youtube`, `spotify`, `iptv`, `tv`, `film`, `music`, `sport`, or `""` for the app's own. |

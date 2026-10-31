@@ -124,4 +124,62 @@ run(async () => {
     !r.j.apps.some(a => a.id === 'netflix' || a.id === 'youtube.leanback.v4'),
     'an uninstalled app leaves the list at once, before the app manager catches up'
   );
+
+  // Power off: LG's full power-off, on POST only; a TV going down may never answer, a refusal is passed on
+  const power = [];
+  let powerReply = { returnValue: false, errorText: 'bad json' };
+  const a4 = req('apps').create({
+    config: memoryConfig({}),
+    luna: async (uri, p) => (power.push(uri.split('/').pop() + ' ' + p.reason), powerReply),
+    version: '1.9.0',
+    feature: () => null,
+  });
+  r = await call(a4, '/api/power/off', 'GET');
+  ok(power.length === 0, 'a GET does not power the TV off');
+  r = await call(a4, '/api/power/off', 'POST');
+  ok(r.j.returnValue === true && power.join() === 'shutDown remoteKey', 'Power off asks for the full shut-down; no answer is not an error');
+  powerReply = { returnValue: false, errorCode: -1, errorText: 'denied' };
+  r = await call(a4, '/api/power/off', 'POST');
+  ok(r.code === 502 && r.j.error === 'denied', 'a refusal of the TV is passed on');
+
+  // inputs on Home: kept by the service, listed with the apps under the input app's id, with what the TV reports now
+  let inputAsks = 0;
+  const luna5 = async uri => {
+    if (/listApps/.test(uri)) return { returnValue: true, apps: [{ id: 'a.one', title: 'One', folderPath: '/x', icon: 'i.png' }] };
+    if (/getAllInputStatus/.test(uri)) {
+      inputAsks++;
+      return {
+        returnValue: true,
+        devices: [
+          { appId: 'com.webos.app.hdmi1', port: 1, label: 'UPC', hdmiPlugIn: true },
+          { appId: 'com.webos.app.hdmi3', port: 3, label: 'HDMI 3', hdmiPlugIn: false },
+        ],
+      };
+    }
+    return { returnValue: true };
+  };
+  const conf5 = memoryConfig({ dock: ['a.one'] }),
+    a5 = req('apps').create({ config: conf5, luna: luna5, version: '1.9.0', feature: () => null });
+  await call(a5, '/api/apps');
+  ok(inputAsks === 0, 'nothing is asked of the inputs while none is on Home');
+  r = await call(a5, '/api/inputs/pin', 'POST', { id: 'com.webos.app.hdmi9', on: true });
+  ok(r.code === 404 && !conf5.get().pinnedInputs, 'an input the TV does not have is not added');
+  await call(a5, '/api/inputs/pin', 'POST', { id: 'com.webos.app.hdmi1', on: true });
+  r = await call(a5, '/api/inputs/pin', 'POST', { id: 'com.webos.app.hdmi3', on: true });
+  r = await call(a5, '/api/apps');
+  const pins = r.j.apps.filter(a => a.input);
+  ok(
+    r.j.apps.length === 3 && pins[0].title === 'UPC' && pins[0].input === 1 && pins[0].off === false && pins[1].off === true,
+    "inputs on Home are listed with the apps: the TV's name, the port and whether something is connected"
+  );
+  ok((await a5.apps()).length === 1, 'the running-apps list still sees installed apps only');
+  r = await call(a5, '/api/uninstall', 'POST', { id: 'com.webos.app.hdmi1' });
+  ok(r.code === 403, 'an input cannot be uninstalled');
+  await call(a5, '/api/config', 'POST', { dock: ['a.one', 'com.webos.app.hdmi1'], sort: 'alpha' });
+  ok(conf5.get().pinnedInputs.length === 2, "saving the launcher's settings keeps the inputs on Home");
+  r = await call(a5, '/api/inputs/pin', 'POST', { id: 'com.webos.app.hdmi1', on: false });
+  ok(
+    r.j.pinned === false && conf5.get().pinnedInputs.length === 1 && conf5.get().dock.join() === 'a.one',
+    'an input taken off Home leaves the dock too'
+  );
 });

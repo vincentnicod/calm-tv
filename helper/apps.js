@@ -1,7 +1,9 @@
 // The launcher's own API: the list of apps with their icons, how often each is used, the inputs, launching, and the launcher's
 // settings (dock, hidden apps, sort order, clock, top buttons), and uninstalling an app.
 //   GET /api/apps  GET /api/inputs  GET /api/foreground  POST /api/launch {id, params}  POST /api/config {...}  GET /icon/<app id>
-//   POST /api/uninstall {id}
+//   POST /api/uninstall {id}  POST /api/power/off  POST /api/inputs/pin {id, on}
+// An input pinned to Home is listed with the apps ({id: its input app, title, input: <port>, off: <nothing connected>}); config.json keeps
+// them in pinnedInputs, apart from the launcher's own keys. The idea and first version are ibexes' (cleanyourtv-WebOS, pull request 25).
 const fs = require('fs'),
   path = require('path');
 const P = require('./paths'),
@@ -49,10 +51,64 @@ function create(ctx) {
       });
     return asking;
   }
-  async function apps() {
+  async function installed() {
     if (!appCache) return askApps();
     if (Date.now() - appCacheAt > 5000) askApps();
     return appCache;
+  }
+
+  // ---- the inputs, read like the apps: the last answer at once, asked again in the background when older than 5 seconds ----
+  let inputCache = null,
+    inputCacheAt = 0,
+    askingInputs = null;
+  function askInputs() {
+    if (!askingInputs)
+      askingInputs = luna('luna://com.webos.service.eim/getAllInputStatus', {}).then(r => {
+        askingInputs = null;
+        if (Array.isArray(r.devices)) {
+          inputCache = r.devices;
+          inputCacheAt = Date.now();
+        }
+        return r;
+      });
+    return askingInputs;
+  }
+  function knownInputs() {
+    if (!inputCache || Date.now() - inputCacheAt > 5000) askInputs();
+    return inputCache || [];
+  }
+  // the inputs on Home, with the name and state the TV reports now, else what was saved when pinned. Nothing is asked when there are none
+  function pinned() {
+    const list = (config.get().pinnedInputs || []).filter(p => p && typeof p.id === 'string');
+    if (!list.length) return [];
+    const now = {};
+    for (const d of knownInputs()) if (d.appId) now[d.appId] = d;
+    return list.map(p => {
+      const d = now[p.id];
+      return {
+        id: p.id,
+        title: (d && d.label) || p.label || 'HDMI ' + p.port,
+        input: (d && d.port) || p.port || 0,
+        off: d ? !d.hdmiPlugIn : false,
+      };
+    });
+  }
+  async function apps() {
+    return (await installed()).concat(pinned());
+  }
+  async function pin(b) {
+    const id = String(b.id || ''),
+      on = b.on !== false,
+      r = await askInputs(),
+      d = (r.devices || inputCache || []).find(x => x.appId === id);
+    if (on && !d) return [{ error: 'not an input of this TV' }, 404];
+    config.update('launcher', c => {
+      const list = (c.pinnedInputs || []).filter(p => p && p.id !== id);
+      if (on) list.push({ id, label: d.label || '', port: d.port });
+      c.pinnedInputs = list.slice(0, 20);
+      if (!on && Array.isArray(c.dock)) c.dock = c.dock.filter(i => i !== id);
+    });
+    return [{ returnValue: true, pinned: on }, 200];
   }
 
   // ---- usage: which apps get used (foreground changes), with a 30-day half-life ----
@@ -191,7 +247,14 @@ function create(ctx) {
   async function handle(req, res, u, body) {
     if (u === '/api/apps')
       return web.json(res, { apps: await apps(), config: launcherConfig(), usage: usageScores(), version: ctx.version });
-    if (u === '/api/inputs') return web.json(res, await luna('luna://com.webos.service.eim/getAllInputStatus', {}));
+    if (u === '/api/inputs') return web.json(res, await askInputs());
+    if (u === '/api/inputs/pin' && req.method === 'POST') return web.json(res, ...(await pin(await body(req))));
+    // the TV off completely (a cold start next time, no Wake-on-LAN), not the remote's standby. A TV going down may never answer
+    if (u === '/api/power/off' && req.method === 'POST') {
+      const r = await luna('luna://com.webos.service.tvpower/power/shutDown', { reason: 'remoteKey' });
+      if (r.returnValue === false && r.errorCode !== undefined) return web.json(res, { error: r.errorText || 'refused by the TV' }, 502);
+      return web.json(res, { returnValue: true });
+    }
     if (u === '/api/foreground') return web.json(res, await luna('luna://com.webos.applicationManager/getForegroundAppInfo', {}));
     if (u === '/api/launch' && req.method === 'POST') {
       const b = await body(req);
@@ -216,11 +279,20 @@ function create(ctx) {
 
   return {
     name: 'apps',
-    paths: ['/api/apps', '/api/inputs', '/api/foreground', '/api/launch', '/api/config', '/api/uninstall'],
+    paths: [
+      '/api/apps',
+      '/api/inputs',
+      '/api/inputs/pin',
+      '/api/foreground',
+      '/api/launch',
+      '/api/config',
+      '/api/uninstall',
+      '/api/power/off',
+    ],
     prefix: '/icon/',
     handle,
     start: () => setInterval(pollForeground, 4000),
-    apps,
+    apps: installed,
   };
 }
 

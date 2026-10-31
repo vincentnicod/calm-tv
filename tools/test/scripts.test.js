@@ -17,7 +17,7 @@ run(async () => {
   // the boot watchdog falls back to LG's Home after 6 missed checks: it must ask something the service answers without luna, or a
   // busy app manager (slower than curl's 3 s) would look like a dead service
   {
-    const home = fs.readFileSync(path.join(root, 'scripts', '10-cleanyourtv-home'), 'utf8');
+    const home = fs.readFileSync(path.join(root, 'scripts', 'watchdog.sh'), 'utf8');
     const probe = (/curl [^\n]*http:\/\/127\.0\.0\.1:8765(\/api\/[\w-]+)/.exec(home) || [])[1];
     const answer = (/\n\s*if \(u === '\/api\/version'\)([^\n]*)/.exec(fs.readFileSync(path.join(root, 'helper', 'helper.js'), 'utf8')) ||
       [])[1];
@@ -25,6 +25,58 @@ run(async () => {
       probe === '/api/version' && !!answer && !/luna/.test(answer),
       "the boot watchdog checks /api/version, which the service answers without asking the TV's app manager"
     );
+  }
+  // the debloat's undo unmounts /etc/hosts only while our RAM copy is on top: a table mounted over it later is another tool's
+  {
+    const undo = fs.readFileSync(path.join(root, 'scripts', 'debloat-undo.sh'), 'utf8');
+    ok(
+      /\[ -e \/tmp\/cleanyourtv-hosts\.mounted \] && \[ \/etc\/hosts -ef \/tmp\/cleanyourtv-hosts \]; then umount \/etc\/hosts/.test(undo),
+      "the debloat's undo leaves a hosts table mounted over ours alone"
+    );
+  }
+  // watchdog.sh with stand-ins for the TV's programs: curl answers or not, the service runs or not, a file says whether our Home is mounted
+  {
+    const w = path.join(tmp, 'wd'),
+      fb = path.join(w, 'bin'),
+      L = path.join(w, 'cytv'),
+      slog = path.join(w, 'svc.log'),
+      calls = path.join(w, 'calls'),
+      mounts = path.join(w, 'mounts');
+    cp.spawnSync('mkdir', ['-p', fb, L]);
+    const tool = (n, s) => fs.writeFileSync(path.join(fb, n), '#!/bin/sh\n' + s + '\n', { mode: 0o755 });
+    tool('curl', '[ -f ' + w + '/answers ]');
+    tool('pgrep', 'case "$2" in *ootstrap*) [ -f ' + w + '/updating ];; *) [ -f ' + w + '/alive ];; esac');
+    tool('node', 'echo start >> ' + calls);
+    // each check is one sleep: the run ends after 12 of them
+    tool(
+      'sleep',
+      'n=$(cat ' + w + '/n 2>/dev/null); n=$((n+1)); echo $n > ' + w + '/n; [ $n -ge 12 ] && rm -f ' + L + '/helper.js; exit 0'
+    );
+    fs.writeFileSync(path.join(L, 'undo-home.sh'), 'echo undo "$1" >> ' + calls + '\n');
+    const watch = opts => {
+      for (const f of ['answers', 'alive', 'updating', 'n', 'calls', 'svc.crash.log']) cp.spawnSync('rm', ['-f', path.join(w, f)]);
+      for (const f of opts.files || []) fs.writeFileSync(path.join(w, f), '');
+      fs.writeFileSync(path.join(L, 'helper.js'), '');
+      fs.writeFileSync(slog, 'the last words\n');
+      fs.writeFileSync(mounts, opts.mounted ? 'x /usr/palm/applications/com.webos.app.home ext4 rw 0 0\n' : '');
+      const env = { CYTV_BIN: fb, CYTV_DIR: L, CYTV_BOOT_LOG: path.join(w, 'boot.log'), CYTV_SERVICE_LOG: slog, CYTV_MOUNTS: mounts };
+      cp.spawnSync('sh', [path.join(root, 'scripts', 'watchdog.sh')], { env: Object.assign({}, process.env, env) });
+      for (let i = 0; i < 40 && opts.settle && !fs.existsSync(calls); i++) cp.spawnSync('/bin/sleep', ['0.05']);
+      cp.spawnSync('/bin/sleep', ['0.2']);
+      return fs.existsSync(calls) ? fs.readFileSync(calls, 'utf8').trim().split('\n') : [];
+    };
+    ok(watch({ files: ['answers'], mounted: true }).length === 0, 'watchdog: a service that answers is left alone');
+    let c = watch({ mounted: true, settle: true });
+    ok(
+      c.filter(x => x === 'undo temp').length === 1 && c.filter(x => x === 'start').length >= 3 && c.filter(x => x === 'start').length < 12,
+      "watchdog: a dead service is started again, less and less often, and LG's Home comes back once: " + c.join()
+    );
+    ok(/the last words/.test(fs.readFileSync(path.join(w, 'svc.crash.log'), 'utf8')), 'watchdog: the log of the run that ended is kept');
+    c = watch({ mounted: false, settle: true });
+    ok(c.indexOf('start') >= 0 && c.indexOf('undo temp') < 0, "watchdog: while LG's Home shows, the service is still started again");
+    c = watch({ files: ['alive'], mounted: true, settle: true });
+    ok(c.indexOf('start') < 0 && c.indexOf('undo temp') >= 0, "watchdog: a running service that hangs for a minute brings LG's Home back");
+    ok(watch({ files: ['updating'], mounted: true }).length === 0, 'watchdog: nothing is done while bootstrap.sh is at work');
   }
   // going to LG's Home (seen on an LG C4, webOS 25): the web engine is not restarted with sam and keeps our page; a killed page process is
   // reopened by the engine from the unmounted folder ("file not found", -6), and sam reopens Home whenever it is closed. So the page is

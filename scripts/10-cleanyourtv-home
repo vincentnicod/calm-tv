@@ -5,6 +5,7 @@ export PATH=/usr/bin:/usr/sbin:/bin:/sbin:$PATH
 L=/media/developer/cleanyourtv
 H=/usr/palm/applications/com.webos.app.home
 pgrep -f cleanyourtv/helper.js >/dev/null || (nohup node $L/helper.js >/tmp/cleanyourtv-helper.log 2>&1 </dev/null &)
+pgrep -f "[c]leanyourtv/watchdog.sh" >/dev/null || (sh $L/watchdog.sh </dev/null >/dev/null 2>&1 &)
 [ -e $L/DISABLE ] && exit 0   # LG's Home is selected: only the service runs (manager, Input key picker)
 sh $L/stage-home.sh
 if grep -q " $H " /proc/mounts; then
@@ -25,16 +26,4 @@ mount --bind $L/home-overlay $H && { (sleep 3; pkill -9 -f /usr/palm/application
       pkill -f "[a]pp-id=com.webos.app.home"; sleep 2
       luna-send -n 1 -w 10000 -f luna://com.webos.applicationManager/launch '{"id":"com.webos.app.home"}' </dev/null ;;
   esac
-) </dev/null >/dev/null 2>&1 &
-# Watchdog: if the helper stays unreachable for 60 s, fall back to stock Home until next reboot.
-(
-  bad=0
-  while grep -q " $H " /proc/mounts; do
-    sleep 10
-    # /api/version is answered by the service alone: a busy app manager (luna) must not look like a dead service
-    if curl -s -m 3 -o /dev/null http://127.0.0.1:8765/api/version; then bad=0; else
-      pgrep -f cleanyourtv/helper.js >/dev/null || (nohup node $L/helper.js >/tmp/cleanyourtv-helper.log 2>&1 </dev/null &)
-      bad=$((bad+1)); [ $bad -ge 6 ] && { sh $L/undo-home.sh temp; break; }
-    fi
-  done
 ) </dev/null >/dev/null 2>&1 &

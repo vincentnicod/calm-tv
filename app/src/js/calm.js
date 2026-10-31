@@ -373,7 +373,7 @@ var IPTV_RE = /iptv|smarters|stb ?emu|siptv|ott ?(navigator|player)|televizo|tiv
 function findApp(re, not) {
   var m = apps
     .filter(function (a) {
-      return a.id.charAt(0) !== '_' && a.id !== not && re.test(a.title || '');
+      return a.id.charAt(0) !== '_' && !a.input && a.id !== not && re.test(a.title || '');
     })
     .sort(function (a, b) {
       return a.title.localeCompare(b.title);
@@ -416,6 +416,7 @@ function saveStartingDock() {
 /* ---------- how an app looks: a name and a drawn icon chosen in the launcher (cfg.tiles), else a few automatic ones ---------- */
 function autoLook(a) {
   if (a.id === '__hdmi') return { label: hdmiLabel(), icon: 'hdmi' };
+  if (a.input) return { label: a.title, icon: 'hdmi' };
   if (a.id === 'youtube.leanback.v4') return { label: 'YouTube', icon: a.title === 'YouTube' ? '' : 'youtube' }; /* YouTube AdFree */
   if (a.id.charAt(0) !== '_' && a.id === iptvId()) return { label: 'IPTV', icon: 'iptv' };
   /* Spotify's own icon carries the wordmark: the drawn mark alone, and the plain name */
@@ -563,10 +564,7 @@ function setHdmiName(n) {
   hdmiPaint();
 }
 function openInput(d) {
-  try {
-    localStorage.setItem(HDMI_LAST, String(+d.port));
-  } catch (e) {}
-  hdmiPaint(); /* the card takes the name of the input chosen */
+  rememberInput(d.port); /* the card takes the name of the input chosen */
   launch(d.appId);
 }
 function gotInputs(x) {
@@ -669,6 +667,31 @@ function hdmiItems() {
   items.push({ label: t('Name...'), sub: hdmiName(), stay: true, fn: hdmiNameMenu });
   return items;
 }
+/* hold OK on an input: open it, or put it on Home as a tile */
+function inputMenu(d) {
+  var on = isPinned(d.appId),
+    name = devName(d);
+  openMenu(name, [
+    {
+      label: t('Open'),
+      fn: function () {
+        openInput(d);
+      },
+    },
+    {
+      label: on ? t('Remove from Home') : t('Add to Home'),
+      fn: function () {
+        pinInput(d.appId, name, !on);
+      },
+    },
+  ]);
+}
+function rememberInput(port) {
+  try {
+    localStorage.setItem(HDMI_LAST, String(+port));
+  } catch (e) {}
+  hdmiPaint();
+}
 /* the Inputs list: devices that are on first */
 function showInputs(devs, title) {
   if (!devs.length) return toast(t('No HDMI inputs found'));
@@ -691,6 +714,9 @@ function showInputs(devs, title) {
         dim: !d.hdmiPlugIn,
         fn: function () {
           openInput(d);
+        },
+        hold: function () {
+          inputMenu(d);
         },
       };
     })
@@ -750,6 +776,7 @@ function monoTile(d) {
   var box = document.createElement('div');
   box.className = 'mono';
   d.appendChild(box);
+  d._monoBox = box;
   if (monos[a.id]) return fillMono(d, box, monos[a.id]);
   var i = new Image();
   i.crossOrigin = 'anonymous';
@@ -765,9 +792,19 @@ function monoTile(d) {
     fillMono(d, box, m);
   };
   i.onerror = function () {
+    d._monoFailed = true;
     fillMono(d, box, { fail: 1 }); /* not remembered: the icon can come back */
   };
-  i.src = a.id === '__live' ? LIVE_ICON : API + '/icon/' + encodeURIComponent(a.id);
+  i.src = a.id === '__live' ? LIVE_ICON : API + '/icon/' + encodeURIComponent(a.id) + (d._monoTries ? '?retry=' + d._monoTries : '');
+}
+/* a white logo whose icon failed is made again, twice at most (tiles.js, retryTileIcons) */
+function retryMono(d) {
+  if (!d._monoFailed || (d._monoTries || 0) >= 2) return;
+  d._monoFailed = false;
+  d._monoTries = (d._monoTries || 0) + 1;
+  d._monoBox.remove();
+  d._mono = false;
+  monoTile(d);
 }
 function fillMono(d, box, m) {
   if (m && m.w && m.k) {

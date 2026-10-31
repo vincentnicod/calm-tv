@@ -436,7 +436,9 @@ function barLabel(o) {
           ? t('Live TV')
           : o.action === 'quick'
             ? t('Quick settings')
-            : o.label || '';
+            : o.action === 'poweroff'
+              ? t('Power off')
+              : o.label || '';
 }
 function clockOpts() {
   var c = cfg.clock,
