@@ -34,6 +34,17 @@ run(async () => {
       "the debloat's undo leaves a hosts table mounted over ours alone"
     );
   }
+  // admanager runs: Disney+ and HBO Max wait for it at start. An earlier stub is lifted by the next run, and the undo still removes it
+  {
+    const stop = fs.readFileSync(path.join(root, 'scripts', 'debloat-stop.sh'), 'utf8'),
+      undo = fs.readFileSync(path.join(root, 'scripts', 'debloat-undo.sh'), 'utf8');
+    ok(
+      /for b in acr2 sportsalarm adoverlay-service; do/.test(stop) &&
+        /admanager\$\/ \{print \$2\}/.test(stop) &&
+        /for b in acr2 admanager/.test(undo),
+      'the debloat leaves admanager running and lifts a stub left by an earlier version'
+    );
+  }
   // watchdog.sh with stand-ins for the TV's programs: curl answers or not, the service runs or not, a file says whether our Home is mounted
   {
     const w = path.join(tmp, 'wd'),

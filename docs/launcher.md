@@ -81,7 +81,8 @@ same icons.
 ## Uninstalling an app
 
 Hold OK on an app and choose **Uninstall...**, then **Yes, uninstall** (Cancel is first). It is LG's own uninstall, the one LG's Home
-uses, and it is offered only for apps the TV lets you remove: never LG's built-in apps, the Homebrew Channel (removing it would lose
+uses, and it is offered only for apps the TV lets you remove: never LG's built-in apps, `safeupdate` and `appupdateblocker` (they keep
+firmware updates away, and an update can remove root), the Homebrew Channel (removing it would lose
 root) or CleanYourTV's own apps.
 
 ## Inputs on Home

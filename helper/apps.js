@@ -16,8 +16,9 @@ const HALF_LIFE = 30 * 24 * 3600 * 1000; // usage counts halve every 30 days
 const GLYPHS = ['', 'youtube', 'iptv', 'spotify', 'tv', 'hdmi', 'film', 'music', 'sport'];
 const APP_ID = /^[\w.\-]{1,120}$/;
 const HOME = 'com.webos.app.home';
-// never offered for uninstalling even when the TV allows it: removing the Homebrew Channel loses root, ours removes the launcher
-const KEEP = /^(com\.webos\.app\.home|org\.webosbrew\.hbchannel|com\.cleanyourtv\..*)$/;
+// never offered for uninstalling even when the TV allows it: the Homebrew Channel keeps root and runs the boot scripts, safeupdate and
+// appupdateblocker keep LG's firmware updates away (an update can remove root), and ours would remove the launcher
+const KEEP = /^(com\.webos\.app\.home|org\.webosbrew\.(hbchannel|safeupdate|appupdateblocker)|com\.cleanyourtv\..*)$/;
 // apps installed in developer mode (Homebrew Channel, ares) are removed through appInstallService's dev/ methods
 const DEV_DIR = '/media/developer/apps/';
 const isDev = a => String(a.folder || '').indexOf(DEV_DIR) === 0;

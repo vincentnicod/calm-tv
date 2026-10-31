@@ -302,6 +302,7 @@ function appMenu(a) {
       'Uninstall...': 'Désinstaller...',
       'Uninstall this app?': 'Désinstaller cette app ?',
       'Yes, uninstall': 'Oui, désinstaller',
+      'Its privacy blocks stop working': 'Ses blocages de confidentialité s’arrêtent',
       'Uninstalling...': 'Désinstallation...',
       'Uninstalled': 'Désinstallée',
       'Could not uninstall': 'Impossible de désinstaller',
@@ -330,6 +331,7 @@ function appMenu(a) {
       'Uninstall...': 'Deinstallieren...',
       'Uninstall this app?': 'Diese App deinstallieren?',
       'Yes, uninstall': 'Ja, deinstallieren',
+      'Its privacy blocks stop working': 'Seine Datenschutz-Sperren enden',
       'Uninstalling...': 'Wird deinstalliert...',
       'Uninstalled': 'Deinstalliert',
       'Could not uninstall': 'Deinstallieren nicht möglich',
@@ -358,6 +360,7 @@ function appMenu(a) {
       'Uninstall...': 'Verwijderen...',
       'Uninstall this app?': 'Deze app verwijderen?',
       'Yes, uninstall': 'Ja, verwijderen',
+      'Its privacy blocks stop working': 'De privacyblokkades stoppen',
       'Uninstalling...': 'Bezig met verwijderen...',
       'Uninstalled': 'Verwijderd',
       'Could not uninstall': 'Verwijderen mislukt',
@@ -385,6 +388,7 @@ function appMenu(a) {
       'Uninstall...': 'Desinstalar...',
       'Uninstall this app?': '¿Desinstalar esta app?',
       'Yes, uninstall': 'Sí, desinstalar',
+      'Its privacy blocks stop working': 'Sus bloqueos de privacidad dejan de funcionar',
       'Uninstalling...': 'Desinstalando...',
       'Uninstalled': 'Desinstalada',
       'Could not uninstall': 'No se pudo desinstalar',
@@ -416,12 +420,13 @@ function appMenu(a) {
   }
 })();
 function uninstallMenu(a) {
-  var name = look(a).label;
+  var name = look(a).label,
+    privacy = a.id === 'ooo.lew.lifesgoodwithoutspying';
   openMenu(t('Uninstall this app?'), [
     { label: t('Cancel'), fn: function () {} },
     {
       label: t('Yes, uninstall'),
-      sub: name,
+      sub: privacy ? t('Its privacy blocks stop working') : name,
       fn: function () {
         toast(t('Uninstalling...') + ' ' + name);
         api('/api/uninstall', { id: a.id }).then(

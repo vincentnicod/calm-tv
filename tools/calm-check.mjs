@@ -656,6 +656,15 @@ try {
   await js('closeMenus(); 0');
   S.config = {};
 
+  // ---- a warning before uninstalling the privacy blocks ----
+  await js("uninstallMenu({ id: 'ooo.lew.lifesgoodwithoutspying', title: 'lifesgoodwithoutspying' }); 0");
+  await key(DOWN);
+  ok(
+    (await js('stack[stack.length - 1].items[1].sub')) === 'Its privacy blocks stop working',
+    'uninstalling lifesgoodwithoutspying warns first'
+  );
+  await js('closeMenus(); 0');
+
   // ---- Power off: a top button to add, asked first ----
   await fresh();
   ok(

@@ -13,7 +13,7 @@ you can call it from a shell on the TV (for example over SSH).
 | `POST /api/launch` `{id, params}` | Launch an app |
 | `POST /api/power/off` | Switch the TV off completely (a cold start next time, no Wake-on-LAN), unlike the remote's standby |
 | `POST /api/inputs/pin` `{id, on}` | Put an input on Home (`id`: its input app) or take it off; it is listed in `/api/apps` with `input` and `off` |
-| `POST /api/uninstall` `{id}` | Uninstall an app with LG's own uninstall; only apps the TV marks removable, never the Homebrew Channel or CleanYourTV's own apps |
+| `POST /api/uninstall` `{id}` | Uninstall an app with LG's own uninstall; only apps the TV marks removable, never the Homebrew Channel, `safeupdate`, `appupdateblocker` or CleanYourTV's own apps |
 | `POST /api/lg-home`, `POST /api/manager/back-home` | LG's Home for now, without a restart (the launcher's **LG Home** button), and back to ours (the manager's **Back to CleanYourTV**) |
 | `GET /api/inputs` | HDMI inputs and their state |
 | `GET /api/quick`, `POST /api/quick` `{picture\|sound\|sleep: value}`, `{sleep: "more"}`, `{screen: "off"}`, `{open: "quick"}` | Quick settings: LG's picture mode, sound mode and sleep timer with the values the TV offers (and when a timer set here ends); setting one, 20 more minutes, screen off, and showing the panel over the screen ([Launcher](launcher.md#quick-settings)) |

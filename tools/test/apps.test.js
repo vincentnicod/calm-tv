@@ -82,6 +82,8 @@ run(async () => {
           { id: 'old.firmware', title: 'Old', folderPath: '/media/cryptofs/apps/o' },
           { id: 'org.webosbrew.hbchannel', title: 'Homebrew Channel', folderPath: '/media/developer/apps/h', removable: true },
           { id: 'com.cleanyourtv.manager', title: 'CleanYourTV', folderPath: '/media/developer/apps/c', removable: true },
+          { id: 'org.webosbrew.safeupdate', title: 'Safe Update', folderPath: '/media/developer/apps/s', removable: true },
+          { id: 'org.webosbrew.appupdateblocker', title: 'Blocker', folderPath: '/media/developer/apps/b', removable: true },
         ],
       };
     if (/appInstallService/.test(uri)) {
@@ -100,8 +102,10 @@ run(async () => {
       rm['com.webos.app.browser'] === false &&
       rm['old.firmware'] === false &&
       rm['org.webosbrew.hbchannel'] === false &&
-      rm['com.cleanyourtv.manager'] === false,
-    'the app list says which apps can be uninstalled: not system apps, the Homebrew Channel or ours'
+      rm['com.cleanyourtv.manager'] === false &&
+      rm['org.webosbrew.safeupdate'] === false &&
+      rm['org.webosbrew.appupdateblocker'] === false,
+    'the app list says which apps can be uninstalled: not system apps, the Homebrew Channel, the update blockers or ours'
   );
   const codes = [];
   for (const id of ['com.webos.app.browser', 'org.webosbrew.hbchannel', 'com.cleanyourtv.manager', 'not.there', 'bad id'])
