@@ -991,6 +991,7 @@ var LIVE = (function () {
   var guideNext = false;
   o.enter = function (guide) {
     o.on = true;
+    weatherShown();
     guideNext = !!guide;
     $('lv').classList.add('on');
     if (loaded && byNum[cur]) {
@@ -1012,6 +1013,7 @@ var LIVE = (function () {
   };
   o.exit = function () {
     o.on = false;
+    weatherShown();
     closeList();
     M.open = false;
     layer('lv-menu', false);

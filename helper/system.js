@@ -16,6 +16,9 @@ const read = f => {
     return '';
   }
 };
+// the per-process files are read without blocking, a few processes at a time, so the service keeps answering meanwhile
+const readAsync = f => new Promise(res => fs.readFile(f, 'utf8', (e, t) => res(e ? '' : t)));
+const BATCH = 24;
 
 // /proc/meminfo in kB
 function meminfo(text) {
@@ -40,31 +43,47 @@ function procName(comm, cmdline) {
   const argv0 = cmdline.split(' ')[0],
     app = /app-id=([\w.\-]+)/.exec(cmdline) || /flutter-client -i ([\w.\-]+)/.exec(cmdline) || /\/applications\/([\w.\-]+)\//.exec(argv0);
   if (app) return { app: app[1] };
-  if (comm === 'node' && /cleanyourtv\/helper\.js/.test(cmdline)) return { name: 'Calm TV service' };
-  return { name: argv0.indexOf('/') >= 0 ? argv0.slice(argv0.lastIndexOf('/') + 1) || comm : comm };
+  if (/cleanyourtv\/helper\.js/.test(cmdline)) return { name: 'Calm TV service' };
+  const prog = argv0.indexOf('/') >= 0 ? argv0.slice(argv0.lastIndexOf('/') + 1) || comm : argv0 || comm;
+  // a Node program by its script (several Homebrew services are written in Node)
+  const js = prog === 'node' && /\S*\.js\b/.exec(cmdline.slice(argv0.length));
+  if (js) return { name: js[0].slice(js[0].lastIndexOf('/') + 1).replace(/\.js$/, '') + ' (node)' };
+  return { name: prog };
 }
-// every process: its name, memory (kB) and processor ticks so far
-function processes(proc) {
-  const out = [];
+// every process: its name, memory (kB) and processor ticks so far. A name is read once per process and kept while the process lives
+// (names: pid -> {start, name}; the start time tells a reused pid apart)
+async function processes(proc, names) {
+  const out = [],
+    seen = {};
   let pids = [];
   try {
     pids = fs.readdirSync(proc).filter(d => /^\d+$/.test(d));
   } catch (_) {}
-  for (const pid of pids) {
-    const stat = read(proc + '/' + pid + '/stat');
-    if (!stat) continue;
+  const one = async pid => {
+    const files = await Promise.all([readAsync(proc + '/' + pid + '/stat'), readAsync(proc + '/' + pid + '/statm')]),
+      stat = files[0];
+    if (!stat) return;
     const comm = stat.slice(stat.indexOf('(') + 1, stat.lastIndexOf(')')),
       rest = stat.slice(stat.lastIndexOf(')') + 2).split(' '),
       ticks = (+rest[11] || 0) + (+rest[12] || 0),
-      kb = +(read(proc + '/' + pid + '/statm').split(' ')[1] || 0) * PAGE_KB;
-    if (!kb) continue; // kernel threads
-    const cmdline = read(proc + '/' + pid + '/cmdline').replace(/\0/g, ' ');
-    out.push(Object.assign({ pid, kb, ticks }, procName(comm, cmdline)));
-  }
+      start = rest[19] || '',
+      kb = +(files[1].split(' ')[1] || 0) * PAGE_KB;
+    if (!kb) return; // kernel threads
+    seen[pid] = true;
+    let n = names[pid];
+    if (!n || n.start !== start) {
+      const cmdline = (await readAsync(proc + '/' + pid + '/cmdline')).replace(/\0/g, ' ').trim();
+      n = names[pid] = { start, name: procName(comm, cmdline) };
+    }
+    out.push(Object.assign({ pid, kb, ticks }, n.name));
+  };
+  for (let i = 0; i < pids.length; i += BATCH) await Promise.all(pids.slice(i, i + BATCH).map(one));
+  for (const pid of Object.keys(names)) if (!seen[pid]) delete names[pid];
   return out;
 }
-function reading(proc) {
-  return { at: Date.now(), cpu: cpuTimes(read(proc + '/stat')), procs: processes(proc) };
+async function reading(proc, names) {
+  const cpu = cpuTimes(read(proc + '/stat'));
+  return { at: Date.now(), cpu, procs: await processes(proc, names) };
 }
 // the shares between two readings
 function summary(proc, before, now) {
@@ -110,14 +129,15 @@ function group(procs, titles) {
 
 function create(ctx) {
   let last = null;
+  const names = {};
   async function system() {
     const proc = P.PROC;
     let before = last;
     if (!before || Date.now() - before.at > 10000) {
-      before = reading(proc);
+      before = await reading(proc, names);
       await new Promise(r => setTimeout(r, 400));
     }
-    const now = reading(proc);
+    const now = await reading(proc, names);
     last = now;
     const s = summary(proc, before, now);
     // an app's own name where the launcher knows it

@@ -67,4 +67,19 @@ run(async () => {
   ok(sm.procName('flutter-client', 'flutter-client -i com.webos.app.home').app === 'com.webos.app.home', 'a Flutter app by its id');
   ok(sm.procName('LunaExecutable', '/usr/palm/applications/airplay/LunaExecutable {}').app === 'airplay', 'a native app by its folder');
   ok(sm.cpuTimes('').total === 0 && sm.cpuTimes('').cores === 1, 'an unreadable /proc/stat gives no share rather than an error');
+  ok(
+    sm.procName('node', '/usr/bin/node /media/developer/apps/x/init/nospy-dns-filter.js --port 53').name === 'nospy-dns-filter (node)' &&
+      sm.procName('node', 'node /media/developer/cleanyourtv/helper.js').name === 'Calm TV service',
+    'another Node program by its script, the service by its name'
+  );
+  // a process that ends between two readings leaves the list, and a new one is named
+  fs.writeFileSync(path.join(proc, '211', 'stat'), '');
+  write('400/stat', pstat(400, 'node', 1, 1));
+  write('400/statm', '100 5000 0 0 0 0 0\n');
+  write('400/cmdline', 'node\0/home/root/tool.js\0');
+  r = await call(sys, '/api/system');
+  ok(
+    r.j.top.some(p => p.name === 'tool (node)') && r.j.top.filter(p => p.name === 'com.webos.app.inputcommon')[0].count === 1,
+    'a process that ended leaves the list, a new one comes in by its name'
+  );
 });

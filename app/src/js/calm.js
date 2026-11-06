@@ -1278,6 +1278,7 @@ setInterval(function () {
   idleCheck();
   nightCheck();
   sceneCheck();
+  if (!document.hidden) refreshWeather(); /* asks the service at most every 10 minutes: Home left on screen follows the sky too */
 }, 20000);
 
 /* ---------- the city (Customise > City): the sun's times, and the weather's city when the weather is on. [id, name, latitude, longitude], the
@@ -1609,9 +1610,16 @@ function wxTexture(key, make) {
   if (!wxTex[key]) wxTex[key] = make();
   return wxTex[key];
 }
+/* nothing is drawn while Live TV covers the scene or Home is not on screen: the layers would cost the GPU under the video */
+function weatherShown() {
+  var box = $('wx');
+  if (box) box.classList.toggle('off', !!(document.hidden || (window.LIVE && LIVE.on)));
+}
+document.addEventListener('visibilitychange', weatherShown);
 function weatherScene() {
   var box = $('wx');
   if (!box) return;
+  weatherShown();
   var w = weatherNow && weatherNow.city === cfg.weather ? weatherNow : null,
     kind = scene.name && w ? weatherKind(w.code) : '',
     night = scene.period === 'nuit' || (w && w.day === false);

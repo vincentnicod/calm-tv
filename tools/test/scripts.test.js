@@ -58,6 +58,7 @@ run(async () => {
     tool('curl', '[ -f ' + w + '/answers ]');
     tool('pgrep', 'case "$2" in *ootstrap*) [ -f ' + w + '/updating ];; *) [ -f ' + w + '/alive ];; esac');
     tool('node', 'echo start >> ' + calls);
+    tool('pkill', 'echo kill >> ' + calls + '; rm -f ' + w + '/alive');
     // each check is one sleep: the run ends after 12 of them
     tool(
       'sleep',
@@ -70,7 +71,14 @@ run(async () => {
       fs.writeFileSync(path.join(L, 'helper.js'), '');
       fs.writeFileSync(slog, 'the last words\n');
       fs.writeFileSync(mounts, opts.mounted ? 'x /usr/palm/applications/com.webos.app.home ext4 rw 0 0\n' : '');
-      const env = { CYTV_BIN: fb, CYTV_DIR: L, CYTV_BOOT_LOG: path.join(w, 'boot.log'), CYTV_SERVICE_LOG: slog, CYTV_MOUNTS: mounts };
+      const env = {
+        CYTV_BIN: fb,
+        CYTV_DIR: L,
+        CYTV_BOOT_LOG: path.join(w, 'boot.log'),
+        CYTV_SERVICE_LOG: slog,
+        CYTV_MOUNTS: mounts,
+        CYTV_BUSY_CHECKS: String(opts.busyMax || 60),
+      };
       cp.spawnSync('sh', [path.join(root, 'scripts', 'watchdog.sh')], { env: Object.assign({}, process.env, env) });
       for (let i = 0; i < 40 && opts.settle && !fs.existsSync(calls); i++) cp.spawnSync('/bin/sleep', ['0.05']);
       cp.spawnSync('/bin/sleep', ['0.2']);
@@ -86,8 +94,13 @@ run(async () => {
     c = watch({ mounted: false, settle: true });
     ok(c.indexOf('start') >= 0 && c.indexOf('undo temp') < 0, "watchdog: while LG's Home shows, the service is still started again");
     c = watch({ files: ['alive'], mounted: true, settle: true });
-    ok(c.indexOf('start') < 0 && c.indexOf('undo temp') >= 0, "watchdog: a running service that hangs for a minute brings LG's Home back");
-    ok(watch({ files: ['updating'], mounted: true }).length === 0, 'watchdog: nothing is done while bootstrap.sh is at work');
+    ok(
+      c[0] === 'kill' && c[1] === 'start' && c.indexOf('undo temp') > 1,
+      'watchdog: a service that runs but hangs is stopped after 30 seconds and started again: ' + c.join()
+    );
+    ok(watch({ files: ['updating'], mounted: true }).length === 0, 'watchdog: nothing is done while an update is at work');
+    c = watch({ files: ['updating'], mounted: true, busyMax: 3, settle: true });
+    ok(c.indexOf('start') >= 0, 'watchdog: an update that stays stuck is no longer waited for: ' + c.join());
   }
   // going to LG's Home (seen on an LG C4, webOS 25): the web engine is not restarted with sam and keeps our page; a killed page process is
   // reopened by the engine from the unmounted folder ("file not found", -6), and sam reopens Home whenever it is closed. So the page is
