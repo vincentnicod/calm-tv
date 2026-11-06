@@ -85,6 +85,13 @@ uses, and it is offered only for apps the TV lets you remove: never LG's built-i
 firmware updates away, and an update can remove root), the Homebrew Channel (removing it would lose
 root) or CleanYourTV's own apps.
 
+## System (hidden)
+
+Press **0** three times quickly on Home to open the **System** panel. It is listed nowhere on screen. It shows the memory used and what is
+still free for apps, the swap, the processor's use (all cores together) and its load, how long the TV has been on, and the ten processes
+that use the most memory, with their share of the processor; processes of one name are counted together (LG runs several input apps).
+It reads again every 2 seconds while open and nothing once it is closed. Back closes it.
+
 ## Inputs on Home
 
 Hold OK on an input in the **Inputs** list and choose **Add to Home**, or use **Customise** > **Inputs on Home**. The input becomes a tile

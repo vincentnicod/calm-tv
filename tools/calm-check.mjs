@@ -65,6 +65,18 @@ const S = {
   uninstalled: [],
   lgHome: 0,
   powerOff: 0,
+  systemReads: 0,
+  system: {
+    mem: { total: 2030392, used: 1582332, available: 448060 },
+    swap: { total: 614396, used: 359172 },
+    cpu: { use: 23, cores: 2 },
+    load: [1.21, 0.98, 0.8],
+    uptime: 7319,
+    top: [
+      { name: 'YouTube', kb: 141164, cpu: 12.5 },
+      { name: 'Calm TV service', kb: 41084, cpu: 0 },
+    ],
+  },
   pinned: [],
   iconFail: false,
   saved: [],
@@ -176,6 +188,7 @@ const srv = http.createServer(async (q, r) => {
   if (u === '/api/launch') return S.launched.push((await body(q)).id), j({ returnValue: true });
   if (u === '/api/uninstall') return S.uninstalled.push((await body(q)).id), j({ returnValue: true });
   if (u === '/api/lg-home') return S.lgHome++, j({ returnValue: true });
+  if (u === '/api/system') return S.systemReads++, j(S.system);
   if (u === '/api/power/off') return S.powerOff++, j({ returnValue: true });
   if (u === '/api/inputs/pin') {
     const b = await body(q);
@@ -693,6 +706,33 @@ try {
   );
   S.weather = null;
   S.config = {};
+
+  // ---- the hidden System panel: 0 three times on Home ----
+  await fresh();
+  await key(48, 120);
+  ok(!(await menuTitle()), 'a single 0 does nothing');
+  await key(48, 120);
+  await key(48, 900);
+  const sysRows = await js("stack.length ? stack[0].items.map(function (i) { return i.label + ': ' + (i.sub || ''); }) : []");
+  ok(
+    (await menuTitle()) === 'System' &&
+      sysRows[0] === 'Memory used: 1.51 GB of 1.94 GB · 78 %' &&
+      sysRows[1] === 'Free for apps: 438 MB' &&
+      sysRows[2] === 'Swap: 351 MB of 600 MB' &&
+      sysRows[3] === 'Processor: 23 % · 2 cores · load 1.21' &&
+      sysRows[4] === 'Up for: 2 h 1 min' &&
+      sysRows[5] === 'YouTube: 138 MB · 12.5 %' &&
+      sysRows[6] === 'Calm TV service: 40 MB',
+    '0 three times opens the System panel: ' + sysRows.join(' | ')
+  );
+  S.system.cpu.use = 61;
+  await sleep(2500);
+  ok((await js('stack[0].items[3].sub')).indexOf('61 %') === 0, 'it reads again every 2 seconds while open');
+  await key(461, 300);
+  const reads = S.systemReads;
+  await sleep(2500);
+  ok(!(await menuTitle()) && S.systemReads === reads, 'Back closes it, and nothing is read once it is closed');
+  S.system.cpu.use = 23;
 
   // ---- a warning before uninstalling the privacy blocks ----
   await js("uninstallMenu({ id: 'ooo.lew.lifesgoodwithoutspying', title: 'lifesgoodwithoutspying' }); 0");

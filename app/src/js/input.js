@@ -103,6 +103,10 @@ document.addEventListener('keydown', function (e) {
     e.preventDefault();
     return;
   } /* Back on the home screen: the running apps */
+  if (zeroKey(k)) {
+    e.preventDefault(); /* 0 three times: the hidden System panel */
+    return;
+  }
   var n = dockKey(k);
   if (n) {
     if (!e.repeat) openNth(n); /* 1-9 and the colour keys: the dock's apps */

@@ -11,6 +11,7 @@ you can call it from a shell on the TV (for example over SSH).
 |---|---|
 | `GET /api/apps` | Installed apps (with `removable`), config, usage, version |
 | `POST /api/launch` `{id, params}` | Launch an app |
+| `GET /api/system` | Memory, swap, processor use and load, uptime, and the processes that use the most memory (the hidden System panel) |
 | `POST /api/power/off` | Switch the TV off completely (a cold start next time, no Wake-on-LAN), unlike the remote's standby |
 | `POST /api/inputs/pin` `{id, on}` | Put an input on Home (`id`: its input app) or take it off; it is listed in `/api/apps` with `input` and `off` |
 | `POST /api/uninstall` `{id}` | Uninstall an app with LG's own uninstall; only apps the TV marks removable, never the Homebrew Channel, `safeupdate`, `appupdateblocker` or CleanYourTV's own apps |

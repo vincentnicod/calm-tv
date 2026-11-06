@@ -723,6 +723,150 @@ function showInputs(devs, title) {
   );
 }
 
+/* ---------- the hidden System panel: 0 three times on Home. Memory, processor and the processes that use the most, read every
+   2 seconds while the panel is open (helper/system.js); nothing is read once it is closed ---------- */
+(function () {
+  var add = {
+    fr: {
+      'System': 'Système',
+      'Memory used': 'Mémoire utilisée',
+      'of': 'sur',
+      'Free for apps': 'Libre pour les apps',
+      'Swap': 'Swap',
+      'none': 'aucun',
+      'Processor': 'Processeur',
+      'cores': 'cœurs',
+      'load': 'charge',
+      'Up for': 'Allumé depuis',
+      'Reading...': 'Lecture...',
+      'Could not read the system': 'Impossible de lire le système',
+    },
+    de: {
+      'System': 'System',
+      'Memory used': 'Belegter Speicher',
+      'of': 'von',
+      'Free for apps': 'Frei für Apps',
+      'Swap': 'Swap',
+      'none': 'keiner',
+      'Processor': 'Prozessor',
+      'cores': 'Kerne',
+      'load': 'Last',
+      'Up for': 'An seit',
+      'Reading...': 'Wird gelesen...',
+      'Could not read the system': 'System nicht lesbar',
+    },
+    nl: {
+      'System': 'Systeem',
+      'Memory used': 'Gebruikt geheugen',
+      'of': 'van',
+      'Free for apps': 'Vrij voor apps',
+      'Swap': 'Swap',
+      'none': 'geen',
+      'Processor': 'Processor',
+      'cores': 'kernen',
+      'load': 'belasting',
+      'Up for': 'Aan sinds',
+      'Reading...': 'Lezen...',
+      'Could not read the system': 'Systeem niet leesbaar',
+    },
+    es: {
+      'System': 'Sistema',
+      'Memory used': 'Memoria usada',
+      'of': 'de',
+      'Free for apps': 'Libre para apps',
+      'Swap': 'Swap',
+      'none': 'ninguno',
+      'Processor': 'Procesador',
+      'cores': 'núcleos',
+      'load': 'carga',
+      'Up for': 'Encendido desde hace',
+      'Reading...': 'Leyendo...',
+      'Could not read the system': 'No se pudo leer el sistema',
+    },
+  };
+  for (var l in add) {
+    TXL[l] = TXL[l] || {};
+    for (var k in add[l]) TXL[l][k] = add[l][k];
+  }
+})();
+var zeroTaps = [];
+function zeroKey(k) {
+  if (k !== 48 && k !== 96) return false;
+  var now = Date.now();
+  zeroTaps = zeroTaps
+    .filter(function (x) {
+      return now - x < 1500;
+    })
+    .concat(now);
+  if (zeroTaps.length >= 3) {
+    zeroTaps = [];
+    systemPanel();
+  }
+  return true;
+}
+function sizeText(kb) {
+  return kb >= 1048576 ? (kb / 1048576).toFixed(2) + ' GB' : Math.round(kb / 1024) + ' MB';
+}
+function upText(s) {
+  var h = Math.floor(s / 3600),
+    m = Math.floor((s % 3600) / 60);
+  return h ? h + ' h ' + m + ' min' : m + ' min';
+}
+function systemRows(x) {
+  var rows = [
+    {
+      label: t('Memory used'),
+      sub:
+        sizeText(x.mem.used) +
+        ' ' +
+        t('of') +
+        ' ' +
+        sizeText(x.mem.total) +
+        ' · ' +
+        Math.round((x.mem.used / (x.mem.total || 1)) * 100) +
+        ' %',
+    },
+    { label: t('Free for apps'), sub: sizeText(x.mem.available) },
+    { label: t('Swap'), sub: x.swap.total ? sizeText(x.swap.used) + ' ' + t('of') + ' ' + sizeText(x.swap.total) : t('none') },
+    {
+      label: t('Processor'),
+      sub: x.cpu.use + ' % · ' + x.cpu.cores + ' ' + t('cores') + (x.load.length ? ' · ' + t('load') + ' ' + x.load[0] : ''),
+    },
+    { label: t('Up for'), sub: upText(x.uptime) },
+  ];
+  x.top.forEach(function (p) {
+    rows.push({
+      label: p.name + (p.count > 1 ? ' ×' + p.count : ''),
+      sub: sizeText(p.kb) + (p.cpu ? ' · ' + p.cpu + ' %' : ''),
+      dim: true,
+    });
+  });
+  return rows;
+}
+function systemPanel() {
+  closeMenus();
+  openMenu(t('System'), [{ label: t('Reading...'), dim: true }]);
+  var m = stack[0];
+  m.system = true;
+  (function read() {
+    if (stack[stack.length - 1] !== m) return; /* closed meanwhile: no more readings */
+    api('/api/system').then(
+      function (x) {
+        if (stack[stack.length - 1] !== m) return;
+        m.items = x && x.mem ? systemRows(x) : [{ label: t('Could not read the system'), dim: true }];
+        m.idx = Math.min(m.idx, m.items.length - 1);
+        drawMenu();
+        setTimeout(read, 2000);
+      },
+      function () {
+        if (stack[stack.length - 1] !== m) return;
+        m.items = [{ label: t('Could not read the system'), dim: true }];
+        drawMenu();
+      }
+    );
+  })();
+}
+
 /* ---------- number keys 1-9 and the red, green, yellow and blue keys open the dock's apps in order ---------- */
 function dockKey(k) {
   if (k >= 49 && k <= 57) return k - 48;
