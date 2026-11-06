@@ -141,6 +141,169 @@ body {
   background: rgba(255, 255, 255, 0.25);
 }
 
+/* the weather over the scene (calm.js, weatherScene): every layer is off unless the weather asks for it. The cloud and falling layers are
+   drawn at half size and scaled by 2, and only their transform animates */
+#wx,
+#wx > div {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+}
+#wx {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+}
+#wx.off {
+  display: none;
+}
+#wx > div {
+  display: none;
+}
+.wx-veil {
+  width: 1920px;
+  height: 1080px;
+  background: linear-gradient(rgb(96, 106, 120), rgb(58, 66, 78) 62%, rgb(30, 34, 42));
+}
+#wx[data-night="1"] .wx-veil {
+  background: linear-gradient(rgb(14, 18, 28), rgb(8, 10, 16));
+}
+.wx-cloud {
+  width: 1920px;
+  height: 270px;
+  transform-origin: 0 0;
+  background-repeat: repeat-x;
+  will-change: transform;
+  animation: wx-drift 420s linear infinite;
+}
+#wx > .wx-mist {
+  top: 470px;
+}
+.wx-mist {
+  width: 1920px;
+  height: 180px;
+  transform-origin: 0 0;
+  background-repeat: repeat-x;
+  background-size: 960px 180px;
+  will-change: transform;
+  animation: wx-drift 300s linear infinite;
+}
+.wx-fall {
+  width: 960px;
+  height: 796px;
+  transform-origin: 0 0;
+  will-change: transform;
+  animation: wx-fall 0.62s linear infinite;
+}
+.wx-flash {
+  width: 1920px;
+  height: 1080px;
+  background: rgb(220, 228, 255);
+  opacity: 0;
+  animation: wx-flash 17s linear infinite;
+}
+@keyframes wx-drift {
+  from {
+    transform: scale(2) translateX(0);
+  }
+  to {
+    transform: scale(2) translateX(-960px);
+  }
+}
+@keyframes wx-fall {
+  from {
+    transform: scale(2) translateY(-256px);
+  }
+  to {
+    transform: scale(2) translateY(0);
+  }
+}
+@keyframes wx-snow {
+  from {
+    transform: scale(2) translate(0, -256px);
+  }
+  to {
+    transform: scale(2) translate(-40px, 0);
+  }
+}
+@keyframes wx-flash {
+  0%,
+  90%,
+  91.2%,
+  92%,
+  100% {
+    opacity: 0;
+  }
+  90.6% {
+    opacity: 0.22;
+  }
+  91.6% {
+    opacity: 0.12;
+  }
+}
+#wx[data-wx="partly"] .wx-veil {
+  display: block;
+  opacity: 0.12;
+}
+#wx[data-wx="partly"] .wx-cloud {
+  display: block;
+  opacity: 0.8;
+}
+#wx[data-wx="cloudy"] .wx-veil,
+#wx[data-wx="fog"] .wx-veil,
+#wx[data-wx="drizzle"] .wx-veil,
+#wx[data-wx="snow"] .wx-veil {
+  display: block;
+  opacity: 0.34;
+}
+#wx[data-wx="rain"] .wx-veil {
+  display: block;
+  opacity: 0.42;
+}
+#wx[data-wx="storm"] .wx-veil {
+  display: block;
+  opacity: 0.52;
+}
+#wx[data-wx="cloudy"] .wx-cloud,
+#wx[data-wx="drizzle"] .wx-cloud,
+#wx[data-wx="rain"] .wx-cloud,
+#wx[data-wx="snow"] .wx-cloud,
+#wx[data-wx="storm"] .wx-cloud {
+  display: block;
+  opacity: 0.9;
+}
+#wx[data-wx="fog"] .wx-mist {
+  display: block;
+  opacity: 0.9;
+}
+#wx[data-wx="drizzle"] .wx-fall,
+#wx[data-wx="rain"] .wx-fall,
+#wx[data-wx="storm"] .wx-fall,
+#wx[data-wx="snow"] .wx-fall {
+  display: block;
+}
+#wx[data-wx="drizzle"] .wx-fall {
+  opacity: 0.7;
+  animation-duration: 0.9s;
+}
+#wx[data-wx="storm"] .wx-fall {
+  animation-duration: 0.45s;
+}
+#wx[data-wx="snow"] .wx-fall {
+  animation: wx-snow 11s linear infinite;
+}
+#wx[data-wx="storm"] .wx-flash {
+  display: block;
+}
+#wx[data-night="1"] .wx-cloud,
+#wx[data-night="1"] .wx-mist {
+  opacity: 0.35;
+}
+#wx[data-night="1"] .wx-fall {
+  opacity: 0.6;
+}
+
 .glow {
   position: absolute;
   left: 0;
@@ -606,6 +769,10 @@ body {
 }
 .tile.gl-hdmi.f {
   box-shadow: 0 24px 36px rgba(0, 0, 0, 0.6);
+}
+/* an input on Home with nothing connected */
+.tile.nosignal {
+  opacity: 0.55;
 }
 .gl-film {
   background-image: linear-gradient(150deg, #ef3b57, #a3173a);

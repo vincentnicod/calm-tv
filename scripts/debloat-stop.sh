@@ -5,7 +5,9 @@ L=/media/developer/cleanyourtv
 for s in remotelogger service-logger contentminer nudge; do systemctl stop $s.service 2>&1 | sed "s/^/$s: /"; done
 # luna dynamic services: bind a do-nothing stub over the binary so ls-hubd cannot start them
 printf '#!/bin/sh\nexit 0\n' > $L/stub-noop; chmod +x $L/stub-noop
-for b in acr2 admanager sportsalarm adoverlay-service; do
+# not admanager: Disney+ and HBO Max wait for it at start. A stub left by an earlier version is lifted here
+for m in $(awk '$2 ~ /\/usr\/sbin\/admanager$/ {print $2}' /proc/mounts | sort -r); do umount $m 2>/dev/null; done
+for b in acr2 sportsalarm adoverlay-service; do
   [ -e /usr/sbin/$b ] || continue
   grep -q " /usr/sbin/$b " /proc/mounts || mount --bind $L/stub-noop /usr/sbin/$b
   pkill -9 -f "^/usr/sbin/$b"

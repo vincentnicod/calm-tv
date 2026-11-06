@@ -373,7 +373,7 @@ var IPTV_RE = /iptv|smarters|stb ?emu|siptv|ott ?(navigator|player)|televizo|tiv
 function findApp(re, not) {
   var m = apps
     .filter(function (a) {
-      return a.id.charAt(0) !== '_' && a.id !== not && re.test(a.title || '');
+      return a.id.charAt(0) !== '_' && !a.input && a.id !== not && re.test(a.title || '');
     })
     .sort(function (a, b) {
       return a.title.localeCompare(b.title);
@@ -416,6 +416,7 @@ function saveStartingDock() {
 /* ---------- how an app looks: a name and a drawn icon chosen in the launcher (cfg.tiles), else a few automatic ones ---------- */
 function autoLook(a) {
   if (a.id === '__hdmi') return { label: hdmiLabel(), icon: 'hdmi' };
+  if (a.input) return { label: a.title, icon: 'hdmi' };
   if (a.id === 'youtube.leanback.v4') return { label: 'YouTube', icon: a.title === 'YouTube' ? '' : 'youtube' }; /* YouTube AdFree */
   if (a.id.charAt(0) !== '_' && a.id === iptvId()) return { label: 'IPTV', icon: 'iptv' };
   /* Spotify's own icon carries the wordmark: the drawn mark alone, and the plain name */
@@ -563,10 +564,7 @@ function setHdmiName(n) {
   hdmiPaint();
 }
 function openInput(d) {
-  try {
-    localStorage.setItem(HDMI_LAST, String(+d.port));
-  } catch (e) {}
-  hdmiPaint(); /* the card takes the name of the input chosen */
+  rememberInput(d.port); /* the card takes the name of the input chosen */
   launch(d.appId);
 }
 function gotInputs(x) {
@@ -669,6 +667,31 @@ function hdmiItems() {
   items.push({ label: t('Name...'), sub: hdmiName(), stay: true, fn: hdmiNameMenu });
   return items;
 }
+/* hold OK on an input: open it, or put it on Home as a tile */
+function inputMenu(d) {
+  var on = isPinned(d.appId),
+    name = devName(d);
+  openMenu(name, [
+    {
+      label: t('Open'),
+      fn: function () {
+        openInput(d);
+      },
+    },
+    {
+      label: on ? t('Remove from Home') : t('Add to Home'),
+      fn: function () {
+        pinInput(d.appId, name, !on);
+      },
+    },
+  ]);
+}
+function rememberInput(port) {
+  try {
+    localStorage.setItem(HDMI_LAST, String(+port));
+  } catch (e) {}
+  hdmiPaint();
+}
 /* the Inputs list: devices that are on first */
 function showInputs(devs, title) {
   if (!devs.length) return toast(t('No HDMI inputs found'));
@@ -692,9 +715,156 @@ function showInputs(devs, title) {
         fn: function () {
           openInput(d);
         },
+        hold: function () {
+          inputMenu(d);
+        },
       };
     })
   );
+}
+
+/* ---------- the hidden System panel: 0 three times on Home. Memory, processor and the processes that use the most, read every
+   2 seconds while the panel is open (helper/system.js); nothing is read once it is closed ---------- */
+(function () {
+  var add = {
+    fr: {
+      'System': 'Système',
+      'Memory used': 'Mémoire utilisée',
+      'of': 'sur',
+      'Free for apps': 'Libre pour les apps',
+      'Swap': 'Swap',
+      'none': 'aucun',
+      'Processor': 'Processeur',
+      'cores': 'cœurs',
+      'load': 'charge',
+      'Up for': 'Allumé depuis',
+      'Reading...': 'Lecture...',
+      'Could not read the system': 'Impossible de lire le système',
+    },
+    de: {
+      'System': 'System',
+      'Memory used': 'Belegter Speicher',
+      'of': 'von',
+      'Free for apps': 'Frei für Apps',
+      'Swap': 'Swap',
+      'none': 'keiner',
+      'Processor': 'Prozessor',
+      'cores': 'Kerne',
+      'load': 'Last',
+      'Up for': 'An seit',
+      'Reading...': 'Wird gelesen...',
+      'Could not read the system': 'System nicht lesbar',
+    },
+    nl: {
+      'System': 'Systeem',
+      'Memory used': 'Gebruikt geheugen',
+      'of': 'van',
+      'Free for apps': 'Vrij voor apps',
+      'Swap': 'Swap',
+      'none': 'geen',
+      'Processor': 'Processor',
+      'cores': 'kernen',
+      'load': 'belasting',
+      'Up for': 'Aan sinds',
+      'Reading...': 'Lezen...',
+      'Could not read the system': 'Systeem niet leesbaar',
+    },
+    es: {
+      'System': 'Sistema',
+      'Memory used': 'Memoria usada',
+      'of': 'de',
+      'Free for apps': 'Libre para apps',
+      'Swap': 'Swap',
+      'none': 'ninguno',
+      'Processor': 'Procesador',
+      'cores': 'núcleos',
+      'load': 'carga',
+      'Up for': 'Encendido desde hace',
+      'Reading...': 'Leyendo...',
+      'Could not read the system': 'No se pudo leer el sistema',
+    },
+  };
+  for (var l in add) {
+    TXL[l] = TXL[l] || {};
+    for (var k in add[l]) TXL[l][k] = add[l][k];
+  }
+})();
+var zeroTaps = [];
+function zeroKey(k) {
+  if (k !== 48 && k !== 96) return false;
+  var now = Date.now();
+  zeroTaps = zeroTaps
+    .filter(function (x) {
+      return now - x < 1500;
+    })
+    .concat(now);
+  if (zeroTaps.length >= 3) {
+    zeroTaps = [];
+    systemPanel();
+  }
+  return true;
+}
+function sizeText(kb) {
+  return kb >= 1048576 ? (kb / 1048576).toFixed(2) + ' GB' : Math.round(kb / 1024) + ' MB';
+}
+function upText(s) {
+  var h = Math.floor(s / 3600),
+    m = Math.floor((s % 3600) / 60);
+  return h ? h + ' h ' + m + ' min' : m + ' min';
+}
+function systemRows(x) {
+  var rows = [
+    {
+      label: t('Memory used'),
+      sub:
+        sizeText(x.mem.used) +
+        ' ' +
+        t('of') +
+        ' ' +
+        sizeText(x.mem.total) +
+        ' · ' +
+        Math.round((x.mem.used / (x.mem.total || 1)) * 100) +
+        ' %',
+    },
+    { label: t('Free for apps'), sub: sizeText(x.mem.available) },
+    { label: t('Swap'), sub: x.swap.total ? sizeText(x.swap.used) + ' ' + t('of') + ' ' + sizeText(x.swap.total) : t('none') },
+    {
+      label: t('Processor'),
+      sub: x.cpu.use + ' % · ' + x.cpu.cores + ' ' + t('cores') + (x.load.length ? ' · ' + t('load') + ' ' + x.load[0] : ''),
+    },
+    { label: t('Up for'), sub: upText(x.uptime) },
+  ];
+  x.top.forEach(function (p) {
+    rows.push({
+      label: p.name + (p.count > 1 ? ' ×' + p.count : ''),
+      sub: sizeText(p.kb) + (p.cpu ? ' · ' + p.cpu + ' %' : ''),
+      dim: true,
+    });
+  });
+  return rows;
+}
+function systemPanel() {
+  closeMenus();
+  openMenu(t('System'), [{ label: t('Reading...'), dim: true }]);
+  var m = stack[0];
+  m.system = true;
+  (function read() {
+    if (stack[stack.length - 1] !== m) return; /* closed meanwhile: no more readings */
+    api('/api/system').then(
+      function (x) {
+        if (stack[stack.length - 1] !== m) return;
+        m.items = x && x.mem ? systemRows(x) : [{ label: t('Could not read the system'), dim: true }];
+        m.idx = Math.min(m.idx, m.items.length - 1);
+        drawMenu();
+        setTimeout(read, 2000);
+      },
+      function () {
+        if (stack[stack.length - 1] !== m) return;
+        m.items = [{ label: t('Could not read the system'), dim: true }];
+        drawMenu();
+      }
+    );
+  })();
 }
 
 /* ---------- number keys 1-9 and the red, green, yellow and blue keys open the dock's apps in order ---------- */
@@ -750,6 +920,7 @@ function monoTile(d) {
   var box = document.createElement('div');
   box.className = 'mono';
   d.appendChild(box);
+  d._monoBox = box;
   if (monos[a.id]) return fillMono(d, box, monos[a.id]);
   var i = new Image();
   i.crossOrigin = 'anonymous';
@@ -765,9 +936,19 @@ function monoTile(d) {
     fillMono(d, box, m);
   };
   i.onerror = function () {
+    d._monoFailed = true;
     fillMono(d, box, { fail: 1 }); /* not remembered: the icon can come back */
   };
-  i.src = a.id === '__live' ? LIVE_ICON : API + '/icon/' + encodeURIComponent(a.id);
+  i.src = a.id === '__live' ? LIVE_ICON : API + '/icon/' + encodeURIComponent(a.id) + (d._monoTries ? '?retry=' + d._monoTries : '');
+}
+/* a white logo whose icon failed is made again, twice at most (tiles.js, retryTileIcons) */
+function retryMono(d) {
+  if (!d._monoFailed || (d._monoTries || 0) >= 2) return;
+  d._monoFailed = false;
+  d._monoTries = (d._monoTries || 0) + 1;
+  d._monoBox.remove();
+  d._mono = false;
+  monoTile(d);
 }
 function fillMono(d, box, m) {
   if (m && m.w && m.k) {
@@ -1097,6 +1278,7 @@ setInterval(function () {
   idleCheck();
   nightCheck();
   sceneCheck();
+  if (!document.hidden) refreshWeather(); /* asks the service at most every 10 minutes: Home left on screen follows the sky too */
 }, 20000);
 
 /* ---------- the city (Customise > City): the sun's times, and the weather's city when the weather is on. [id, name, latitude, longitude], the
@@ -1166,6 +1348,7 @@ function refreshWeather(force) {
       weatherNow = null;
       tick();
     }
+    weatherScene();
     return;
   }
   if (!force && Date.now() - weatherAt < 10 * 60000 && weatherNow && weatherNow.city === c) return;
@@ -1174,6 +1357,7 @@ function refreshWeather(force) {
     function (x) {
       weatherNow = x && typeof x.temp === 'number' ? x : null;
       tick();
+      weatherScene();
     },
     function () {}
   );
@@ -1327,9 +1511,135 @@ function sceneApply() {
     st.setProperty('--glass', 'url("scene-' + scene.glass + (scene.glass === scene.name ? suffix : '') + '-glass.jpg")');
     if (themeKeys.indexOf('--glass') < 0) themeKeys.push('--glass');
   }
+  weatherScene();
 }
 function sceneCheck() {
   if (scene.daily && dayPeriod() !== scene.period) sceneApply();
+}
+
+/* ---------- the weather on the scene: clouds, rain, snow, fog and storms over the picture, from the weather of the city (Customise >
+   Weather). The textures are drawn once here at half size and scaled up; the layers only move and fade, which the GPU of older TVs
+   keeps up with (home.css, #wx). Nothing is shown without a scene, a city or a weather answer ---------- */
+var wxKind = '',
+  wxTex = {};
+function weatherKind(code) {
+  if (code === 2) return 'partly';
+  if (code === 3) return 'cloudy';
+  if (code === 45 || code === 48) return 'fog';
+  if (code >= 51 && code <= 57) return 'drizzle';
+  if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return 'rain';
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return 'snow';
+  if (code >= 95) return 'storm';
+  return '';
+}
+function wxCanvas(w, h, draw) {
+  var cv = document.createElement('canvas');
+  cv.width = w;
+  cv.height = h;
+  draw(cv.getContext('2d'), w, h);
+  return 'url(' + cv.toDataURL('image/png') + ')';
+}
+/* a seed so the same weather always draws the same picture */
+function wxRand(seed) {
+  var s = seed;
+  return function () {
+    s = (s * 16807) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+}
+/* falling rain or snow in a 256 x 256 tile that repeats without a seam (what leaves the bottom comes in at the top) */
+function wxFallTex(kind) {
+  var rnd = wxRand(kind === 'snow' ? 7 : kind === 'drizzle' ? 11 : 13);
+  return wxCanvas(256, 256, function (g, w, h) {
+    var n = kind === 'snow' ? 34 : kind === 'drizzle' ? 26 : kind === 'storm' ? 70 : 48;
+    for (var i = 0; i < n; i++) {
+      var x = rnd() * w,
+        y = rnd() * h,
+        a = 0.16 + rnd() * 0.3;
+      for (var k = -1; k <= 0; k++) {
+        if (kind === 'snow') {
+          var r = 0.8 + rnd() * 1.6,
+            gr = g.createRadialGradient(x, y + k * h, 0, x, y + k * h, r);
+          gr.addColorStop(0, 'rgba(255,255,255,' + (a + 0.35) + ')');
+          gr.addColorStop(1, 'rgba(255,255,255,0)');
+          g.fillStyle = gr;
+          g.fillRect(x - r, y + k * h - r, 2 * r, 2 * r);
+        } else {
+          var len = kind === 'drizzle' ? 6 + rnd() * 6 : 10 + rnd() * 16;
+          g.strokeStyle = 'rgba(214,226,255,' + a + ')';
+          g.lineWidth = kind === 'drizzle' ? 0.6 : 0.8;
+          g.beginPath();
+          g.moveTo(x, y + k * h);
+          g.lineTo(x - len * 0.12, y + k * h + len);
+          g.stroke();
+        }
+      }
+    }
+  });
+}
+/* soft clouds in a 960 x 270 tile that repeats sideways: faint puffs gathered in a few banks and flattened (clouds over a lake are wide,
+   not round), denser for a covered sky */
+function wxCloudTex(dense) {
+  var rnd = wxRand(dense ? 5 : 3);
+  return wxCanvas(960, 270, function (g, w, h) {
+    var banks = dense ? 7 : 4,
+      FLAT = 0.42;
+    g.scale(1, FLAT);
+    for (var b = 0; b < banks; b++) {
+      var bx = rnd() * w,
+        by = (24 + Math.pow(rnd(), 1.4) * (h - 70)) / FLAT,
+        n = dense ? 16 : 11;
+      for (var i = 0; i < n; i++) {
+        var x = bx + (rnd() - 0.5) * (dense ? 420 : 300),
+          y = by + (rnd() - 0.5) * 70,
+          r = 28 + rnd() * (dense ? 80 : 60),
+          a = (dense ? 0.08 : 0.13) + rnd() * 0.1;
+        for (var k = -1; k <= 1; k++) {
+          var gr = g.createRadialGradient(x + k * w, y, 0, x + k * w, y, r);
+          gr.addColorStop(0, 'rgba(255,255,255,' + a + ')');
+          gr.addColorStop(0.55, 'rgba(255,255,255,' + a * 0.55 + ')');
+          gr.addColorStop(1, 'rgba(255,255,255,0)');
+          g.fillStyle = gr;
+          g.fillRect(x + k * w - r, y - r, 2 * r, 2 * r);
+        }
+      }
+    }
+  });
+}
+function wxTexture(key, make) {
+  if (!wxTex[key]) wxTex[key] = make();
+  return wxTex[key];
+}
+/* nothing is drawn while Live TV covers the scene or Home is not on screen: the layers would cost the GPU under the video */
+function weatherShown() {
+  var box = $('wx');
+  if (box) box.classList.toggle('off', !!(document.hidden || (window.LIVE && LIVE.on)));
+}
+document.addEventListener('visibilitychange', weatherShown);
+function weatherScene() {
+  var box = $('wx');
+  if (!box) return;
+  weatherShown();
+  var w = weatherNow && weatherNow.city === cfg.weather ? weatherNow : null,
+    kind = scene.name && w ? weatherKind(w.code) : '',
+    night = scene.period === 'nuit' || (w && w.day === false);
+  box.setAttribute('data-wx', kind);
+  box.setAttribute('data-night', night ? '1' : '');
+  if (kind === wxKind) return;
+  wxKind = kind;
+  var covered = kind && kind !== 'partly' && kind !== 'fog';
+  if (kind && kind !== 'fog')
+    box.querySelector('.wx-cloud').style.backgroundImage = wxTexture(covered ? 'cloudy' : 'partly', function () {
+      return wxCloudTex(covered);
+    });
+  if (kind === 'fog')
+    box.querySelector('.wx-mist').style.backgroundImage = wxTexture('cloudy', function () {
+      return wxCloudTex(true);
+    });
+  if (kind === 'drizzle' || kind === 'rain' || kind === 'storm' || kind === 'snow')
+    box.querySelector('.wx-fall').style.backgroundImage = wxTexture(kind, function () {
+      return wxFallTex(kind);
+    });
 }
 
 /* ---------- the Remote buttons screen (Customise): the taught buttons as cards beside a drawing of the remote; teaching a button is a

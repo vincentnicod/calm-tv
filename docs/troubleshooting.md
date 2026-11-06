@@ -26,6 +26,8 @@
   `POST /api/live/settings` ([Live TV](live-tv.md#setting-it-up)).
 - **Something is broken after an update.** A launcher or service that does not start is replaced by the previous version
   automatically. **Go back to launcher** in the manager returns to the previous launcher by hand.
+- **An app shows its name instead of its icon after a start.** Home can draw before the service is up. Icons that failed are asked for again
+  when the service answers, at most twice per tile; an icon that stays missing does not exist on the TV.
 - **Back to LG's Home right now.** In the manager, **CleanYourTV as Home** off, or `sh /media/developer/cleanyourtv/undo-home.sh`
   over SSH. For a moment only (to change something in LG's Home): Customise > **LG Home** in the launcher, then **Back to CleanYourTV**
   in the manager.

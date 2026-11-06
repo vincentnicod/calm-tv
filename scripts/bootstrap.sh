@@ -168,6 +168,8 @@ ensure_apps() {
 # ---- an update: restart the service on the new files; go back to the previous files if it does not answer ----
 restart_for_update() {
   say "restarting the service"
+  pkill -f "[c]leanyourtv/watchdog.sh"   # the boot script below starts the one of the new files
+  pkill -f "[1]0-cleanyourtv-home"       # the watchdog of a version before watchdog.sh
   pkill -f "[c]leanyourtv/helper.js"; sleep 1
   sh $D/10-cleanyourtv-home keep </dev/null
   ok=0
@@ -178,6 +180,7 @@ restart_for_update() {
   done
   if [ $ok = 0 ]; then
     warn "the new service (${hv:-not answering}) did not come up; going back to the previous files"
+    pkill -f "[c]leanyourtv/watchdog.sh"
     pkill -f "[c]leanyourtv/helper.js"; sleep 1
     [ -f $D/backup/service-prev.tgz ] && (cd $D && tar xzf backup/service-prev.tgz)
     echo "update to $WANT failed at $(date)" > $D/last-error.txt

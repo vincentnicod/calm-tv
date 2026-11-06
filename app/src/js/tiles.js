@@ -7,13 +7,14 @@ function tile(a) {
   /* a kept tile takes the app's latest details: the first paint comes from the saved list, which can be older (no removable) */
   if (tiles[a.id] && tiles[a.id]._sig === sig) {
     tiles[a.id]._a = a;
+    tiles[a.id].classList.toggle('nosignal', !!a.off);
     return tiles[a.id];
   }
   var d = document.createElement('div'),
     tint = document.createElement('div'),
     face = document.createElement('div'),
     cap = document.createElement('div');
-  d.className = 'tile' + (a.sys ? ' sys' : '');
+  d.className = 'tile' + (a.sys ? ' sys' : '') + (a.off ? ' nosignal' : '');
   d._a = a;
   d._sig = sig;
   tiles[a.id] = d;
@@ -45,6 +46,12 @@ function tile(a) {
   d._i = i;
   if (!known) i.crossOrigin = 'anonymous';
   i.onload = function () {
+    d._iconFailed = false;
+    if (d._iconText) {
+      d._iconText.remove();
+      d._iconText = null;
+    }
+    if (!i.parentNode) face.appendChild(i);
     if (!colors[a.id]) {
       var col = iconColor(i, a.id);
       d._col = col;
@@ -58,11 +65,15 @@ function tile(a) {
     }
   };
   i.onerror = function () {
+    d._iconFailed = true;
     i.remove();
-    var t = document.createElement('div');
-    t.className = 't';
-    t.textContent = lk.label;
-    face.appendChild(t);
+    if (!d._iconText) {
+      var t = document.createElement('div');
+      t.className = 't';
+      t.textContent = lk.label;
+      d._iconText = t;
+      face.appendChild(t);
+    }
     if (!colors[a.id]) {
       var f = hsl2rgb(hashHue(a.id), 0.42, 0.42);
       paint(d, { c: f, b: hsl2rgb(hashHue(a.id), 0.4, 0.2) });
@@ -72,6 +83,20 @@ function tile(a) {
   face.appendChild(i);
   if (i.decode) i.decode().catch(function () {});
   return d;
+}
+
+/* the first paint can beat the service, and a kept tile is not drawn again: once the service answers, icons that failed are asked for
+   again, twice at most. The text stays until a picture really loads. The dock's white logos have their own picture (calm.js, retryMono). */
+function retryTileIcons() {
+  Object.keys(tiles).forEach(function (id) {
+    var d = tiles[id];
+    if (id === '__live') return;
+    retryMono(d);
+    if (!d._iconFailed || !d._i || (d._iconTries || 0) >= 2) return;
+    d._iconFailed = false;
+    d._iconTries = (d._iconTries || 0) + 1;
+    d._i.src = API + '/icon/' + encodeURIComponent(id) + '?retry=' + d._iconTries;
+  });
 }
 
 /* ---------- ambient glow: two layers cross-fade, updated only once focus settles ---------- */

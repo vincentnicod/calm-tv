@@ -8,7 +8,7 @@ An optional clean-up of LG's ads and telemetry. It is on by default in the setup
 About a minute after every boot, the debloat:
 
 - **stops** the systemd services `remotelogger`, `service-logger`, `contentminer` and `nudge`;
-- **prevents** `acr2`, `admanager`, `sportsalarm` and `adoverlay-service` from starting, by mounting a do-nothing stub over each
+- **prevents** `acr2`, `sportsalarm` and `adoverlay-service` from starting (not `admanager`: Disney+ and HBO Max wait for it at start), by mounting a do-nothing stub over each
   program (in RAM; the real files are not changed);
 - **adds** `eic.ads.lgtvcommon.com`, `nl.ad.lgsmartad.com` and `nl.info.lgsmartad.com` to `/etc/hosts`, pointing at `127.0.0.1`
   and `::1` and marked `# cleanyourtv-debloat` (other entries are untouched). Where `/etc/hosts` is on the read-only system partition, a copy

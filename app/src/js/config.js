@@ -74,6 +74,7 @@ function act(e) {
         e.classList.remove('launching');
       }, 4000);
     }
+    if (a.input) rememberInput(a.input);
     return launch(a.id);
   }
   var o = e._o || {};
@@ -82,5 +83,6 @@ function act(e) {
   if (o.action === 'inputs') return inputsMenu();
   if (o.action === 'quick') return openQuick();
   if (o.action === 'lghome') return lgHomeMenu();
+  if (o.action === 'poweroff') return powerOffMenu();
   if (o.app) launch(o.app, o.params);
 }

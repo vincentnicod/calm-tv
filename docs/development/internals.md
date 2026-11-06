@@ -45,8 +45,9 @@ card are small and stay single files.
    `backup/home-appinfo.orig.json` the first time), switched to the web type.
 3. The script **bind-mounts** that directory over `/usr/palm/applications/com.webos.app.home`, restarts the system app manager
    (`sam`) so it reads the new Home, and launches Home again.
-4. A **watchdog** keeps checking that the service answers. If it stays unreachable for about a minute, it restores LG's Home until
-   the next reboot.
+4. A **watchdog** (`scripts/watchdog.sh`, one per boot, also while LG's Home shows) checks every 10 seconds that the service answers. It
+   starts a stopped service again, less often when it keeps stopping, and keeps the log of the run that ended. If our Home stays
+   unreachable for about a minute, it restores LG's Home until the next restart.
 
 Nothing is written under `/usr`: the mount disappears at reboot. `DISABLE` in `/media/developer/cleanyourtv` makes the script skip it.
 
