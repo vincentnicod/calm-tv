@@ -156,6 +156,10 @@ that is not would leave the TV silent.
 - **City.** Customise > **City** chooses where you are, from ten Swiss cities. The row shows today's sunrise and sunset there. The times
   are worked out on the TV from the date and the city's coordinates (the sunrise equation, within three minutes): nothing is asked of
   the network. **None** keeps the fixed hours.
+- **The weather on the scene.** With the weather on, the lake (Paysage) and the peaks (Verre) show it: flat cloud banks when it is partly
+  cloudy, a grey covered sky when overcast, falling rain or snow, a mist band over the water in fog, and a heavier rain with a rare soft
+  flash in a thunderstorm. Clear weather leaves the picture as it is; at night everything is dimmer. It is drawn in the page and only
+  moves and fades, so older TVs keep up.
 - **Weather.** Customise > **Weather** turns on the temperature and the sky beside the date, for the city, from Open-Meteo
   ([Security](security.md#weather)). Without a city it first asks for one; a new city moves the weather with it. Off until turned on.
 - **The time of day.** Paysage's lake and Verre's peaks follow the sun: dawn from 40 minutes before sunrise, day from 80 minutes after,

@@ -656,6 +656,44 @@ try {
   await js('closeMenus(); 0');
   S.config = {};
 
+  // ---- the weather on the scene: clouds, rain, snow, fog and storms over the lake, from the city's weather ----
+  S.weather = { temp: 6, code: 63, day: true };
+  await fresh();
+  S.config = { weather: 'lausanne', place: 'lausanne' };
+  await send('Page.navigate', { url: BASE + '/home.html' });
+  await sleep(2000);
+  ok(
+    (await js("document.getElementById('wx').getAttribute('data-wx')")) === 'rain' &&
+      (await js(
+        "getComputedStyle(document.querySelector('.wx-fall')).display === 'block' && /^url\\(\"?data:image\\/png/.test(document.querySelector('.wx-fall').style.backgroundImage)"
+      )),
+    'rain from the weather service falls over the lake'
+  );
+  const kinds = await js(
+    "[0, 1, 2, 3, 45, 48, 53, 61, 81, 73, 86, 95].map(function (c) { weatherNow = { city: 'lausanne', temp: 6, code: c, day: true }; weatherScene(); return document.getElementById('wx').getAttribute('data-wx'); }).join()"
+  );
+  ok(kinds === ',,partly,cloudy,fog,fog,drizzle,rain,rain,snow,snow,storm', 'each weather code has its look: ' + kinds);
+  ok(
+    await js(
+      "cfg.weather = 'off'; weatherScene(); var a = document.getElementById('wx').getAttribute('data-wx'); cfg.weather = 'lausanne'; a === ''"
+    ),
+    'nothing over the scene when Weather is off'
+  );
+  ok(
+    await js(
+      "var n = scene.name; scene.name = ''; weatherScene(); var a = document.getElementById('wx').getAttribute('data-wx'); scene.name = n; a === ''"
+    ),
+    'nothing either in a style without a scene'
+  );
+  ok(
+    await js(
+      "weatherNow = { city: 'lausanne', temp: 6, code: 63, day: false }; weatherScene(); document.getElementById('wx').getAttribute('data-night') === '1'"
+    ),
+    'at night the clouds and rain are dimmer'
+  );
+  S.weather = null;
+  S.config = {};
+
   // ---- a warning before uninstalling the privacy blocks ----
   await js("uninstallMenu({ id: 'ooo.lew.lifesgoodwithoutspying', title: 'lifesgoodwithoutspying' }); 0");
   await key(DOWN);

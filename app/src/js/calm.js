@@ -1203,6 +1203,7 @@ function refreshWeather(force) {
       weatherNow = null;
       tick();
     }
+    weatherScene();
     return;
   }
   if (!force && Date.now() - weatherAt < 10 * 60000 && weatherNow && weatherNow.city === c) return;
@@ -1211,6 +1212,7 @@ function refreshWeather(force) {
     function (x) {
       weatherNow = x && typeof x.temp === 'number' ? x : null;
       tick();
+      weatherScene();
     },
     function () {}
   );
@@ -1364,9 +1366,128 @@ function sceneApply() {
     st.setProperty('--glass', 'url("scene-' + scene.glass + (scene.glass === scene.name ? suffix : '') + '-glass.jpg")');
     if (themeKeys.indexOf('--glass') < 0) themeKeys.push('--glass');
   }
+  weatherScene();
 }
 function sceneCheck() {
   if (scene.daily && dayPeriod() !== scene.period) sceneApply();
+}
+
+/* ---------- the weather on the scene: clouds, rain, snow, fog and storms over the picture, from the weather of the city (Customise >
+   Weather). The textures are drawn once here at half size and scaled up; the layers only move and fade, which the GPU of older TVs
+   keeps up with (home.css, #wx). Nothing is shown without a scene, a city or a weather answer ---------- */
+var wxKind = '',
+  wxTex = {};
+function weatherKind(code) {
+  if (code === 2) return 'partly';
+  if (code === 3) return 'cloudy';
+  if (code === 45 || code === 48) return 'fog';
+  if (code >= 51 && code <= 57) return 'drizzle';
+  if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return 'rain';
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return 'snow';
+  if (code >= 95) return 'storm';
+  return '';
+}
+function wxCanvas(w, h, draw) {
+  var cv = document.createElement('canvas');
+  cv.width = w;
+  cv.height = h;
+  draw(cv.getContext('2d'), w, h);
+  return 'url(' + cv.toDataURL('image/png') + ')';
+}
+/* a seed so the same weather always draws the same picture */
+function wxRand(seed) {
+  var s = seed;
+  return function () {
+    s = (s * 16807) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+}
+/* falling rain or snow in a 256 x 256 tile that repeats without a seam (what leaves the bottom comes in at the top) */
+function wxFallTex(kind) {
+  var rnd = wxRand(kind === 'snow' ? 7 : kind === 'drizzle' ? 11 : 13);
+  return wxCanvas(256, 256, function (g, w, h) {
+    var n = kind === 'snow' ? 34 : kind === 'drizzle' ? 26 : kind === 'storm' ? 70 : 48;
+    for (var i = 0; i < n; i++) {
+      var x = rnd() * w,
+        y = rnd() * h,
+        a = 0.16 + rnd() * 0.3;
+      for (var k = -1; k <= 0; k++) {
+        if (kind === 'snow') {
+          var r = 0.8 + rnd() * 1.6,
+            gr = g.createRadialGradient(x, y + k * h, 0, x, y + k * h, r);
+          gr.addColorStop(0, 'rgba(255,255,255,' + (a + 0.35) + ')');
+          gr.addColorStop(1, 'rgba(255,255,255,0)');
+          g.fillStyle = gr;
+          g.fillRect(x - r, y + k * h - r, 2 * r, 2 * r);
+        } else {
+          var len = kind === 'drizzle' ? 6 + rnd() * 6 : 10 + rnd() * 16;
+          g.strokeStyle = 'rgba(214,226,255,' + a + ')';
+          g.lineWidth = kind === 'drizzle' ? 0.6 : 0.8;
+          g.beginPath();
+          g.moveTo(x, y + k * h);
+          g.lineTo(x - len * 0.12, y + k * h + len);
+          g.stroke();
+        }
+      }
+    }
+  });
+}
+/* soft clouds in a 960 x 270 tile that repeats sideways: faint puffs gathered in a few banks and flattened (clouds over a lake are wide,
+   not round), denser for a covered sky */
+function wxCloudTex(dense) {
+  var rnd = wxRand(dense ? 5 : 3);
+  return wxCanvas(960, 270, function (g, w, h) {
+    var banks = dense ? 7 : 4,
+      FLAT = 0.42;
+    g.scale(1, FLAT);
+    for (var b = 0; b < banks; b++) {
+      var bx = rnd() * w,
+        by = (24 + Math.pow(rnd(), 1.4) * (h - 70)) / FLAT,
+        n = dense ? 16 : 11;
+      for (var i = 0; i < n; i++) {
+        var x = bx + (rnd() - 0.5) * (dense ? 420 : 300),
+          y = by + (rnd() - 0.5) * 70,
+          r = 28 + rnd() * (dense ? 80 : 60),
+          a = (dense ? 0.08 : 0.13) + rnd() * 0.1;
+        for (var k = -1; k <= 1; k++) {
+          var gr = g.createRadialGradient(x + k * w, y, 0, x + k * w, y, r);
+          gr.addColorStop(0, 'rgba(255,255,255,' + a + ')');
+          gr.addColorStop(0.55, 'rgba(255,255,255,' + a * 0.55 + ')');
+          gr.addColorStop(1, 'rgba(255,255,255,0)');
+          g.fillStyle = gr;
+          g.fillRect(x + k * w - r, y - r, 2 * r, 2 * r);
+        }
+      }
+    }
+  });
+}
+function wxTexture(key, make) {
+  if (!wxTex[key]) wxTex[key] = make();
+  return wxTex[key];
+}
+function weatherScene() {
+  var box = $('wx');
+  if (!box) return;
+  var w = weatherNow && weatherNow.city === cfg.weather ? weatherNow : null,
+    kind = scene.name && w ? weatherKind(w.code) : '',
+    night = scene.period === 'nuit' || (w && w.day === false);
+  box.setAttribute('data-wx', kind);
+  box.setAttribute('data-night', night ? '1' : '');
+  if (kind === wxKind) return;
+  wxKind = kind;
+  var covered = kind && kind !== 'partly' && kind !== 'fog';
+  if (kind && kind !== 'fog')
+    box.querySelector('.wx-cloud').style.backgroundImage = wxTexture(covered ? 'cloudy' : 'partly', function () {
+      return wxCloudTex(covered);
+    });
+  if (kind === 'fog')
+    box.querySelector('.wx-mist').style.backgroundImage = wxTexture('cloudy', function () {
+      return wxCloudTex(true);
+    });
+  if (kind === 'drizzle' || kind === 'rain' || kind === 'storm' || kind === 'snow')
+    box.querySelector('.wx-fall').style.backgroundImage = wxTexture(kind, function () {
+      return wxFallTex(kind);
+    });
 }
 
 /* ---------- the Remote buttons screen (Customise): the taught buttons as cards beside a drawing of the remote; teaching a button is a
