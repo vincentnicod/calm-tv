@@ -15,6 +15,7 @@ done
 LASTAPP=/var/luna/preferences/bootd_last_foreground_app_id.json
 grep -q cleanyourtv $LASTAPP 2>/dev/null && echo '{"lastAppId":"com.webos.app.home"}' > $LASTAPP
 [ -f $D/debloat-undo.sh ] && sh $D/debloat-undo.sh </dev/null
+[ -f $D/vpn.sh ] && sh $D/vpn.sh down </dev/null   # the VPN's tunnel, routes and firewall rules
 pkill -f "[c]leanyourtv/watchdog.sh"   # it would restart the service
 pkill -f "[1]0-cleanyourtv-home"       # the watchdog of a version before watchdog.sh
 pkill -f "[c]leanyourtv/helper.js"

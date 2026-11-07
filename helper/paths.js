@@ -19,6 +19,7 @@ module.exports = {
   LIVE: env.CYTV_LIVE_DIR || D + '/live',
   THEMES: env.CYTV_THEMES || path.join(__dirname, 'themes'),
   VOICE: D + '/voice',
+  VPN: env.CYTV_VPN_DIR || D + '/vpn', // the VPN's servers: their WireGuard files hold private keys
   HOOK: D + '/inputhook',
   APP: D + '/app',
   COMPAT: [D + '/compat.json', SERVICE_DIR + '/compat.json'],

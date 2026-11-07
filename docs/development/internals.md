@@ -25,6 +25,7 @@
 | `apps.js`, `running.js` | The app list, icons, usage, launching and the launcher's own settings; the running apps to close (Back on Home). |
 | `inputkey.js`, `inputhook.js`, `picker.js` | The Input key: the hook in LG's input processes, the key binds, the Inputs picker. |
 | `quick.js` | Quick settings: LG's picture mode, sound mode and sleep timer through LG's settings service, screen off, and the sleep timer's warning a minute before. The panel is the picker app's (`picker/app`, launch parameter `panel`). |
+| `vpn.js` | The VPN: WireGuard files (checked, kept root-only in `vpn/`), the keys given to `wireguard-go` over its control socket, a check every 30 seconds, the pause while a chosen app is in front (`apps.watchForeground`), the setup page on port 8770. `scripts/vpn.sh` sets the routes, the DNS redirect, the kill switch and blocks IPv6, all in RAM. |
 | `manager.js`, `updates.js`, `debloat.js` | The manager's API, updates from GitHub releases with rollback, switching the debloat. |
 | `live.js`, `notify.js`, `notifyapi.js` | One feature each. |
 | `theme.js`, `themeschema.js` | Themes: `themeschema.js` holds every setting a theme can make, the checks and how a theme becomes CSS variables; `theme.js` reads themes from GitHub and keeps them on the TV. |

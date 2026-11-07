@@ -43,5 +43,9 @@ echo; echo "===== The service's last operations (a start that finds a dead proce
 cat /tmp/cytv-run.json 2>&1
 echo; echo "===== Live TV status ====="
 curl -s -m 3 http://127.0.0.1:8765/api/live/status 2>&1
+echo; echo "===== VPN (no keys; addresses hidden) ====="
+curl -s -m 5 http://127.0.0.1:8765/api/vpn 2>&1 | sed 's/"code":"[0-9]*"/"code":"<hidden>"/; s/"url":"[^"]*"/"url":"<hidden>"/'
+echo; [ -f $D/vpn.sh ] && sh $D/vpn.sh status 2>&1
+tail -20 /tmp/cleanyourtv-vpn.log 2>/dev/null | sed -E 's/[0-9]{1,3}(\.[0-9]{1,3}){3}/<ip>/g'
 echo
 REMOTE

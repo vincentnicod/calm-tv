@@ -122,6 +122,16 @@ function report() {
         .join('\n')
   );
   sec('Service status', sh('curl -s -m 3 http://127.0.0.1:8765/api/manager/status 2>&1').slice(0, 2500) || '(service not answering)');
+  // the VPN's state and the tunnel's errors; its files hold private keys and are never read here, addresses are hidden
+  sec(
+    'VPN',
+    (
+      sh('curl -s -m 5 http://127.0.0.1:8765/api/vpn 2>&1').replace(/"(code|url)":"[^"]*"/g, '"$1":"<hidden>"') +
+      '\n' +
+      sh('[ -f ' + D + '/vpn.sh ] && sh ' + D + '/vpn.sh status 2>&1') +
+      read('/tmp/cleanyourtv-vpn.log', 10)
+    ).replace(/\b\d{1,3}(\.\d{1,3}){3}\b/g, '<ip>')
+  );
   sec('Setup log (' + SETUPLOG + ')', read(SETUPLOG, 150));
   sec('Service log saved at the last rollback', read(SETUPLOG + '.service', 80));
   sec('Last update error', read(D + '/last-error.txt'));

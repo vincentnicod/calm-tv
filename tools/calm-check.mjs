@@ -66,6 +66,8 @@ const S = {
   lgHome: 0,
   powerOff: 0,
   systemReads: 0,
+  vpn: { on: false, kill: false, server: '', servers: [], pauseFor: [], state: 'none', error: '', paused: '', pairing: null },
+  vpnCalls: [],
   system: {
     mem: { total: 2030392, used: 1582332, available: 448060 },
     swap: { total: 614396, used: 359172 },
@@ -189,6 +191,21 @@ const srv = http.createServer(async (q, r) => {
   if (u === '/api/uninstall') return S.uninstalled.push((await body(q)).id), j({ returnValue: true });
   if (u === '/api/lg-home') return S.lgHome++, j({ returnValue: true });
   if (u === '/api/system') return S.systemReads++, j(S.system);
+  if (u === '/api/vpn' || u.indexOf('/api/vpn/') === 0) {
+    const b = q.method === 'POST' ? await body(q) : {},
+      V = S.vpn;
+    if (q.method === 'POST') S.vpnCalls.push(u + ' ' + JSON.stringify(b));
+    if (u === '/api/vpn/pair') return j({ url: 'http://192.168.1.20:8770', code: '123456', seconds: 600 });
+    if (u === '/api/vpn/pause-for') {
+      V.pauseFor = V.pauseFor.filter(a => a !== b.id).concat(b.on ? [b.id] : []);
+      return j({ returnValue: true, pauseFor: V.pauseFor });
+    }
+    if (u === '/api/vpn' && q.method === 'POST') {
+      if (typeof b.on === 'boolean') (V.on = b.on), (V.state = b.on ? 'connected' : 'off');
+      if (typeof b.kill === 'boolean') V.kill = b.kill;
+    }
+    return j(V);
+  }
   if (u === '/api/power/off') return S.powerOff++, j({ returnValue: true });
   if (u === '/api/inputs/pin') {
     const b = await body(q);
@@ -814,6 +831,48 @@ try {
     'an input with nothing connected is dimmed'
   );
   S.pinned = [];
+
+  // ---- the VPN: Customise > VPN adds a server from a phone, turns it on; the date says so; an app's menu pauses it ----
+  await js('closeMenus(); customizeMenu(); 0');
+  const vpnRow = (await js('stack[0].items.map(function (i) { return i.label; })')).indexOf('VPN');
+  ok(vpnRow >= 0 && vpnRow < 8, 'Customise offers the VPN without scrolling');
+  await js('stack[0].idx = ' + vpnRow + '; drawMenu(); 0');
+  await key(OK, 900);
+  ok(
+    (await menuTitle()) === 'Add a VPN server' &&
+      (await js('stack[stack.length - 1].items[0].label')) === 'http://192.168.1.20:8770' &&
+      (await js('stack[stack.length - 1].items[1].label')) === '123456',
+    'no server yet: it shows the setup address and code at once'
+  );
+  S.vpn.servers = [{ id: 'tv-ch-12', name: 'TV-CH-12', cc: 'CH' }];
+  S.vpn.server = 'tv-ch-12';
+  S.vpn.state = 'off';
+  await sleep(3200);
+  ok(
+    (await menuTitle()) === 'VPN' && (await js('stack[stack.length - 1].items[1].sub')) === 'TV-CH-12',
+    'a server added from the phone: the VPN menu opens with it'
+  );
+  await js('stack[stack.length - 1].idx = 0; drawMenu(); 0');
+  await key(OK, 900);
+  ok(
+    S.vpnCalls.indexOf('/api/vpn {"on":true}') >= 0 && (await js('stack[stack.length - 1].items[0].sub')) === 'Connected',
+    'Turn on: connected'
+  );
+  await js('closeMenus(); tick(); 0');
+  ok(/ · VPN$/.test(await js("document.getElementById('date').textContent")), 'the date on Home says VPN while it is connected');
+  await js('closeMenus(); appMenu(tiles.netflix._a); 0');
+  const pauseIdx = (await js('stack[0].items.map(function (i) { return i.label; })')).indexOf('Pause the VPN while open');
+  ok(pauseIdx >= 0, "an app's menu offers to pause the VPN while it is open");
+  await js('stack[0].idx = ' + pauseIdx + '; drawMenu(); 0');
+  await key(OK, 700);
+  ok(S.vpn.pauseFor.join() === 'netflix', 'OK pauses it for that app');
+  await js('closeMenus(); vpnMenu(); 0');
+  await sleep(500);
+  await js('stack[stack.length - 1].idx = 0; drawMenu(); 0');
+  await key(OK, 900);
+  await js('closeMenus(); tick(); 0');
+  ok(!S.vpn.on && !/VPN/.test(await js("document.getElementById('date').textContent")), 'Turn off: the date says nothing more');
+  S.vpn = { on: false, kill: false, server: '', servers: [], pauseFor: [], state: 'none', error: '', paused: '', pairing: null };
 
   // ---- icons that failed: the dock's white logos and the grid come back once the service answers ----
   S.config = {};

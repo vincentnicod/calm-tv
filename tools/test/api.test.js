@@ -207,6 +207,8 @@ const CALLS = [
   ['live state', 'GET', '/api/live/state'],
   ['themes', 'GET', '/api/theme/list'],
   ['voice', 'GET', '/api/voice/status'],
+  ['vpn without a server', 'GET', '/api/vpn'],
+  ['vpn cannot turn on without a server', 'POST', '/api/vpn', { on: true }],
   ['icon', 'GET', '/icon/netflix'],
   ['icon of an app without the file', 'GET', '/icon/youtube.leanback.v4'],
   ['icon of an unknown app', 'GET', '/icon/nope'],
@@ -305,6 +307,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       'weather',
       'quick',
       'system',
+      'vpn',
     ];
     const okTv = tv.sdk === '10.2.2' && tv.pickerMode === 'overlay' && tv.notifyWindow === 'topui';
     const okSv = JSON.stringify(sv.features) === JSON.stringify(want) && !Object.keys(sv.failed).length;

@@ -1028,6 +1028,30 @@
   "status": 200,
   "type": "application/json"
  },
+ "vpn without a server": {
+  "body": {
+   "error": "",
+   "kill": false,
+   "on": false,
+   "pairing": null,
+   "pauseFor": [],
+   "paused": "",
+   "server": "",
+   "servers": [],
+   "state": "none"
+  },
+  "cors": "null",
+  "status": 200,
+  "type": "application/json"
+ },
+ "vpn cannot turn on without a server": {
+  "body": {
+   "error": "add a server first"
+  },
+  "cors": "null",
+  "status": 409,
+  "type": "application/json"
+ },
  "icon": {
   "body": {
    "bytes": 8

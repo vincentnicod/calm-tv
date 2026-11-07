@@ -160,7 +160,9 @@ function create(ctx) {
       if ((await apps()).some(a => a.id === id)) bump(id);
     }
   }
-  // poll every few seconds: a subscription's output is block-buffered by luna-send, so it would arrive late
+  // poll every few seconds: a subscription's output is block-buffered by luna-send, so it would arrive late. Other parts can follow the
+  // app in front with watchForeground(fn) (the VPN pauses for chosen apps).
+  const watchers = [];
   function pollForeground() {
     exec.execFile(
       'luna-send',
@@ -169,7 +171,10 @@ function create(ctx) {
       (e, out) => {
         try {
           const o = JSON.parse(out);
-          if (o.returnValue !== false) onForeground(o.appId || '');
+          if (o.returnValue !== false) {
+            onForeground(o.appId || '');
+            watchers.forEach(w => w(o.appId || ''));
+          }
         } catch (_) {}
       }
     );
@@ -293,6 +298,7 @@ function create(ctx) {
     prefix: '/icon/',
     handle,
     start: () => setInterval(pollForeground, 4000),
+    watchForeground: fn => watchers.push(fn),
     apps: installed,
   };
 }

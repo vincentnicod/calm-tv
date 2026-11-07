@@ -292,6 +292,8 @@ function appMenu(a) {
         uninstallMenu(a);
       },
     });
+  var vpnRow = vpnAppItem(a);
+  if (vpnRow) items.push(vpnRow);
   openMenu(look(a).label, items);
 }
 
@@ -567,6 +569,7 @@ function customizeMenu() {
     { label: t('Remote buttons'), stay: true, fn: RB.open },
     { label: 'LG Home', sub: t('for now, without a restart'), stay: true, fn: lgHomeMenu },
     { label: t('Inputs on Home'), stay: true, fn: pinMenu },
+    vpnItem(),
     idleItem(),
     nightItem(),
     placeItem(),

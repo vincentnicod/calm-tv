@@ -194,6 +194,7 @@ Steefzar for the original CleanYourTV.
 - the **style** (Paysage, Verre, Éditorial, Lin, Aurore, Calm, Original),
 - the **remote buttons** given to apps or to Quick settings,
 - **LG Home** and **Inputs on Home**,
+- the **VPN**: on or off, the server, the kill switch and the apps that pause it ([VPN](vpn.md)),
 - the **idle screen**, **night mode**, the **city** and the **weather**,
 - the **top buttons** (add Inputs, Quick settings, Settings, Live TV, LG Home, Power off or any app, or remove one),
 - **hidden apps** (show them again),

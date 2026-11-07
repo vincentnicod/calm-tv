@@ -11,7 +11,7 @@ uninstall. Optional features contact other services only when you switch them on
 
 | Where | What |
 |---|---|
-| `/media/developer/cleanyourtv/` | The service (`helper.js` and modules), the launcher (`app/`), scripts, `config.json`, `usage.json`, the backup of the original state in `backup/`, downloaded themes in `themes/`, Live TV data in `live/`, the optional voice download in `voice/` |
+| `/media/developer/cleanyourtv/` | The service (`helper.js` and modules), the launcher (`app/`), scripts, `config.json`, `usage.json`, the backup of the original state in `backup/`, downloaded themes in `themes/`, Live TV data in `live/`, the optional voice download in `voice/`, the VPN's servers in `vpn/` and its tunnel program `wireguard-go` |
 | `/media/developer/apps/usr/palm/applications/` | The apps `com.cleanyourtv.manager`, `.picker` and `.notify` |
 | `/media/developer/apps/usr/palm/services/com.cleanyourtv.manager.service/` | The installed package contents |
 | `/var/lib/webosbrew/init.d/` | Boot scripts `10-cleanyourtv-home` and, with debloat on, `15-cleanyourtv-debloat` (links into the folder above) |
@@ -34,7 +34,8 @@ The bind mount lives in RAM. A reboot without the boot scripts, or the Homebrew 
 |---|---|
 | The service (`node helper.js`), running as root | `127.0.0.1:8765` |
 | The input hook, injected into LG's input service (`lginput2`; other input processes only on firmware without it) | none |
-| Short-lived pages (Live TV pairing, share log, voice setup) and the optional notification endpoint | [Security](security.md#what-this-changes-on-a-tv) |
+| With the VPN on: `wireguard-go cytv0` (the tunnel), its routes, the `iptables` chains `CYTV_VPN_DNS` (nat) and `CYTV_VPN` (kill switch), all in RAM ([VPN](vpn.md)) | none |
+| Short-lived pages (Live TV pairing, share log, voice setup, VPN setup) and the optional notification endpoint | [Security](security.md#what-this-changes-on-a-tv) |
 
 ## What the uninstall removes
 

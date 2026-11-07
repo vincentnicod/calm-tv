@@ -25,6 +25,18 @@ license is in the frida-gum project). Anyone who received this package can ask f
 issue tracker, and we will provide it. The GPL-3.0 text is in `LICENSE-inputhookpp-GPL-3.0.txt`. This applies to
 that library only, not to the rest of this project.
 
+## VPN (wireguard-go)
+
+`third-party/wireguard-go/wireguard-go` (installed to `/media/developer/cleanyourtv/wireguard-go` on the TV) is
+[wireguard-go](https://git.zx2c4.com/wireguard-go) 0.0.20250522 (commit `f333402bd9cbe0f3eeb02507bd14e23d7d639280`), unmodified, built
+for 32-bit ARM Linux by `third-party/wireguard-go/build.sh` (Go 1.27.3, reproducible; hashes in `third-party/wireguard-go/SHA256SUMS`).
+It runs the VPN's tunnel; our service talks to it over its control socket and is not linked with it.
+
+| Component | Licence | Source |
+|---|---|---|
+| wireguard-go | MIT (`LICENSE-wireguard-go-MIT.txt`) | [git.zx2c4.com/wireguard-go](https://git.zx2c4.com/wireguard-go) |
+| Go standard library and `golang.org/x/crypto`, `x/net`, `x/sys` (compiled into it) | BSD-3-Clause | [go.dev](https://go.dev/LICENSE) |
+
 ## Voice (optional download)
 
 Nothing below is shipped in the package; the manager app downloads it on request (see the Voice page of the documentation) and

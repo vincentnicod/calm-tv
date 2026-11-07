@@ -114,11 +114,15 @@ copy_files() {
   if [ -f $S/BUILD ]; then cp $S/BUILD $D/BUILD; else rm -f $D/BUILD; fi   # the commit of a test build
   cp $S/scripts/* $D/
   mkdir -p $D/inputhook && cp $S/inputhook/* $D/inputhook/ && chmod 755 $D/inputhook/ezinject
+  # the VPN's tunnel program may be running: put the new file next to it and rename (a copy over a running program fails)
+  if [ -f $S/vpn/wireguard-go ] && ! cmp -s $S/vpn/wireguard-go $D/wireguard-go; then
+    cp $S/vpn/wireguard-go $D/wireguard-go.new && chmod 755 $D/wireguard-go.new && mv -f $D/wireguard-go.new $D/wireguard-go
+  fi
   [ -d $S/licenses ] && { mkdir -p $D/licenses; cp $S/licenses/* $D/licenses/; }
   chmod +x $D/*.sh $D/10-cleanyourtv-home $D/15-cleanyourtv-debloat
   # root runs these files at boot and from the Input-key hook: nobody else may write them (the dev partition is world-writable)
   chmod -R go-w $D $S 2>/dev/null
-  mkdir -p $D/live; chmod 700 $D/live 2>/dev/null; chmod 600 $D/config.json $D/usage.json $D/live/* 2>/dev/null
+  mkdir -p $D/live $D/vpn; chmod 700 $D/live $D/vpn 2>/dev/null; chmod 600 $D/config.json $D/usage.json $D/live/* $D/vpn/* 2>/dev/null
   [ -f $D/config.json ] || cp $S/config.example.json $D/config.json
   [ -f $D/compat.json ] || cp $S/compat.json $D/compat.json
 }

@@ -18,6 +18,8 @@ on-device voice recognition, and an optional debloat of LG's ads and telemetry.
 - **Voice (optional).** Speech recognition on the TV (Moonshine), with answers from Home Assistant's Assist, a language model through
   OpenRouter or your own server, shown as text. [More](voice.md).
 - **Debloat.** Stops LG's ad and telemetry services and blocks a few ad servers. [More](debloat.md).
+- **VPN.** The TV's internet traffic through a WireGuard server (Proton VPN and others), with a kill switch and a pause for chosen apps.
+  [More](vpn.md).
 - **Manager app.** Sets up, updates and removes everything from the TV. [More](manager.md).
 
 LG's system files are not modified. The launcher takes over Home with a mount that exists only in RAM, so a reboot without the

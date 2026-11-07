@@ -12,6 +12,7 @@ local network on request, and an optional notification endpoint is off by defaul
 | 8767 | Network notifications | Only when you switch it on in the manager app; needs a token |
 | 8768 and up | Share-log page | Ten minutes, at a random address, with a masked report |
 | 8769 | Voice setup page | Ten minutes, at a random 128-bit address, closed after saving |
+| 8770 | VPN setup page | While you add a VPN server: a 6-digit code shown on the TV, ten minutes, closed after five wrong codes ([VPN](vpn.md)) |
 
 What the setup changes on the TV is listed in [What it changes on the TV](tv-changes.md).
 

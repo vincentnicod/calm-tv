@@ -209,7 +209,7 @@ function tick() {
   var d = new Date();
   try {
     $('time').textContent = d.toLocaleTimeString(LOC, clockOpts());
-    $('date').textContent = d.toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' }) + weatherText();
+    $('date').textContent = d.toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' }) + weatherText() + vpnText();
   } catch (e) {
     $('time').textContent = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
   }

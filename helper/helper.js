@@ -63,6 +63,7 @@ load('running', () => require('./running').create(ctx));
 load('weather', () => require('./weather').create(ctx));
 load('quick', () => require('./quick').create(ctx));
 load('system', () => require('./system').create(ctx));
+load('vpn', () => require('./vpn').create(ctx));
 
 require('./server')
   .create({ features: () => loaded })
@@ -71,6 +72,7 @@ require('./server')
     /** @type {Array<[string, number]>} */
     const secret = [
       [P.LIVE, 0o700],
+      [P.VPN, 0o700],
       [P.CONF, 0o600],
       [P.USAGE, 0o600],
     ];

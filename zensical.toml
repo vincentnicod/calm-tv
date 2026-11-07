@@ -25,6 +25,7 @@ nav = [
     { "Picture notifications" = "notifications.md" },
     { "Voice (optional)" = "voice.md" },
     { "Debloat" = "debloat.md" },
+    { "VPN" = "vpn.md" },
     { "The manager app" = "manager.md" },
   ] },
   { "Reference" = [
