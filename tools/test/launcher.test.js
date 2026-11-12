@@ -91,4 +91,27 @@ run(async () => {
         'com.webos.app.inputcommon ×5: 268 MB',
     'the rows of the System panel: ' + rows.join(' | ')
   );
+  const hw = c
+    .systemRows({
+      mem: { total: 1, used: 1, available: 0 },
+      swap: { total: 0, used: 0 },
+      cpu: { use: 1, cores: 4 },
+      load: [],
+      uptime: 60,
+      top: [],
+      temp: 47,
+      wifi: { signal: -54, quality: 80 },
+      net: { iface: 'wlan0', down: 2048, up: 90 },
+      storage: { free: 4194304, total: 6291456 },
+      flash: 20,
+      panel: { hours: 4769, refreshIn: 1231, failures: 0 },
+    })
+    .slice(5)
+    .map(r => r.label + ': ' + r.sub);
+  ok(
+    hw.join(' | ') ===
+      'Chip temperature: 47 °C | Network: Wi-Fi -54 dBm · ↓ 2.0 MB/s · ↑ 90 kB/s | Storage: 4.00 GB free · wear ≤ 20 % | ' +
+        'Panel: 4769 h · Pixel Refresher in 1231 h',
+    'the hardware rows, where the TV gives them: ' + hw.join(' | ')
+  );
 });

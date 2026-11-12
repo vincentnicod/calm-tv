@@ -58,6 +58,9 @@ launcher as `app/font-*.woff2` under the SIL Open Font License 1.1 (each licence
 The home-screen design follows the Android TV project [CleanYourTV](https://github.com/Gathin23/cleanyourtv) (MIT). No code from
 it is used.
 
+Where the chip's temperature and the OLED panel's counters are on the TV, and the units of those counters, are taken from the
+documentation of [Glasshouse](https://github.com/rorygallagher2024/glasshouse) by Rory Gallagher (MIT). No code from it is used.
+
 ## This documentation
 
 Built with [Zensical](https://zensical.org).

@@ -8,7 +8,15 @@ run(async () => {
   const proc = process.env.CYTV_PROC;
   const write = (f, s) => {
     const p = path.join(proc, f);
-    if (!fs.existsSync(path.dirname(p))) fs.mkdirSync(path.dirname(p));
+    path
+      .relative(proc, path.dirname(p))
+      .split(path.sep)
+      .filter(Boolean)
+      .reduce((d, part) => {
+        const n = path.join(d, part);
+        if (!fs.existsSync(n)) fs.mkdirSync(n);
+        return n;
+      }, proc);
     fs.writeFileSync(p, s);
   };
   write(
@@ -37,7 +45,90 @@ run(async () => {
   write('300/cmdline', '');
 
   const apps = { apps: async () => [{ id: 'youtube.leanback.v4', title: 'YouTube' }] };
-  const sys = req('system').create({ feature: n => (n === 'apps' ? apps : null) });
+  // the hardware readings: a TV without their sources gives none of them
+  let dfOut = '';
+  const sys0 = req('system').create({ feature: () => null, run: async () => ({ out: dfOut }) });
+  let r0 = (await call(sys0, '/api/system')).j;
+  ok(
+    r0.temp === undefined &&
+      r0.wifi === undefined &&
+      r0.net === undefined &&
+      r0.storage === undefined &&
+      r0.flash === undefined &&
+      r0.panel === undefined,
+    'a TV without the hardware sources: no temperature, network, storage or panel readings, and no error'
+  );
+  write('lg/pm/temperature', '47\n');
+  write(
+    'net/wireless',
+    'Inter-| sta-|   Quality        |   Discarded packets\n face | tus | link level noise |  nwid\n wlan0: 0000   56.  -54.  -256        0\n'
+  );
+  const dev = (rx, tx) =>
+    'Inter-|   Receive  |  Transmit\n face |bytes\n    lo: 500 5 0 0 0 0 0 0 500 5 0 0 0 0 0 0\n wlan0: ' +
+    rx +
+    ' 9 0 0 0 0 0 0 ' +
+    tx +
+    ' 9 0 0 0 0 0 0\n';
+  write('net/dev', dev(1000000, 500000));
+  const sysDir = path.join(path.dirname(proc), 'sys'),
+    pn = path.join(path.dirname(proc), 'pnwash');
+  process.env.CYTV_SYS = sysDir;
+  process.env.CYTV_PNWASH = pn;
+  for (const d of [sysDir, sysDir + '/block', sysDir + '/block/mmcblk0', sysDir + '/block/mmcblk0/device', pn]) fs.mkdirSync(d);
+  fs.writeFileSync(sysDir + '/block/mmcblk0/device/life_time', '0x01 0x02\n');
+  const pw = {
+    autoOffRsLastTime: '4767',
+    autoJbLastTime: '4000',
+    autoJbInterval: '2000 ok',
+    completedOffRsCount: '812',
+    completedJbCount: '2',
+    failAlertCount: '0',
+  };
+  Object.keys(pw).forEach(k => fs.writeFileSync(pn + '/' + k, pw[k] + '\n'));
+  delete require.cache[require.resolve(path.join(__dirname, '..', '..', 'helper', 'paths.js'))];
+  delete require.cache[require.resolve(path.join(__dirname, '..', '..', 'helper', 'oled.js'))];
+  delete require.cache[require.resolve(path.join(__dirname, '..', '..', 'helper', 'system.js'))];
+  let lunaAsked = 0;
+  const oled = req('oled').create({ luna: async () => (lunaAsked++, { returnValue: true, panelUsageTime: 28614 }) });
+  dfOut = 'Filesystem 1K-blocks Used Available Use% Mounted on\n/dev/mmcblk0p59 6291456 2097152 4194304 33% /mnt/lg/appstore\n';
+  const sys1 = req('system').create({ feature: n => (n === 'oled' ? oled : null), run: async () => ({ out: dfOut }) });
+  r0 = (await call(sys1, '/api/system')).j;
+  ok(r0.temp === 47 && r0.wifi.signal === -54 && r0.wifi.quality === 80, "the chip's temperature in degrees, the Wi-Fi signal in dBm");
+  ok(
+    r0.storage.free === 4194304 && r0.storage.total === 6291456 && r0.flash === 20,
+    'free storage, and the worse of the two flash wear steps as a percentage'
+  );
+  ok(
+    r0.panel.hours === 4769 &&
+      r0.panel.refreshIn === 2000 - 769 &&
+      r0.panel.shortCount === 812 &&
+      r0.panel.refreshCount === 2 &&
+      r0.panel.failures === 0,
+    'the panel: hours from the 10-minute counter, hours left before the next Pixel Refresher, the cycles done'
+  );
+  ok(r0.net === undefined, 'no network speed from a single reading');
+  write('net/dev', dev(1000000 + 2048000, 500000 + 102400));
+  await new Promise(res => setTimeout(res, 1000));
+  r0 = (await call(sys1, '/api/system')).j;
+  ok(
+    r0.net.iface === 'wlan0' && r0.net.down > 1000 && r0.net.down <= 2000 && r0.net.up > 50 && r0.net.up <= 100,
+    'the speed since the last reading, in kB/s'
+  );
+  ok(lunaAsked === 1, 'the panel counters are asked at most once a minute');
+  const om = req('oled');
+  ok(Object.keys(om.figures(null, {})).length === 0, 'an LCD TV: no panel readings');
+  ok(
+    om.figures(600, { autoJbLastTime: 500, autoJbInterval: 2000 }).refreshIn === undefined,
+    'a counter behind its last run gives no countdown'
+  );
+  const sm0 = req('system');
+  ok(
+    sm0.temperature('') === null && sm0.temperature('0') === null && sm0.flashWear('0x00 0x00') === null && sm0.wireless('') === null,
+    'unreadable sources give nothing'
+  );
+  for (const f of ['lg/pm/temperature', 'net/wireless', 'net/dev']) fs.unlinkSync(path.join(proc, f));
+
+  const sys = req('system').create({ feature: n => (n === 'apps' ? apps : null), run: async () => ({ out: '' }) });
   let r = await call(sys, '/api/system');
   ok(
     r.j.mem.total === 2030392 && r.j.mem.available === 448060 && r.j.mem.used === 2030392 - 448060,

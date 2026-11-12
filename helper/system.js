@@ -2,7 +2,9 @@
 // asks, every 2 seconds while it is open; nothing runs in between.
 //   GET /api/system  ->  {mem: {total, used, available} (kB), swap: {total, used}, cpu: {use (%), cores}, load, uptime (s),
 //                        top: [{name, kb, cpu, count}]: the processes that use the most memory, those of one name together, with their
-//                        share of the processor since the last call}
+//                        share of the processor since the last call; and, each only where this TV has it: temp (°C, the chip),
+//                        wifi: {signal (dBm), quality (%)}, net: {iface, down, up (kB/s since the last call)},
+//                        storage: {free, total (kB)}, flash (% of the storage chip's life used, upper bound), panel: see oled.js}
 // The processor shares need two readings: a call that finds no recent one reads twice, 400 ms apart.
 const fs = require('fs');
 const P = require('./paths'),
@@ -110,6 +112,50 @@ function summary(proc, before, now) {
     })),
   };
 }
+// ---- the hardware readings: each is left out where this TV does not have its source ----
+// LG's own tree gives the chip's temperature in plain degrees (the generic thermal zones are empty on these TVs). Never read
+// lg/pm/ts_enable: it crashes the reader (noted by the Glasshouse project, whose documentation names these sources).
+function temperature(text) {
+  const m = /-?\d+(\.\d+)?/.exec(text || ''),
+    v = m ? parseFloat(m[0]) : NaN;
+  return v > 0 && v < 150 ? Math.round(v) : null;
+}
+// /proc/net/wireless: "wlan0: 0000   58.  -52.  -256 ..." -> the link quality (of 70) and the signal in dBm
+function wireless(text) {
+  const m = /^\s*(\w+):\s+\w+\s+(-?\d+)\.?\s+(-?\d+)\.?/m.exec(text || '');
+  if (!m) return null;
+  const level = +m[3];
+  return { iface: m[1], quality: Math.max(0, Math.min(100, Math.round((+m[2] / 70) * 100))), signal: level > 0 ? level - 256 : level };
+}
+// /proc/net/dev -> {iface: {rx, tx}} in bytes
+function netBytes(text) {
+  const o = {};
+  for (const line of (text || '').split('\n')) {
+    const m = /^\s*([\w.-]+):\s*(\d+)(?:\s+\d+){7}\s+(\d+)/.exec(line);
+    if (m && m[1] !== 'lo') o[m[1]] = { rx: +m[2], tx: +m[3] };
+  }
+  return o;
+}
+// the interface that carries the traffic: the wireless one when it is up, else the one with the most received
+function mainIface(bytes, wifi) {
+  if (wifi && bytes[wifi.iface]) return wifi.iface;
+  return (
+    Object.keys(bytes)
+      .filter(k => !/^(cytv|tun|sit|ip6|dummy)/.test(k))
+      .sort((a, b) => bytes[b].rx - bytes[a].rx)[0] || ''
+  );
+}
+// JEDEC eMMC life_time "0x01 0x01": each step is 10 % of the chip's rated writes; the worse of the two, as its upper bound in %
+function flashWear(text) {
+  const v = ((text || '').match(/0x[0-9a-f]{2}/gi) || []).map(x => parseInt(x, 16)).filter(x => x >= 1 && x <= 11);
+  return v.length ? Math.min(100, Math.max.apply(null, v) * 10) : null;
+}
+// df -k of one folder -> {free, total} in kB
+function dfLine(text) {
+  const m = /\s(\d+)\s+(\d+)\s+(\d+)\s+\d+%\s/.exec((text || '').split('\n').slice(1).join(' '));
+  return m ? { total: +m[1], free: +m[3] } : null;
+}
+
 // processes of the same name together (LG runs several input apps, the web engine several pages), most memory first
 function group(procs, titles) {
   const by = {};
@@ -128,8 +174,46 @@ function group(procs, titles) {
 }
 
 function create(ctx) {
-  let last = null;
-  const names = {};
+  let last = null,
+    lastNet = null,
+    /** @type {any} */
+    slow = null, // storage and flash wear: they change slowly, read once a minute
+    slowAt = 0;
+  const names = {},
+    run = ctx.run || require('./exec').run;
+  async function hardware() {
+    const proc = P.PROC;
+    /** @type {any} */
+    const o = {};
+    const t = temperature(read(proc + '/lg/pm/temperature'));
+    if (t !== null) o.temp = t;
+    const w = wireless(read(proc + '/net/wireless'));
+    if (w) o.wifi = { signal: w.signal, quality: w.quality };
+    const bytes = netBytes(read(proc + '/net/dev')),
+      ifc = mainIface(bytes, w),
+      nowNet = { at: Date.now(), bytes };
+    if (ifc && lastNet && lastNet.bytes[ifc] && nowNet.at > lastNet.at) {
+      const s = (nowNet.at - lastNet.at) / 1000,
+        rate = k => Math.max(0, Math.round((bytes[ifc][k] - lastNet.bytes[ifc][k]) / 1024 / s));
+      o.net = { iface: ifc, down: rate('rx'), up: rate('tx') };
+    }
+    lastNet = nowNet;
+    if (!slow || Date.now() - slowAt > 60000) {
+      slow = {};
+      const d = dfLine((await run('df', ['-k', P.D], { timeout: 5000 })).out);
+      if (d) slow.storage = d;
+      const f = flashWear(read(P.SYS + '/block/mmcblk0/device/life_time'));
+      if (f !== null) slow.flash = f;
+      slowAt = Date.now();
+    }
+    Object.assign(o, slow);
+    const oled = ctx.feature && ctx.feature('oled');
+    if (oled) {
+      const p = await oled.read();
+      if (Object.keys(p).length) o.panel = p;
+    }
+    return o;
+  }
   async function system() {
     const proc = P.PROC;
     let before = last;
@@ -146,6 +230,11 @@ function create(ctx) {
     if (apps) for (const a of await apps.apps()) titles[a.id] = a.title;
     s.top = group(s.procs, titles);
     delete s.procs;
+    try {
+      Object.assign(s, await hardware());
+    } catch (e) {
+      console.error('system: hardware readings failed: ' + ((e && e.message) || e));
+    }
     return s;
   }
   return {
@@ -155,4 +244,4 @@ function create(ctx) {
   };
 }
 
-module.exports = { create, meminfo, cpuTimes, procName, summary, group };
+module.exports = { create, meminfo, cpuTimes, procName, summary, group, temperature, wireless, netBytes, mainIface, flashWear, dfLine };

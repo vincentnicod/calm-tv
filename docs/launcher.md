@@ -92,6 +92,10 @@ still free for apps, the swap, the processor's use (all cores together) and its 
 that use the most memory, with their share of the processor; processes of one name are counted together (LG runs several input apps).
 It reads again every 2 seconds while open and nothing once it is closed. Back closes it.
 
+Where the TV gives them, it also shows the chip's temperature, the Wi-Fi signal and the network speed, the free storage with the
+flash chip's wear, and on an OLED the **panel**: its hours of use, the hours left before the next Pixel Refresher (LG's long
+compensation, about every 2,000 hours) and any failed run. These are read only; nothing about the panel's care is changed.
+
 ## Inputs on Home
 
 Hold OK on an input in the **Inputs** list and choose **Add to Home**, or use **Customise** > **Inputs on Home**. The input becomes a tile

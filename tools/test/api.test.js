@@ -306,6 +306,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       'running',
       'weather',
       'quick',
+      'oled',
       'system',
       'vpn',
     ];

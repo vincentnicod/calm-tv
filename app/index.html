@@ -4643,6 +4643,14 @@ function showInputs(devs, title) {
       'cores': 'cœurs',
       'load': 'charge',
       'Up for': 'Allumé depuis',
+      'Chip temperature': 'Température de la puce',
+      'Network': 'Réseau',
+      'Storage': 'Stockage',
+      'free': 'libre',
+      'wear': 'usure',
+      'Panel': 'Dalle',
+      'Pixel Refresher in': 'Pixel Refresher dans',
+      'failed': 'en échec',
       'Reading...': 'Lecture...',
       'Could not read the system': 'Impossible de lire le système',
     },
@@ -4657,6 +4665,14 @@ function showInputs(devs, title) {
       'cores': 'Kerne',
       'load': 'Last',
       'Up for': 'An seit',
+      'Chip temperature': 'Chip-Temperatur',
+      'Network': 'Netzwerk',
+      'Storage': 'Speicher',
+      'free': 'frei',
+      'wear': 'Abnutzung',
+      'Panel': 'Panel',
+      'Pixel Refresher in': 'Pixel Refresher in',
+      'failed': 'fehlgeschlagen',
       'Reading...': 'Wird gelesen...',
       'Could not read the system': 'System nicht lesbar',
     },
@@ -4671,6 +4687,14 @@ function showInputs(devs, title) {
       'cores': 'kernen',
       'load': 'belasting',
       'Up for': 'Aan sinds',
+      'Chip temperature': 'Chiptemperatuur',
+      'Network': 'Netwerk',
+      'Storage': 'Opslag',
+      'free': 'vrij',
+      'wear': 'slijtage',
+      'Panel': 'Paneel',
+      'Pixel Refresher in': 'Pixel Refresher over',
+      'failed': 'mislukt',
       'Reading...': 'Lezen...',
       'Could not read the system': 'Systeem niet leesbaar',
     },
@@ -4685,6 +4709,14 @@ function showInputs(devs, title) {
       'cores': 'núcleos',
       'load': 'carga',
       'Up for': 'Encendido desde hace',
+      'Chip temperature': 'Temperatura del chip',
+      'Network': 'Red',
+      'Storage': 'Almacenamiento',
+      'free': 'libre',
+      'wear': 'desgaste',
+      'Panel': 'Panel',
+      'Pixel Refresher in': 'Pixel Refresher en',
+      'failed': 'fallidos',
       'Reading...': 'Leyendo...',
       'Could not read the system': 'No se pudo leer el sistema',
     },
@@ -4711,6 +4743,9 @@ function zeroKey(k) {
 }
 function sizeText(kb) {
   return kb >= 1048576 ? (kb / 1048576).toFixed(2) + ' GB' : Math.round(kb / 1024) + ' MB';
+}
+function rateText(kb) {
+  return kb >= 1024 ? (kb / 1024).toFixed(1) + ' MB/s' : kb + ' kB/s';
 }
 function upText(s) {
   var h = Math.floor(s / 3600),
@@ -4739,6 +4774,35 @@ function systemRows(x) {
     },
     { label: t('Up for'), sub: upText(x.uptime) },
   ];
+  /* the hardware readings, each only where this TV gives it */
+  if (typeof x.temp === 'number') rows.push({ label: t('Chip temperature'), sub: x.temp + ' °C' });
+  if (x.wifi || x.net)
+    rows.push({
+      label: t('Network'),
+      sub: [x.wifi ? 'Wi-Fi ' + x.wifi.signal + ' dBm' : '', x.net ? '↓ ' + rateText(x.net.down) + ' · ↑ ' + rateText(x.net.up) : '']
+        .filter(Boolean)
+        .join(' · '),
+    });
+  if (x.storage || typeof x.flash === 'number')
+    rows.push({
+      label: t('Storage'),
+      sub: [
+        x.storage ? sizeText(x.storage.free) + ' ' + t('free') : '',
+        typeof x.flash === 'number' ? t('wear') + ' ≤ ' + x.flash + ' %' : '',
+      ]
+        .filter(Boolean)
+        .join(' · '),
+    });
+  var p = x.panel;
+  if (p && typeof p.hours === 'number')
+    rows.push({
+      label: t('Panel'),
+      sub:
+        p.hours +
+        ' h' +
+        (typeof p.refreshIn === 'number' ? ' · ' + t('Pixel Refresher in') + ' ' + p.refreshIn + ' h' : '') +
+        (p.failures ? ' · ' + p.failures + ' ' + t('failed') : ''),
+    });
   x.top.forEach(function (p) {
     rows.push({
       label: p.name + (p.count > 1 ? ' ×' + p.count : ''),

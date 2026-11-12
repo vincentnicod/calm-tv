@@ -62,6 +62,7 @@ load('apps', () => require('./apps').create(ctx));
 load('running', () => require('./running').create(ctx));
 load('weather', () => require('./weather').create(ctx));
 load('quick', () => require('./quick').create(ctx));
+load('oled', () => require('./oled').create(ctx));
 load('system', () => require('./system').create(ctx));
 load('vpn', () => require('./vpn').create(ctx));
 

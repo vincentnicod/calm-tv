@@ -31,6 +31,8 @@ module.exports = {
   HOOK_LOG: '/tmp/lginput-hook-lginput2.log',
   LASTAPP: '/var/luna/preferences/bootd_last_foreground_app_id.json',
   PROC: env.CYTV_PROC || '/proc',
+  SYS: env.CYTV_SYS || '/sys',
+  PNWASH: env.CYTV_PNWASH || '/mnt/lg/cmn_data/pnwash', // the OLED panel's own counters (read only)
   HOME_APP: '/usr/palm/applications/com.webos.app.home',
   FULLHOME_APP: '/usr/palm/applications/com.webos.app.fullhome',
   // child processes find the system tools first, as in a login shell on the TV
