@@ -4,6 +4,8 @@
 (function () {
   var add = {
     fr: {
+      'VPN off': 'VPN désactivé',
+      'Internet blocked': 'Internet bloqué',
       'Turn on': 'Activer',
       'Turn off': 'Désactiver',
       Connected: 'Connecté',
@@ -33,6 +35,8 @@
       'VPN not connected': 'VPN non connecté',
     },
     de: {
+      'VPN off': 'VPN aus',
+      'Internet blocked': 'Internet gesperrt',
       'Turn on': 'Einschalten',
       'Turn off': 'Ausschalten',
       Connected: 'Verbunden',
@@ -62,6 +66,8 @@
       'VPN not connected': 'VPN nicht verbunden',
     },
     nl: {
+      'VPN off': 'VPN uit',
+      'Internet blocked': 'Internet geblokkeerd',
       'Turn on': 'Aanzetten',
       'Turn off': 'Uitzetten',
       Connected: 'Verbonden',
@@ -91,6 +97,8 @@
       'VPN not connected': 'VPN niet verbonden',
     },
     es: {
+      'VPN off': 'VPN desactivado',
+      'Internet blocked': 'Internet bloqueado',
       'Turn on': 'Activar',
       'Turn off': 'Desactivar',
       Connected: 'Conectado',
@@ -141,10 +149,44 @@ function refreshVpn() {
 function vpnText() {
   if (!vpnNow || !vpnNow.on) return '';
   var s = vpnNow.state;
-  if (s === 'connected') return ' · VPN';
+  if (s === 'connected') return ' · VPN' + (vpnCountry(vpnNow) ? ' ' + vpnCountry(vpnNow) : '');
   if (s === 'paused') return ' · ' + t('VPN paused');
   if (s === 'error') return ' · ' + t('VPN not connected');
   return ' · VPN…';
+}
+/* the country code of the server in use ("CH"), when its name has one */
+function vpnCountry(x) {
+  var s = (x.servers || []).filter(function (v) {
+    return v.id === x.server;
+  })[0];
+  return (s && s.cc) || '';
+}
+/* the VPN top button: one press turns it on or off; with no server yet it opens the setup */
+function vpnButton() {
+  api('/api/vpn').then(
+    function (x) {
+      if (!x || !x.servers || !x.servers.length) return vpnMenu();
+      toast(x.on ? t('VPN off') : t('Connecting...'));
+      api('/api/vpn', { on: !x.on }).then(
+        function (y) {
+          if (!y || !y.servers) return toast(t('Could not change the VPN'));
+          vpnNow = y;
+          tick();
+          if (y.state === 'error') toast(y.error);
+          else if (y.on)
+            setTimeout(function () {
+              refreshVpn();
+            }, 3000);
+        },
+        function () {
+          toast(t('Could not change the VPN'));
+        }
+      );
+    },
+    function () {
+      toast(t('Could not read the VPN'));
+    }
+  );
 }
 function vpnAppTitle(id) {
   var a = apps.filter(function (b) {
@@ -157,7 +199,7 @@ function vpnWords(x) {
   if (x.state === 'connected') return t('Connected');
   if (x.state === 'starting' || x.state === 'waiting') return t('Connecting...');
   if (x.state === 'paused') return t('Paused while %s is open').replace('%s', vpnAppTitle(x.paused));
-  if (x.state === 'error') return x.error || t('Not connected');
+  if (x.state === 'error') return (x.blocked ? t('Internet blocked') + ': ' : '') + (x.error || t('Not connected'));
   return t('Disabled');
 }
 function vpnServerName(x, id) {

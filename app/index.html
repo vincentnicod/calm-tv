@@ -2095,6 +2095,7 @@ var PRESETS = [
   { label: 'Quick settings', icon: 'quick', action: 'quick' },
   { label: 'LG Home', icon: 'restore', action: 'lghome' },
   { label: 'Power off', icon: 'power', action: 'poweroff' },
+  { label: 'VPN', icon: 'shield', action: 'vpn' },
 ];
 var ICONS = {
   inputs: '<path d="M15 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/>',
@@ -2105,6 +2106,7 @@ var ICONS = {
   grid: '<path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/>',
   hdmi: '<path d="M4 8h16v7l-3 3H7l-3-3z"/><path d="M9 11v3M12 11v3M15 11v3"/>',
   power: '<path d="M12 3v9"/><path d="M18 6.5a8.5 8.5 0 1 1-12 0"/>',
+  shield: '<path d="M12 3l8 3v6c0 4.6-3.2 7.9-8 9-4.8-1.1-8-4.4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
   restore: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
 };
 function svg(name) {
@@ -3216,6 +3218,7 @@ function act(e) {
   if (o.action === 'quick') return openQuick();
   if (o.action === 'lghome') return lgHomeMenu();
   if (o.action === 'poweroff') return powerOffMenu();
+  if (o.action === 'vpn') return vpnButton();
   if (o.app) launch(o.app, o.params);
 }
 /* ---------- menus ---------- */
@@ -5781,6 +5784,8 @@ RB.check = function () {
 (function () {
   var add = {
     fr: {
+      'VPN off': 'VPN désactivé',
+      'Internet blocked': 'Internet bloqué',
       'Turn on': 'Activer',
       'Turn off': 'Désactiver',
       Connected: 'Connecté',
@@ -5810,6 +5815,8 @@ RB.check = function () {
       'VPN not connected': 'VPN non connecté',
     },
     de: {
+      'VPN off': 'VPN aus',
+      'Internet blocked': 'Internet gesperrt',
       'Turn on': 'Einschalten',
       'Turn off': 'Ausschalten',
       Connected: 'Verbunden',
@@ -5839,6 +5846,8 @@ RB.check = function () {
       'VPN not connected': 'VPN nicht verbunden',
     },
     nl: {
+      'VPN off': 'VPN uit',
+      'Internet blocked': 'Internet geblokkeerd',
       'Turn on': 'Aanzetten',
       'Turn off': 'Uitzetten',
       Connected: 'Verbonden',
@@ -5868,6 +5877,8 @@ RB.check = function () {
       'VPN not connected': 'VPN niet verbonden',
     },
     es: {
+      'VPN off': 'VPN desactivado',
+      'Internet blocked': 'Internet bloqueado',
       'Turn on': 'Activar',
       'Turn off': 'Desactivar',
       Connected: 'Conectado',
@@ -5918,10 +5929,44 @@ function refreshVpn() {
 function vpnText() {
   if (!vpnNow || !vpnNow.on) return '';
   var s = vpnNow.state;
-  if (s === 'connected') return ' · VPN';
+  if (s === 'connected') return ' · VPN' + (vpnCountry(vpnNow) ? ' ' + vpnCountry(vpnNow) : '');
   if (s === 'paused') return ' · ' + t('VPN paused');
   if (s === 'error') return ' · ' + t('VPN not connected');
   return ' · VPN…';
+}
+/* the country code of the server in use ("CH"), when its name has one */
+function vpnCountry(x) {
+  var s = (x.servers || []).filter(function (v) {
+    return v.id === x.server;
+  })[0];
+  return (s && s.cc) || '';
+}
+/* the VPN top button: one press turns it on or off; with no server yet it opens the setup */
+function vpnButton() {
+  api('/api/vpn').then(
+    function (x) {
+      if (!x || !x.servers || !x.servers.length) return vpnMenu();
+      toast(x.on ? t('VPN off') : t('Connecting...'));
+      api('/api/vpn', { on: !x.on }).then(
+        function (y) {
+          if (!y || !y.servers) return toast(t('Could not change the VPN'));
+          vpnNow = y;
+          tick();
+          if (y.state === 'error') toast(y.error);
+          else if (y.on)
+            setTimeout(function () {
+              refreshVpn();
+            }, 3000);
+        },
+        function () {
+          toast(t('Could not change the VPN'));
+        }
+      );
+    },
+    function () {
+      toast(t('Could not read the VPN'));
+    }
+  );
 }
 function vpnAppTitle(id) {
   var a = apps.filter(function (b) {
@@ -5934,7 +5979,7 @@ function vpnWords(x) {
   if (x.state === 'connected') return t('Connected');
   if (x.state === 'starting' || x.state === 'waiting') return t('Connecting...');
   if (x.state === 'paused') return t('Paused while %s is open').replace('%s', vpnAppTitle(x.paused));
-  if (x.state === 'error') return x.error || t('Not connected');
+  if (x.state === 'error') return (x.blocked ? t('Internet blocked') + ': ' : '') + (x.error || t('Not connected'));
   return t('Disabled');
 }
 function vpnServerName(x, id) {

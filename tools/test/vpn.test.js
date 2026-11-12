@@ -196,12 +196,24 @@ run(async () => {
   ok(/^status\nstart\nnet /.test(fs.readFileSync(calls, 'utf8')) && logs.some(l => /stopped/.test(l)), 'a stopped tunnel is started again');
   fs.writeFileSync(path.join(w, 'status'), 'process=1 tunnel=1 routes=1 kill=1\n');
 
+  // with the kill switch, a tunnel that stops and cannot start again leaves the kill switch holding the traffic
+  fs.writeFileSync(path.join(w, 'fail-net'), '');
+  fs.writeFileSync(path.join(w, 'status'), 'process=0 tunnel=0 routes=0 kill=1\n');
+  fs.writeFileSync(calls, '');
+  await v.keep();
+  r = await call(v, '/api/vpn');
+  ok(
+    /block 185\.159\.157\.1 51820\n$/.test(fs.readFileSync(calls, 'utf8')) && r.j.blocked === true && r.j.state === 'error',
+    'kill switch on and the tunnel cannot start: the tunnel goes, the kill switch stays'
+  );
+  fs.writeFileSync(path.join(w, 'status'), 'process=1 tunnel=1 routes=1 kill=1\n');
+
   // a failure is shown and leaves nothing half-done
   fs.writeFileSync(path.join(w, 'fail-net'), '');
   await call(v, '/api/vpn', 'POST', { kill: false });
   r = await call(v, '/api/vpn');
   ok(
-    r.j.state === 'error' && r.j.error === 'it broke' && /down\n$/.test(fs.readFileSync(calls, 'utf8')),
+    r.j.state === 'error' && r.j.error === 'it broke' && r.j.blocked === false && /down\n$/.test(fs.readFileSync(calls, 'utf8')),
     'a failure: shown, and the tunnel is taken down'
   );
   fs.unlinkSync(path.join(w, 'fail-net'));
@@ -236,7 +248,9 @@ run(async () => {
         log +
         '\n' +
         'case "$*" in\n' +
-        '  "-4 route show default") echo "default via 192.168.1.1 dev wlan0" ;;\n' +
+        '  "-4 route show default") [ -f ' +
+        w +
+        '/nogw ] || echo "default via 192.168.1.1 dev wlan0" ;;\n' +
         '  "-4 route show") printf "default via 192.168.1.1 dev wlan0\\n203.0.113.7 via 192.168.1.1 dev wlan0\\n185.159.157.1 via 192.168.1.1 dev wlan0\\n192.168.1.0/24 dev wlan0 proto kernel scope link src 192.168.1.20\\n" ;;\n' +
         '  "link show cytv0") [ -f ' +
         w +
@@ -336,6 +350,23 @@ run(async () => {
     fs.unlinkSync(path.join(w, 'up'));
     x = vsh(['net', '10.2.0.2/32', '185.159.157.1', '51820', '10.2.0.1', '1420', '0']);
     ok(x.code === 1 && /not up/.test(x.err), 'net without a tunnel fails');
+    fs.writeFileSync(path.join(w, 'up'), '');
+    fs.writeFileSync(path.join(w, 'nogw'), '');
+    x = vsh(['net', '10.2.0.2/32', '185.159.157.1', '51820', '10.2.0.1', '1420', '0']);
+    ok(
+      x.code === 1 && /network is not up/.test(x.err) && x.log.indexOf('0.0.0.0/1') < 0,
+      'net before the network is up fails, with no routes'
+    );
+    fs.unlinkSync(path.join(w, 'nogw'));
+    x = vsh(['block', '185.159.157.1', '51820']);
+    ok(
+      x.code === 0 &&
+        x.log.indexOf('ip route del 0.0.0.0/1 dev cytv0') >= 0 &&
+        /iptables -A CYTV_VPN -p udp -d 185\.159\.157\.1 --dport 51820 -j RETURN\niptables -A CYTV_VPN -j REJECT\niptables -I OUTPUT 1 -j CYTV_VPN/.test(
+          x.log
+        ),
+      'block: the tunnel is taken down and the kill switch is left in place'
+    );
     x = vsh(['status']);
     ok(x.code === 0, 'status runs');
     s2.close();

@@ -197,6 +197,8 @@ function create(ctx) {
     error = '',
     starting = false,
     clean = false, // down was run since the last start: nothing to take down
+    blocked = false, // the kill switch is holding the traffic while the tunnel is down
+    last = null, // {host, ip}: the last address a server's name gave, for the kill switch when names cannot be asked
     busy = Promise.resolve(),
     timer = null;
   const script = async (args, ms) => {
@@ -212,6 +214,7 @@ function create(ctx) {
   async function bringUp(id) {
     const c = parse(fs.readFileSync(confFile(id), 'utf8'));
     const ip = await resolveHost(c.host);
+    last = { host: c.host, ip };
     const k = settings().kill ? '1' : '0';
     clean = false;
     await script(['start']);
@@ -219,10 +222,25 @@ function create(ctx) {
     await script(['net', c.address, ip, String(c.port), c.dns, String(c.mtu), k]);
     up = { id, ip, port: c.port, kill: k };
   }
-  async function bringDown() {
-    await script(['down']);
+  // block: the VPN is meant to be on with the kill switch and could not be (a failure, a stopped tunnel): the tunnel goes, the kill
+  // switch stays, so nothing leaves the normal way while it is tried again
+  async function bringDown(block) {
+    if (block) await script(['block', block.ip, String(block.port)]);
+    else await script(['down']);
     up = null;
-    clean = true;
+    clean = !block;
+    blocked = !!block;
+  }
+  // the server's address for the kill switch when the tunnel could not start: the one in use, or the file's when it is an address
+  function blockFor(s) {
+    if (!s.kill || !s.on || paused) return null;
+    if (up) return { ip: up.ip, port: up.port };
+    try {
+      const c = parse(fs.readFileSync(confFile(s.server), 'utf8'));
+      return ip4(c.host) ? { ip: c.host, port: c.port } : last && last.host === c.host ? { ip: last.ip, port: c.port } : null;
+    } catch (_) {
+      return null;
+    }
   }
   // Make the tunnel what the settings and the app in front ask for. One change at a time; a failure is kept for the launcher to show and
   // leaves nothing half-done (the routes go with the tunnel).
@@ -245,7 +263,7 @@ function create(ctx) {
         error = String(e.message || e);
         log('vpn: ' + error);
         try {
-          await bringDown();
+          await bringDown(blockFor(s));
         } catch (_) {}
       }
       starting = false;
@@ -283,6 +301,7 @@ function create(ctx) {
     else if (starting) state = 'starting';
     else if (error && s.on) state = 'error';
     else if (up) state = r.handshake >= 0 && r.handshake <= FRESH_S ? 'connected' : 'waiting';
+    else if (s.on) state = 'starting'; // on, and the first start has not finished (the service just started)
     return Object.assign(
       {
         on: s.on,
@@ -291,6 +310,7 @@ function create(ctx) {
         servers: list.map(x => ({ id: x.id, name: x.name, cc: x.cc })),
         pauseFor: s.pauseFor,
         state,
+        blocked,
         error,
         paused,
         pairing: pair ? { url: pair.url, code: pair.code } : null,

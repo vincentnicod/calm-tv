@@ -16,6 +16,7 @@ var PRESETS = [
   { label: 'Quick settings', icon: 'quick', action: 'quick' },
   { label: 'LG Home', icon: 'restore', action: 'lghome' },
   { label: 'Power off', icon: 'power', action: 'poweroff' },
+  { label: 'VPN', icon: 'shield', action: 'vpn' },
 ];
 var ICONS = {
   inputs: '<path d="M15 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/>',
@@ -26,6 +27,7 @@ var ICONS = {
   grid: '<path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z"/>',
   hdmi: '<path d="M4 8h16v7l-3 3H7l-3-3z"/><path d="M9 11v3M12 11v3M15 11v3"/>',
   power: '<path d="M12 3v9"/><path d="M18 6.5a8.5 8.5 0 1 1-12 0"/>',
+  shield: '<path d="M12 3l8 3v6c0 4.6-3.2 7.9-8 9-4.8-1.1-8-4.4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
   restore: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
 };
 function svg(name) {

@@ -58,6 +58,7 @@ const dev = (port, label, on, act) => ({
   activate: !!act,
 });
 // what the stand-in answers; each check changes it
+const PRESET_HAS_VPN = l => l.split(',').indexOf('vpn') >= 0;
 const S = {
   config: {},
   inputs: [],
@@ -859,7 +860,10 @@ try {
     'Turn on: connected'
   );
   await js('closeMenus(); tick(); 0');
-  ok(/ · VPN$/.test(await js("document.getElementById('date').textContent")), 'the date on Home says VPN while it is connected');
+  ok(
+    / · VPN CH$/.test(await js("document.getElementById('date').textContent")),
+    'the date on Home says VPN and the country while it is connected'
+  );
   await js('closeMenus(); appMenu(tiles.netflix._a); 0');
   const pauseIdx = (await js('stack[0].items.map(function (i) { return i.label; })')).indexOf('Pause the VPN while open');
   ok(pauseIdx >= 0, "an app's menu offers to pause the VPN while it is open");
@@ -872,6 +876,14 @@ try {
   await key(OK, 900);
   await js('closeMenus(); tick(); 0');
   ok(!S.vpn.on && !/VPN/.test(await js("document.getElementById('date').textContent")), 'Turn off: the date says nothing more');
+  await js('closeMenus(); vpnButton(); 0');
+  await sleep(900);
+  await js('tick(); 0');
+  ok(
+    S.vpn.on && / · VPN CH$/.test(await js("document.getElementById('date').textContent")),
+    'the VPN top button turns it on with one press; the date names the country'
+  );
+  ok(PRESET_HAS_VPN(await js('PRESETS.map(function (p) { return p.action; }).join()')), 'VPN is offered as a top button');
   S.vpn = { on: false, kill: false, server: '', servers: [], pauseFor: [], state: 'none', error: '', paused: '', pairing: null };
 
   // ---- icons that failed: the dock's white logos and the grid come back once the service answers ----

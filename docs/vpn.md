@@ -18,9 +18,9 @@ The first server added is the one used. Add more (other countries) the same way 
 
 | In Customise > VPN | What it does |
 |---|---|
-| **Turn on** / **Turn off** | The tunnel starts in a second or two. The date on Home then ends with **· VPN** (**· VPN…** while it waits for the server). It stays on after a restart of the TV. |
+| **Turn on** / **Turn off** | The tunnel starts in a second or two. The date on Home then ends with **· VPN** and the server's country code when its name has one (**· VPN…** while it waits for the server). A **VPN** top button (Customise > Top buttons) does the same with one press. It stays on after a restart of the TV. |
 | **Server** | The server in use; a change reconnects at once. |
-| **Block the internet if the VPN drops** | The kill switch: while the VPN is on, nothing leaves the TV outside the tunnel, so a server that stops answering cuts the internet instead of sending traffic the normal way. The home network (casting, Home Assistant, SSH) still works. |
+| **Block the internet if the VPN drops** | The kill switch: while the VPN is on, nothing leaves the TV outside the tunnel, so a server that stops answering cuts the internet instead of sending traffic the normal way. If the tunnel stops or cannot start, the block stays while the service tries again every 30 seconds, and the menu says **Internet blocked** with the reason. The home network (casting, Home Assistant, SSH) still works. It starts with the service, a few seconds after the TV does: until then traffic goes the normal way. |
 | **Pause for apps** | Lists the apps that pause the VPN. Choose them in an app's menu (hold OK on it): **Pause the VPN while open**. While that app is in front the VPN is off (and so is the kill switch); it comes back when you go to Home or another app. Use it for an app that wants your own address, such as your TV provider's app. |
 | **Remove a server** | Forgets the server and deletes its file. Removing the last one turns the VPN off. |
 

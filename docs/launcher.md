@@ -196,7 +196,7 @@ Steefzar for the original CleanYourTV.
 - **LG Home** and **Inputs on Home**,
 - the **VPN**: on or off, the server, the kill switch and the apps that pause it ([VPN](vpn.md)),
 - the **idle screen**, **night mode**, the **city** and the **weather**,
-- the **top buttons** (add Inputs, Quick settings, Settings, Live TV, LG Home, Power off or any app, or remove one),
+- the **top buttons** (add Inputs, Quick settings, Settings, Live TV, LG Home, Power off, VPN or any app, or remove one),
 - **hidden apps** (show them again),
 - the **app order** (most used first, or A to Z),
 - the **clock** format (automatic, 12 or 24 hour),

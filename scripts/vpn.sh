@@ -7,6 +7,7 @@
 #                                                  KILL=1 also blocks any traffic that would leave outside the tunnel (kill switch)
 #   vpn.sh check ENDPOINT                          put back what the TV's network manager may have dropped (routes, DNS order)
 #   vpn.sh down                                    remove all of it and stop wireguard-go
+#   vpn.sh block ENDPOINT PORT                     take the tunnel down but keep the kill switch: the VPN is meant to be on and is not
 #   vpn.sh status                                  "process=0|1 tunnel=0|1 routes=0|1 kill=0|1"
 # This TV has no policy routing (ip rule) and no IPv6 firewall, so all of IPv4 goes to the tunnel with two half routes (0/1 and 128/1, more
 # precise than the default route), the server itself keeps a route through the router, and global IPv6 is made unreachable instead.
@@ -57,7 +58,8 @@ gateway() {
 }
 endpoint_route() {
   gateway
-  [ -n "$GW" ] && ip route replace "$1/32" via "$GW" dev "$DEV"
+  [ -n "$GW" ] || return 1
+  ip route replace "$1/32" via "$GW" dev "$DEV"
 }
 # The network manager keeps host routes through the router for its DNS servers and its internet check; they are more precise than the
 # half routes, so they go into the tunnel too (DNS is redirected anyway; the internet check must not be refused by the kill switch).
@@ -150,7 +152,8 @@ net() {
   old=$(cat "$EPFILE" 2>/dev/null)
   [ -n "$old" ] && [ "$old" != "$2" ] && ip route del "$old/32" 2>/dev/null
   echo "$2" >"$EPFILE"
-  endpoint_route "$2"
+  # without a router yet (the network comes up after a start of the TV) the tunnel's own packets would be routed into the tunnel
+  endpoint_route "$2" || { echo "the network is not up yet" >&2; return 1; }
   routes || return 1
   dns_on "$4" || return 1
   if [ "$6" = 1 ]; then kill_on "$2" "$3" || return 1; else kill_off; fi
@@ -206,6 +209,7 @@ case $cmd in
   net) net "$@" ;;
   check) check "$@" ;;
   down) down ;;
+  block) down; kill_on "$1" "$2" ;;
   status) status ;;
-  *) echo "usage: vpn.sh start|net|check|down|status" >&2; exit 2 ;;
+  *) echo "usage: vpn.sh start|net|check|down|block|status" >&2; exit 2 ;;
 esac

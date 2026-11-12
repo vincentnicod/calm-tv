@@ -1030,6 +1030,7 @@
  },
  "vpn without a server": {
   "body": {
+   "blocked": false,
    "error": "",
    "kill": false,
    "on": false,
